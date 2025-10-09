@@ -10,7 +10,7 @@
 set -e  # Exit on any error
 
 # Configuration variables - CHANGE THESE AS NEEDED
-APP_NAME="cemse"
+APP_NAME="cms-estrella-sur"
 APP_USER="ubuntu"
 APP_DOMAIN="estrella.boring.lat"
 APP_PATH="/opt/$APP_NAME"
@@ -70,7 +70,7 @@ if ! lsb_release -d | grep -q "Ubuntu 24.04"; then
     fi
 fi
 
-log "🚀 Starting CEMSE application setup for Ubuntu 24.04 LTS..."
+log "🚀 Starting CMS Estrella Sur application setup for Ubuntu 24.04 LTS..."
 log "App Name: $APP_NAME"
 log "Domain: $APP_DOMAIN"
 log "Path: $APP_PATH"
@@ -280,9 +280,9 @@ if [ -d "$APP_PATH" ]; then
     sudo rm -rf $APP_PATH
 fi
 
-# Clone directly to /opt/cemse (git will create the directory)
+# Clone directly to /opt/cms-estrella-sur (git will create the directory)
 cd /opt
-sudo git clone $GIT_REPO cemse
+sudo git clone $GIT_REPO cms-estrella-sur
 
 # Set proper ownership
 sudo chown -R $USER:$USER $APP_PATH
@@ -315,8 +315,8 @@ if [ ! -f "$APP_PATH/.env" ]; then
         # Create basic environment file
         cat > $APP_PATH/.env << EOF
 # Database Configuration
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/${APP_NAME}_prod"
-DIRECT_URL="postgresql://postgres:postgres@localhost:5432/${APP_NAME}_prod"
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/cms_estrella_sur_prod"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/cms_estrella_sur_prod"
 
 # Application Configuration
 NODE_ENV="production"
@@ -438,7 +438,7 @@ log "🔧 Creating systemd service..."
 
 sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null << EOF
 [Unit]
-Description=$APP_NAME Next.js Application
+Description=CMS Estrella Sur Next.js Application
 After=network.target
 Requires=$APP_NAME-backend.service
 After=$APP_NAME-backend.service
@@ -466,7 +466,7 @@ EOF
 # Create backend startup service
 sudo tee /etc/systemd/system/$APP_NAME-backend.service > /dev/null << EOF
 [Unit]
-Description=$APP_NAME Backend Services (Docker)
+Description=CMS Estrella Sur Backend Services (Docker)
 After=docker.service
 Requires=docker.service
 
@@ -727,7 +727,7 @@ success "Application built and ready"
 # =============================================================================
 echo ""
 echo "========================================="
-echo "🎉 $APP_NAME Setup Complete!"
+echo "🎉 CMS Estrella Sur Setup Complete!"
 echo "🐧 Ubuntu Server 24.04 LTS"
 echo "========================================="
 echo ""
@@ -765,6 +765,7 @@ echo "   - Application: http://$APP_DOMAIN (after DNS setup)"
 echo "   - Direct IP: http://$(curl -s http://checkip.amazonaws.com)"
 echo "   - MinIO: http://$(curl -s http://checkip.amazonaws.com):9000"
 echo "   - MinIO Console: http://$(curl -s http://checkip.amazonaws.com):9001"
+echo "   - Prisma Studio: http://$(curl -s http://checkip.amazonaws.com):5555"
 echo ""
 warn "⚠️  IMPORTANT:"
 echo "   - Please reboot the system to apply all changes"

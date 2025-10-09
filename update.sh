@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # =============================================================================
-# CEMSE Simple Update Script
+# CMS Estrella Sur Simple Update Script
 # =============================================================================
 # This script handles all update steps in one command:
 # - git pull
 # - prisma migrate & generate
 # - restart docker backend
-# - restart cemse service
+# - restart cms-estrella-sur service
 # =============================================================================
 
 set -e  # Exit on any error
 
 # Configuration
-APP_NAME="cemse"
+APP_NAME="cms-estrella-sur"
 APP_PATH="/opt/$APP_NAME"
 
 # Colors for output
@@ -43,7 +43,7 @@ success() {
 # Function to check if we're in the right directory
 check_directory() {
     if [ ! -f "package.json" ] || [ ! -f "docker-compose.yml" ]; then
-        error "This doesn't look like the CEMSE project directory"
+        error "This doesn't look like the CMS Estrella Sur project directory"
         error "Please run this script from $APP_PATH"
         exit 1
     fi
@@ -135,13 +135,13 @@ restart_services() {
     # Wait a moment for containers to be ready
     sleep 5
 
-    # Restart the cemse service (Next.js app)
-    log "Restarting CEMSE service..."
-    if systemctl is-active --quiet cemse 2>/dev/null; then
-        sudo systemctl restart cemse
+    # Restart the cms-estrella-sur service (Next.js app)
+    log "Restarting CMS Estrella Sur service..."
+    if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
+        sudo systemctl restart "$APP_NAME"
     else
-        warn "CEMSE service not running, starting it..."
-        sudo systemctl start cemse
+        warn "CMS Estrella Sur service not running, starting it..."
+        sudo systemctl start "$APP_NAME"
     fi
 
     success "Services restarted"
@@ -159,12 +159,12 @@ verify_update() {
         docker-compose ps
     fi
 
-    # Check cemse service
-    if systemctl is-active --quiet cemse 2>/dev/null; then
-        success "CEMSE service is running"
+    # Check cms-estrella-sur service
+    if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
+        success "CMS Estrella Sur service is running"
     else
-        error "CEMSE service failed to start"
-        warn "Check logs with: sudo journalctl -u cemse -f"
+        error "CMS Estrella Sur service failed to start"
+        warn "Check logs with: sudo journalctl -u $APP_NAME -f"
     fi
 
     # Check if app is responding (wait a bit for startup)
@@ -173,7 +173,7 @@ verify_update() {
         success "Application is responding"
     else
         warn "Application health check failed, but this might be temporary"
-        warn "Check status with: sudo systemctl status cemse"
+        warn "Check status with: sudo systemctl status $APP_NAME"
     fi
 }
 
@@ -193,10 +193,10 @@ show_status() {
     echo ""
 
     log "🔧 Service Status:"
-    if systemctl is-active --quiet cemse 2>/dev/null; then
-        echo "✅ CEMSE service: Running"
+    if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
+        echo "✅ CMS Estrella Sur service: Running"
     else
-        echo "❌ CEMSE service: Not running"
+        echo "❌ CMS Estrella Sur service: Not running"
     fi
 
     if systemctl is-active --quiet nginx 2>/dev/null; then
@@ -212,9 +212,9 @@ show_status() {
     echo ""
 
     log "📝 Useful Commands:"
-    echo "   - Check logs: sudo journalctl -u cemse -f"
-    echo "   - Check status: sudo systemctl status cemse"
-    echo "   - Manual restart: sudo systemctl restart cemse"
+    echo "   - Check logs: sudo journalctl -u $APP_NAME -f"
+    echo "   - Check status: sudo systemctl status $APP_NAME"
+    echo "   - Manual restart: sudo systemctl restart $APP_NAME"
     echo "   - Docker logs: docker-compose logs -f"
     echo ""
 }
@@ -223,7 +223,7 @@ show_status() {
 main() {
     echo ""
     echo "========================================="
-    echo "🚀 CEMSE Update Script"
+    echo "🚀 CMS Estrella Sur Update Script"
     echo "========================================="
     echo ""
 
@@ -247,7 +247,7 @@ main() {
 
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-    echo "CEMSE Update Script"
+    echo "CMS Estrella Sur Update Script"
     echo "Usage: $0"
     echo ""
     echo "This script will:"
@@ -256,7 +256,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  3. Generate Prisma client"
     echo "  4. Run database migrations"
     echo "  5. Restart Docker containers (backend)"
-    echo "  6. Restart CEMSE service (Next.js app)"
+    echo "  6. Restart CMS Estrella Sur service (Next.js app)"
     echo "  7. Verify everything is working"
     echo ""
     echo "This replaces the manual process of:"
@@ -265,7 +265,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  - pnpm prisma generate"
     echo "  - pnpm prisma migrate deploy"
     echo "  - docker-compose restart"
-    echo "  - sudo systemctl restart cemse"
+    echo "  - sudo systemctl restart $APP_NAME"
     echo ""
     exit 0
 fi

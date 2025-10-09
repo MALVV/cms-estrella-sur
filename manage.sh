@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # =============================================================================
-# CEMSE Application Management Script
+# CMS Estrella Sur Application Management Script
 # =============================================================================
-# Unified script for managing the CEMSE application on AWS EC2
+# Unified script for managing the CMS Estrella Sur application on AWS EC2
 # =============================================================================
 
 set -e  # Exit on any error
 
 # Configuration
-APP_NAME="cemse"
+APP_NAME="cms-estrella-sur"
 APP_PATH="/opt/$APP_NAME"
 APP_PORT="3000"
 BACKUP_DIR="$APP_PATH/backups"
@@ -59,7 +59,7 @@ get_server_ip() {
 
 # Function to start services
 start_services() {
-    log "🚀 Starting CEMSE services..."
+    log "🚀 Starting CMS Estrella Sur services..."
 
     # Check if app directory exists
     if [ ! -d "$APP_PATH" ]; then
@@ -80,7 +80,7 @@ start_services() {
     # Start Next.js app
     log "Starting Next.js application..."
     if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
-        success "CEMSE app already running"
+        success "CMS Estrella Sur app already running"
     else
         sudo systemctl start "$APP_NAME"
     fi
@@ -100,7 +100,7 @@ start_services() {
 
 # Function to stop services
 stop_services() {
-    log "🛑 Stopping CEMSE services..."
+    log "🛑 Stopping CMS Estrella Sur services..."
 
     # Check if app directory exists for docker-compose
     if [ -d "$APP_PATH" ]; then
@@ -120,7 +120,7 @@ stop_services() {
 
 # Function to restart services
 restart_services() {
-    log "🔄 Restarting CEMSE services..."
+    log "🔄 Restarting CMS Estrella Sur services..."
 
     # Check if app directory exists
     if [ ! -d "$APP_PATH" ]; then
@@ -155,7 +155,7 @@ restart_services() {
 
 # Function to show status
 show_status() {
-    log "📊 CEMSE Application Status"
+    log "📊 CMS Estrella Sur Application Status"
     echo ""
 
     # System info
@@ -180,9 +180,9 @@ show_status() {
     # Service status
     info "Systemd Services:"
     if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
-        success "CEMSE app ($APP_NAME): Running"
+        success "CMS Estrella Sur app ($APP_NAME): Running"
     else
-        warn "CEMSE app ($APP_NAME): Not running"
+        warn "CMS Estrella Sur app ($APP_NAME): Not running"
     fi
 
     if systemctl is-active --quiet "$APP_NAME-backend" 2>/dev/null; then
@@ -221,7 +221,7 @@ show_logs() {
 
 # Function to deploy application
 deploy_app() {
-    log "🚀 Deploying CEMSE application..."
+    log "🚀 Deploying CMS Estrella Sur application..."
 
     # Use the dedicated update script
     if [ -f "$APP_PATH/update.sh" ]; then
@@ -245,7 +245,7 @@ backup_app() {
     # Backup database
     if sudo docker-compose ps db | grep -q "Up"; then
         log "🗄️ Backing up database..."
-        sudo docker-compose exec -T db pg_dump -U postgres cemse_prod > "$BACKUP_DIR/db_backup_$date.sql" || warn "Database backup failed"
+        sudo docker-compose exec -T db pg_dump -U postgres cms_estrella_sur_prod > "$BACKUP_DIR/db_backup_$date.sql" || warn "Database backup failed"
         gzip "$BACKUP_DIR/db_backup_$date.sql" 2>/dev/null || true
     fi
 
@@ -362,7 +362,7 @@ setup_ssl() {
 
 # Function to show help
 show_help() {
-    echo "CEMSE Application Management Script"
+    echo "CMS Estrella Sur Application Management Script"
     echo "Usage: $0 <command> [options]"
     echo ""
     echo "Commands:"
@@ -452,9 +452,9 @@ show_service_status() {
     echo ""
     info "🔧 Service Status:"
     if systemctl is-active --quiet "$APP_NAME" 2>/dev/null; then
-        success "CEMSE app: Running"
+        success "CMS Estrella Sur app: Running"
     else
-        warn "CEMSE app: Not running"
+        warn "CMS Estrella Sur app: Not running"
     fi
 
     if systemctl is-active --quiet "$APP_NAME-backend" 2>/dev/null; then
