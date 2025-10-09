@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # =============================================================================
-# estrella Application Setup Script for Ubuntu Server 24.04 LTS
+# estrella Application Setup Script for Ubuntu Server 25.04 LTS
 # =============================================================================
-# This script prepares an Ubuntu Server 24.04 LTS instance for deploying the estrella 
+# This script prepares an Ubuntu Server 25.04 LTS instance for deploying the estrella 
 # application with all required dependencies, services, and configurations.
 # =============================================================================
 
@@ -60,8 +60,8 @@ if ! sudo -n true 2>/dev/null; then
 fi
 
 # Check Ubuntu version
-if ! lsb_release -d | grep -q "Ubuntu 24.04"; then
-    warn "This script is designed for Ubuntu 24.04 LTS. Current system:"
+if ! lsb_release -d | grep -q "Ubuntu 25.04"; then
+    warn "This script is designed for Ubuntu 25.04 LTS. Current system:"
     lsb_release -d
     read -p "Continue anyway? (y/N): " -n 1 -r
     echo
@@ -70,7 +70,7 @@ if ! lsb_release -d | grep -q "Ubuntu 24.04"; then
     fi
 fi
 
-log "🚀 Starting estrella application setup for Ubuntu 24.04 LTS..."
+log "🚀 Starting estrella application setup for Ubuntu 25.04 LTS..."
 log "App Name: $APP_NAME"
 log "Domain: $APP_DOMAIN"
 log "Path: $APP_PATH"
@@ -220,24 +220,26 @@ sudo apt install -y redis-tools
 success "Redis CLI version: $(redis-cli --version)"
 
 # =============================================================================
-# 8. NGINX INSTALLATION
+# 8. NGINX INSTALLATION (SKIPPED)
 # =============================================================================
-log "🌐 Installing Nginx..."
-sudo apt install -y nginx
+# log "🌐 Installing Nginx..."
+# sudo apt install -y nginx
 
-# Start and enable Nginx
-sudo systemctl start nginx
-sudo systemctl enable nginx
+# # Start and enable Nginx
+# sudo systemctl start nginx
+# sudo systemctl enable nginx
 
-success "Nginx version: $(nginx -v 2>&1)"
+# success "Nginx version: $(nginx -v 2>&1)"
+warn "Nginx installation skipped - configure manually if needed"
 
 # =============================================================================
-# 9. SSL CERTIFICATE TOOLS (Let's Encrypt)
+# 9. SSL CERTIFICATE TOOLS (Let's Encrypt) - SKIPPED
 # =============================================================================
-log "🔒 Installing Certbot for SSL certificates..."
-sudo apt install -y certbot python3-certbot-nginx
+# log "🔒 Installing Certbot for SSL certificates..."
+# sudo apt install -y certbot python3-certbot-nginx
 
-success "Certbot version: $(certbot --version)"
+# success "Certbot version: $(certbot --version)"
+warn "SSL/Certbot installation skipped - configure manually if needed"
 
 # =============================================================================
 # 10. FIREWALL CONFIGURATION
@@ -348,88 +350,89 @@ EOF
 fi
 
 # =============================================================================
-# 14. NGINX CONFIGURATION
+# 14. NGINX CONFIGURATION (SKIPPED)
 # =============================================================================
-log "🌐 Creating Nginx configuration..."
+# log "🌐 Creating Nginx configuration..."
 
-sudo tee /etc/nginx/sites-available/$APP_NAME > /dev/null << EOF
-# $APP_NAME Application Configuration
-server {
-    listen 80;
-    server_name $APP_DOMAIN www.$APP_DOMAIN;
-    
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
-    
-    # Gzip compression
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 1024;
-    gzip_proxied expired no-cache no-store private auth;
-    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript application/json;
-    
-    # Client max body size (for file uploads)
-    client_max_body_size 100M;
-    
-    # Proxy settings
-    location / {
-        proxy_pass http://127.0.0.1:$APP_PORT;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_cache_bypass \$http_upgrade;
-        proxy_read_timeout 86400;
-        proxy_send_timeout 86400;
-    }
-    
-    # Static files caching
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        proxy_pass http://127.0.0.1:$APP_PORT;
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-    
-    # Health check endpoint
-    location /health {
-        access_log off;
-        return 200 "healthy\n";
-        add_header Content-Type text/plain;
-    }
-    
-    # Logs
-    access_log /var/log/nginx/${APP_NAME}_access.log;
-    error_log /var/log/nginx/${APP_NAME}_error.log;
-}
+# sudo tee /etc/nginx/sites-available/$APP_NAME > /dev/null << EOF
+# # $APP_NAME Application Configuration
+# server {
+#     listen 80;
+#     server_name $APP_DOMAIN www.$APP_DOMAIN;
+#     
+#     # Security headers
+#     add_header X-Frame-Options "SAMEORIGIN" always;
+#     add_header X-XSS-Protection "1; mode=block" always;
+#     add_header X-Content-Type-Options "nosniff" always;
+#     add_header Referrer-Policy "no-referrer-when-downgrade" always;
+#     add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+#     
+#     # Gzip compression
+#     gzip on;
+#     gzip_vary on;
+#     gzip_min_length 1024;
+#     gzip_proxied expired no-cache no-store private auth;
+#     gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript application/json;
+#     
+#     # Client max body size (for file uploads)
+#     client_max_body_size 100M;
+#     
+#     # Proxy settings
+#     location / {
+#         proxy_pass http://127.0.0.1:$APP_PORT;
+#         proxy_http_version 1.1;
+#         proxy_set_header Upgrade \$http_upgrade;
+#         proxy_set_header Connection 'upgrade';
+#         proxy_set_header Host \$host;
+#         proxy_set_header X-Real-IP \$remote_addr;
+#         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto \$scheme;
+#         proxy_cache_bypass \$http_upgrade;
+#         proxy_read_timeout 86400;
+#         proxy_send_timeout 86400;
+#     }
+#     
+#     # Static files caching
+#     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+#         proxy_pass http://127.0.0.1:$APP_PORT;
+#         expires 1y;
+#         add_header Cache-Control "public, immutable";
+#     }
+#     
+#     # Health check endpoint
+#     location /health {
+#         access_log off;
+#         return 200 "healthy\n";
+#         add_header Content-Type text/plain;
+#     }
+#     
+#     # Logs
+#     access_log /var/log/nginx/${APP_NAME}_access.log;
+#     error_log /var/log/nginx/${APP_NAME}_error.log;
+# }
 
-# Redirect www to non-www
-server {
-    listen 80;
-    server_name www.$APP_DOMAIN;
-    return 301 http://$APP_DOMAIN\$request_uri;
-}
-EOF
+# # Redirect www to non-www
+# server {
+#     listen 80;
+#     server_name www.$APP_DOMAIN;
+#     return 301 http://$APP_DOMAIN\$request_uri;
+# }
+# EOF
 
-# Enable the site
-sudo ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
+# # Enable the site
+# sudo ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
 
-# Remove default site
-sudo rm -f /etc/nginx/sites-enabled/default
+# # Remove default site
+# sudo rm -f /etc/nginx/sites-enabled/default
 
-# Test nginx configuration
-sudo nginx -t
+# # Test nginx configuration
+# sudo nginx -t
 
-# Restart Nginx
-sudo systemctl restart nginx
+# # Restart Nginx
+# sudo systemctl restart nginx
 
-success "Nginx configuration created and enabled"
+# success "Nginx configuration created and enabled"
+warn "Nginx configuration skipped - configure manually if needed"
 
 # =============================================================================
 # 15. SYSTEMD SERVICE CONFIGURATION
@@ -545,26 +548,26 @@ APP_PORT="$APP_PORT"
 case "\$1" in
     start)
         sudo systemctl start \$APP_NAME
-        sudo systemctl start nginx
+        # sudo systemctl start nginx
         echo "✅ Services started"
         ;;
     stop)
         sudo systemctl stop \$APP_NAME
-        sudo systemctl stop nginx
+        # sudo systemctl stop nginx
         echo "✅ Services stopped"
         ;;
     restart)
         sudo systemctl restart \$APP_NAME
-        sudo systemctl restart nginx
+        # sudo systemctl restart nginx
         echo "✅ Services restarted"
         ;;
     status)
         echo "=== \$APP_NAME Service Status ==="
         sudo systemctl status \$APP_NAME --no-pager
         echo ""
-        echo "=== Nginx Status ==="
-        sudo systemctl status nginx --no-pager
-        echo ""
+        # echo "=== Nginx Status ==="
+        # sudo systemctl status nginx --no-pager
+        # echo ""
         echo "=== Docker Containers ==="
         docker-compose -f \$APP_PATH/docker-compose.yml ps
         ;;
@@ -581,8 +584,8 @@ case "\$1" in
         ./deploy.sh
         ;;
     ssl)
-        echo "Setting up SSL certificate..."
-        sudo certbot --nginx -d \$APP_DOMAIN -d www.\$APP_DOMAIN
+        echo "SSL setup skipped - configure manually if needed"
+        # sudo certbot --nginx -d \$APP_DOMAIN -d www.\$APP_DOMAIN
         ;;
     backup)
         cd \$APP_PATH
@@ -632,17 +635,18 @@ OLD_DOMAIN="$APP_DOMAIN"
 echo "🔄 Updating domain from \$OLD_DOMAIN to \$NEW_DOMAIN..."
 
 # Update nginx configuration
-sudo sed -i "s/\$OLD_DOMAIN/\$NEW_DOMAIN/g" /etc/nginx/sites-available/\$APP_NAME
+# sudo sed -i "s/\$OLD_DOMAIN/\$NEW_DOMAIN/g" /etc/nginx/sites-available/\$APP_NAME
 
 # Test nginx configuration
-if sudo nginx -t; then
-    sudo systemctl reload nginx
-    echo "✅ Nginx configuration updated"
-else
-    echo "❌ Nginx configuration error, reverting..."
-    sudo sed -i "s/\$NEW_DOMAIN/\$OLD_DOMAIN/g" /etc/nginx/sites-available/\$APP_NAME
-    exit 1
-fi
+# if sudo nginx -t; then
+#     sudo systemctl reload nginx
+#     echo "✅ Nginx configuration updated"
+# else
+#     echo "❌ Nginx configuration error, reverting..."
+#     sudo sed -i "s/\$NEW_DOMAIN/\$OLD_DOMAIN/g" /etc/nginx/sites-available/\$APP_NAME
+#     exit 1
+# fi
+echo "⚠️  Nginx configuration update skipped - update manually if needed"
 
 # Update environment file
 if [ -f "$APP_PATH/.env" ]; then
@@ -728,7 +732,7 @@ success "Application built and ready"
 echo ""
 echo "========================================="
 echo "🎉 $APP_NAME Setup Complete!"
-echo "🐧 Ubuntu Server 24.04 LTS"
+echo "🐧 Ubuntu Server 25.04 LTS"
 echo "========================================="
 echo ""
 success "Setup completed successfully!"
@@ -749,7 +753,7 @@ echo ""
 echo "4. Configure domain (optional):"
 echo "   ./manage.sh domain your-domain.com"
 echo ""
-echo "5. Setup SSL certificate (optional):"
+echo "5. Setup SSL certificate (optional - configure nginx first):"
 echo "   ./manage.sh ssl"
 echo ""
 info "🔧 Management Commands:"
@@ -757,12 +761,12 @@ echo "   - Deploy: $APP_NAME-manage deploy"
 echo "   - Status: $APP_NAME-manage status"
 echo "   - Logs: $APP_NAME-manage logs"
 echo "   - Restart: $APP_NAME-manage restart"
-echo "   - SSL: $APP_NAME-manage ssl"
+echo "   - SSL: $APP_NAME-manage ssl (requires nginx setup)"
 echo "   - Domain: $APP_NAME-domain <new-domain>"
 echo ""
 info "🌐 Access Information:"
 echo "   - Application: http://$APP_DOMAIN (after DNS setup)"
-echo "   - Direct IP: http://$(curl -s http://checkip.amazonaws.com)"
+echo "   - Direct IP: http://$(curl -s http://checkip.amazonaws.com):3000"
 echo "   - MinIO: http://$(curl -s http://checkip.amazonaws.com):9000"
 echo "   - MinIO Console: http://$(curl -s http://checkip.amazonaws.com):9001"
 echo ""
@@ -770,7 +774,8 @@ warn "⚠️  IMPORTANT:"
 echo "   - Please reboot the system to apply all changes"
 echo "   - Update your .env file with actual configuration values"
 echo "   - Configure DNS records for your domain"
-echo "   - Run SSL setup after DNS propagation"
+echo "   - Setup nginx manually if you need reverse proxy"
+echo "   - Run SSL setup after nginx configuration"
 echo ""
 warn "🔄 Please reboot your system now:"
 warn "sudo reboot"
