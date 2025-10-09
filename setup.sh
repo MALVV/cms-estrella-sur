@@ -12,10 +12,10 @@ set -e  # Exit on any error
 # Configuration variables - CHANGE THESE AS NEEDED
 APP_NAME="cemse"
 APP_USER="ubuntu"
-APP_DOMAIN="cemse.boring.lat"
+APP_DOMAIN="estrella.boring.lat"
 APP_PATH="/opt/$APP_NAME"
 APP_PORT="3000"
-GIT_REPO="https://github.com/figuu/cemse.git"
+GIT_REPO="https://github.com/MALVV/cms-estrella-sur.git"
 
 # Colors for output
 RED='\033[0;31m'
