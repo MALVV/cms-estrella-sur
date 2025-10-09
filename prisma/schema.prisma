@@ -1,0 +1,323 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String                 @id @default(cuid())
+  email              String                 @unique
+  name               String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  password           String
+  createdBy          String?
+  emailVerified      DateTime?
+  isActive           Boolean                @default(true)
+  lastLoginAt        DateTime?
+  lockedUntil        DateTime?
+  loginAttempts      Int                    @default(0)
+  mustChangePassword Boolean                @default(false)
+  refreshToken       String?                @unique
+  refreshTokenExp    DateTime?
+  role               UserRole               @default(TECNICO)
+  allies             allies[]               @relation("AllyCreator")
+  events             Event[]                @relation("EventOrganizer")
+  imageLibrary       ImageLibrary[]         @relation("ImageLibraryCreator")
+  methodologies      Methodology[]          @relation("MethodologyCreator")
+  news               News[]                 @relation("NewsAuthor")
+  programas          Programas[]            @relation("ProgramasCreator")
+  projects           Project[]              @relation("ProjectCreator")
+  resources          Resource[]             @relation("ResourceCreator")
+  stories            stories[]
+  transparencyDocs   TransparencyDocument[] @relation("TransparencyCreator")
+  creator            User?                  @relation("UserCreator", fields: [createdBy], references: [id])
+  createdUsers       User[]                 @relation("UserCreator")
+  videoTestimonials  VideoTestimonial[]     @relation("VideoTestimonialCreator")
+
+  @@map("users")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("posts")
+}
+
+model stories {
+  id        String   @id
+  title     String
+  imageUrl  String
+  imageAlt  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  content   String   @default("")
+  summary   String   @default("")
+  users     User?    @relation(fields: [createdBy], references: [id])
+}
+
+model allies {
+  id          String   @id
+  name        String
+  role        String
+  description String?
+  imageUrl    String
+  imageAlt    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  isFeatured  Boolean  @default(false)
+  users       User?    @relation("AllyCreator", fields: [createdBy], references: [id])
+}
+
+model News {
+  id            String       @id @default(cuid())
+  title         String
+  content       String
+  excerpt       String?
+  imageUrl      String?
+  imageAlt      String?
+  category      NewsCategory @default(NOTICIAS)
+  isActive      Boolean      @default(true)
+  isFeatured    Boolean      @default(false)
+  publishedAt   DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  createdBy     String?
+  programaId    String?
+  methodologyId String?
+  projectId     String?
+  author        User?        @relation("NewsAuthor", fields: [createdBy], references: [id])
+  methodology   Methodology? @relation("NewsMethodology", fields: [methodologyId], references: [id])
+  programa      Programas?   @relation("NewsProgramas", fields: [programaId], references: [id])
+  project       Project?     @relation("NewsProject", fields: [projectId], references: [id])
+
+  @@map("news")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String?
+  imageUrl    String?
+  imageAlt    String?
+  eventDate   DateTime
+  location    String?
+  isActive    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  organizer   User?    @relation("EventOrganizer", fields: [createdBy], references: [id])
+
+  @@map("events")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  title           String
+  executionStart  DateTime
+  executionEnd    DateTime
+  context         String
+  objectives      String
+  content         String
+  strategicAllies String?
+  financing       String?
+  imageUrl        String?
+  imageAlt        String?
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  createdBy       String?
+  news            News[]   @relation("NewsProject")
+  creator         User?    @relation("ProjectCreator", fields: [createdBy], references: [id])
+
+  @@map("projects")
+}
+
+model Methodology {
+  id               String              @id @default(cuid())
+  title            String
+  description      String
+  shortDescription String
+  imageUrl         String?
+  imageAlt         String?
+  ageGroup         String
+  category         MethodologyCategory
+  targetAudience   String
+  objectives       String
+  implementation   String
+  results          String
+  methodology      String?
+  resources        String?
+  evaluation       String?
+  isActive         Boolean             @default(true)
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  createdBy        String?
+  isFeatured       Boolean             @default(false)
+  creator          User?               @relation("MethodologyCreator", fields: [createdBy], references: [id])
+  news             News[]              @relation("NewsMethodology")
+
+  @@map("methodologies")
+}
+
+model TransparencyDocument {
+  id          String               @id @default(cuid())
+  title       String
+  description String?
+  fileName    String
+  fileUrl     String
+  fileSize    Int?
+  fileType    String?
+  category    TransparencyCategory
+  year        Int?
+  isActive    Boolean              @default(true)
+  isFeatured  Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  createdBy   String?
+  creator     User?                @relation("TransparencyCreator", fields: [createdBy], references: [id])
+
+  @@map("transparency_documents")
+}
+
+model Resource {
+  id            String               @id @default(cuid())
+  title         String
+  description   String?
+  fileName      String
+  fileUrl       String
+  fileSize      Int?
+  fileType      String?
+  category      ResourceCategory
+  subcategory   ResourceSubcategory?
+  thumbnailUrl  String?
+  duration      Int?
+  isActive      Boolean              @default(true)
+  isFeatured    Boolean              @default(false)
+  downloadCount Int                  @default(0)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  createdBy     String?
+  creator       User?                @relation("ResourceCreator", fields: [createdBy], references: [id])
+
+  @@map("resources")
+}
+
+model VideoTestimonial {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  youtubeUrl   String
+  thumbnailUrl String?
+  duration     Int?
+  isActive     Boolean  @default(true)
+  isFeatured   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  createdBy    String?
+  creator      User?    @relation("VideoTestimonialCreator", fields: [createdBy], references: [id])
+
+  @@map("video_testimonials")
+}
+
+model Programas {
+  id                   String         @id @default(cuid())
+  nombreSector         String
+  descripcion          String
+  videoPresentacion    String?
+  alineacionODS        String?
+  subareasResultados   String?
+  resultados           String?
+  gruposAtencion       String?
+  contenidosTemas      String?
+  enlaceMasInformacion String?
+  isActive             Boolean        @default(true)
+  isFeatured           Boolean        @default(false)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  createdBy            String?
+  imageAlt             String?
+  imageUrl             String?
+  imageLibrary         ImageLibrary[] @relation("ImageLibraryProgramas")
+  news                 News[]         @relation("NewsProgramas")
+  creator              User?          @relation("ProgramasCreator", fields: [createdBy], references: [id])
+
+  @@map("programas")
+}
+
+model ImageLibrary {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  imageAlt    String?
+  fileName    String?
+  fileSize    Int?
+  fileType    String?
+  isActive    Boolean    @default(true)
+  isFeatured  Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  createdBy   String?
+  programaId  String?
+  creator     User?      @relation("ImageLibraryCreator", fields: [createdBy], references: [id])
+  programa    Programas? @relation("ImageLibraryProgramas", fields: [programaId], references: [id])
+
+  @@map("image_library")
+}
+
+enum UserRole {
+  ADMINISTRADOR
+  TECNICO
+  SUPERVISOR
+}
+
+enum NewsCategory {
+  NOTICIAS
+  FUNDRAISING
+  COMPANIA
+  SIN_CATEGORIA
+}
+
+enum MethodologyCategory {
+  EDUCACION
+  SALUD
+  SOCIAL
+  AMBIENTAL
+}
+
+enum TransparencyCategory {
+  CENTRO_DOCUMENTOS
+  RENDICION_CUENTAS
+  FINANCIADORES_ALIADOS
+  INFORMES_ANUALES
+}
+
+enum ResourceCategory {
+  CENTRO_MULTIMEDIA
+  PUBLICACIONES
+}
+
+enum ResourceSubcategory {
+  VIDEOS
+  AUDIOS
+  REPRODUCTOR_INTEGRADO
+  BIBLIOTECA_DIGITAL
+  GUIAS_DESCARGABLES
+  MANUALES
+}
