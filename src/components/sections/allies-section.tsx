@@ -54,7 +54,7 @@ export const AlliesSection: React.FC = () => {
       <section className="py-6 sm:py-8 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4 w-full max-w-7xl">
           <div className="text-center mb-16">
-            <span className="inline-block bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold mb-4">
+            <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
               ALIADOS ESTRATÉGICOS
             </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
@@ -77,7 +77,7 @@ export const AlliesSection: React.FC = () => {
       <section className="py-6 sm:py-8 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4 w-full max-w-7xl">
           <div className="text-center mb-16">
-            <span className="inline-block bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold mb-4">
+            <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
               ALIADOS ESTRATÉGICOS
             </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
@@ -100,7 +100,7 @@ export const AlliesSection: React.FC = () => {
       <div className="container mx-auto px-4 w-full max-w-7xl">
         {/* Encabezado */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold mb-4">
+          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
             LOS ALIADOS
           </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">

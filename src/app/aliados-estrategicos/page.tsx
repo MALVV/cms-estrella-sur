@@ -10,11 +10,13 @@ import {
   Globe,
   Handshake,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Search
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Ally {
   id: string;
@@ -63,218 +65,212 @@ export default function AliadosEstrategicosPage() {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
       {/* Hero Section */}
-      <main className="relative min-h-[60vh] flex items-center justify-center bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDxj7aF9-tpq6_zWnwVuojHHQc6bgc0eYuTVzXoE54LfjueardQbB6d3EFqZK3uv57oPTiHleVgH-Yi34c27AzoP75Qy1KG7aX02vlCFgOrykyPM-7ngRDNctmwl-uvyGeoidjSDqXHYXwBToi1ZuwUrOC0WEgjGrmw6E2n9SWGVuA-jl7O9o8Jpy99P817v_9-SFCIO7Y4FJ-vvLo2jZnXag1G1XwpbZuRBQKvKBtEKeA195mYIaDVYeWR_qsqQvyMmN5lHxaP-Q4')"}}>
-        <div className="absolute inset-0 bg-white/80 dark:bg-black/70"></div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative p-4">
-              <div className="absolute inset-0 -z-10">
-                <Image 
-                  alt="Strategic partnerships" 
-                  className="w-full h-full object-contain opacity-60" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6OIceM-_FT9G0DLEA6WqHqXlzlJU-VaRCRGc9YmiIowGpPowBftussI75QEvZB9_--dBx4PzUuEEy0IcDa2c_UceyI_2xYkO_HVTFssrxGoPHIw0omP5gMXjqYTSnA_3dvjAM7Lb8_71gI8ZwulPak0-RTUB6qMvKe9x6m10z9cuTF0uFGMHTQssgmxQqn0wX99_XKgOj86JVeNCaD1e0wfnzKVk4cA5Eww2nGD1KmW7CVDBSXCZjOxdgaJwWkcVw931k71FPm98"
-                  width={400}
-                  height={300}
-                />
-              </div>
-              <div className="relative transform -rotate-6 max-w-sm mx-auto">
-                <Image 
-                  alt="Partnership meeting" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0DKGKMYw36YxwT9YsJXl1eVtdB-GCWJZ_4WjzDxUdML2vGmj6xbZ9_DwGHVQvh1D0lRny2Gki7pbHQWxUau_Inz0RHWtE6GevDh5_mykpglJ_LQSgxeGtCVCdHkXj_urWqkI8DkcmEH4EBrDXR-5153a4nN5xOuPvOr4Vs2y0Ii2HOYhPTuOpXEheDFlaSvA3XCpWfhe04uSO1aOu70z8qif64ppIm4lQWU2hWjlhHF-fSMDaXrbvE9MC_5dHxtbxBKygXs0JoO0"
-                  width={400}
-                  height={300}
-                />
-              </div>
-              <div className="relative transform rotate-3 mt-[-15%] ml-[20%] max-w-xs">
-                <Image 
-                  alt="Corporate alliance" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcojMb_tNeqCrnNo1DH8v1vKFm2shH7i9X_UrDGDxoSUU6JdshPCdQy99xuAfZp_78sh87ME9W706dQ75iClppApHElnQaU0Svwngv46AOmz3-ke1ulDNpRN02F5Iujger72_L06XMRQBNEq3zPIXy7Jw7GPUm4rKpHEUBemS2jq5vmMKX_KQ3c7R0qRF0B2ZWlgIBFoMbn6UOXdsCepwN_iRMrzWpzQGLKhhitD8rxMKlOOlgf2mz6zhwgpXJV_NXcrTDU92VGkE"
-                  width={300}
-                  height={200}
-                />
-              </div>
-            </div>
-            <div className="text-left">
-              <span className="inline-block bg-orange-400 text-gray-800 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm mb-4">
+      <div className="relative min-h-screen flex items-center bg-hero">
+        <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
+        <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <div className="max-w-2xl text-white text-center">
+            <div className="mb-4">
+              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
                 Nuestros aliados
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-light dark:text-text-dark leading-tight">
-                ALIADOS ESTRATÉGICOS<br/>
-                COMPROMETIDOS<br/>
-                CON EL IMPACTO SOCIAL
-              </h1>
-              <p className="mt-6 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Organizaciones, empresas y fundaciones que comparten nuestra visión de transformación social y trabajan junto a nosotros para crear un impacto positivo.
-              </p>
-              <p className="mt-4 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Nuestros aliados estratégicos son fundamentales para amplificar nuestro alcance y maximizar el impacto en las comunidades que servimos.
-              </p>
             </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Strategic Partners Section */}
-      <section className="py-12 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-sm mb-4">
-              ALIANZAS ESTRATÉGICAS
-            </span>
-            <h1 className="text-4xl font-bold text-text-light dark:text-text-dark">
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white">
               ALIADOS ESTRATÉGICOS
             </h1>
-            <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto mt-4">
+            <p className="mt-6 text-lg md:text-xl text-gray-200">
+              Organizaciones, empresas y fundaciones que comparten nuestra visión de transformación social y trabajan junto a nosotros para crear un impacto positivo.
+            </p>
+            <p className="mt-4 text-lg md:text-xl text-gray-200">
+              Nuestros aliados estratégicos son fundamentales para amplificar nuestro alcance y maximizar el impacto en las comunidades que servimos.
+            </p>
+            <div className="mt-8">
+              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#aliados">
+                CONOCE NUESTROS ALIADOS
+                <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </main>
+      </div>
+
+
+      {/* Strategic Partners Section */}
+      <section className="py-12 bg-background-light dark:bg-background-dark" id="aliados">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+              ALIANZAS ESTRATÉGICAS
+            </span>
+            <h2 className="text-4xl font-bold text-text-light dark:text-text-dark mb-4">
+              Nuestros Aliados Estratégicos
+            </h2>
+            <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto">
               Organizaciones que comparten nuestra misión y trabajan con nosotros para crear un impacto social sostenible.
             </p>
           </div>
           
           {loading ? (
-            <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400">Cargando aliados estratégicos...</p>
+            <div className="text-center py-16">
+              <div className="inline-flex items-center gap-3 text-text-secondary-light dark:text-text-secondary-dark">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span className="text-lg">Cargando aliados estratégicos...</span>
+              </div>
             </div>
           ) : error ? (
-            <div className="text-center">
-              <p className="text-red-600 dark:text-red-400">{error}</p>
+            <div className="text-center py-16">
+              <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 max-w-md mx-auto">
+                <div className="text-destructive text-lg font-medium mb-2">Error al cargar</div>
+                <p className="text-text-secondary-light dark:text-text-secondary-dark">{error}</p>
+              </div>
             </div>
           ) : allies.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {allies.map((ally) => (
-                <div key={ally.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20 rounded-lg">
-                  <div className="relative h-80 sm:h-96">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allies.map((ally, index) => (
+                <div 
+                  key={ally.id} 
+                  className="group bg-card-light dark:bg-card-dark rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-border-light dark:border-border-dark hover:border-primary hover:-translate-y-1"
+                >
+                  {/* Image Container */}
+                  <div className="relative h-48 overflow-hidden">
                     <Image
                       alt={ally.imageAlt || ally.name}
                       src={ally.imageUrl}
                       fill
-                      className="object-cover"
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
-                  </div>
-                  
-                  <div className="p-6">
-                    <div className="text-left">
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="inline-block bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium px-2 py-1 border border-white/30 dark:border-gray-500/30 rounded">
-                          {ally.role}
-                        </span>
-                        {ally.isFeatured && (
-                          <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full">
-                            ⭐ DESTACADO
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                    
+                    {/* Role Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span className="inline-block bg-primary text-white text-xs font-bold px-2 py-1 rounded">
+                        {ally.role}
+                      </span>
+                    </div>
+
+                    {/* Title over image */}
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 drop-shadow-lg">
                         {ally.name}
                       </h3>
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-4">
+                    <div className="space-y-3">
                       {ally.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm leading-relaxed line-clamp-3">
                           {ally.description}
                         </p>
                       )}
+
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center">
-              <p className="text-gray-600 dark:text-gray-400">No hay aliados estratégicos disponibles en este momento.</p>
+            <div className="text-center py-16">
+              <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-8 max-w-md mx-auto">
+                <Search className="h-12 w-12 text-text-secondary-light dark:text-text-secondary-dark mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-text-light dark:text-text-dark mb-2">
+                  No se encontraron aliados
+                </h3>
+                <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
+                  No hay aliados estratégicos disponibles en este momento.
+                </p>
+              </div>
             </div>
           )}
         </div>
       </section>
 
       {/* Partnership Benefits Section */}
-      <section className="py-8 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <span className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-sm mb-4">
-              BENEFICIOS DE LA ALIANZA
-            </span>
-            <h2 className="text-4xl font-bold text-text-light dark:text-text-dark">
-              ¿POR QUÉ SER NUESTRO ALIADO ESTRATÉGICO?
-            </h2>
-            <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto mt-4">
-              Únete a nuestra red de aliados estratégicos y forma parte de la transformación social.
-            </p>
+      <section className="py-6 bg-background-light dark:bg-background-dark">
+        <div className="container mx-auto px-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div>
+              <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+                BENEFICIOS DE LA ALIANZA
+              </span>
+              <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
+                ¿POR QUÉ SER NUESTRO ALIADO ESTRATÉGICO?
+              </h1>
+            </div>
+            <div>
+              <p className="text-text-secondary-light dark:text-text-secondary-dark text-lg">
+                Al unirte como aliado estratégico, formas parte de una red de organizaciones comprometidas con el cambio social y obtienes beneficios únicos que amplifican tu impacto.
+              </p>
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-blue-100 dark:bg-blue-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Handshake className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
+                <Handshake className="h-8 w-8 text-orange-500" />
               </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Impacto Amplificado
-              </h3>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">IMPACTO AMPLIFICADO</h3>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Multiplica el impacto de tu organización trabajando junto a nosotros en proyectos sociales.
+                Multiplica el alcance de tus iniciativas sociales trabajando junto a una organización con presencia nacional y reconocimiento internacional.
+              </p>
+            </div>
+            
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
+                <Globe className="h-8 w-8 text-green-500" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">ALCANCE GLOBAL</h3>
+              <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                Accede a nuestra red global de comunidades y proyectos en diferentes regiones del país.
               </p>
             </div>
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-green-100 dark:bg-green-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Globe className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
+                <Award className="h-8 w-8 text-blue-500" />
               </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Alcance Global
-              </h3>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">RECONOCIMIENTO</h3>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Accede a nuestra red global de comunidades y proyectos en diferentes regiones.
+                Obtén visibilidad y reconocimiento por tu compromiso con la responsabilidad social y el desarrollo comunitario.
               </p>
             </div>
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-purple-100 dark:bg-purple-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Award className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
+                <Users className="h-8 w-8 text-purple-500" />
               </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Reconocimiento
-              </h3>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">NETWORKING</h3>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Obtén visibilidad y reconocimiento por tu compromiso con la responsabilidad social.
+                Conecta con otras organizaciones comprometidas con el desarrollo social y amplía tu red de contactos.
               </p>
             </div>
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-orange-100 dark:bg-orange-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Users className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-6">
+                <Lightbulb className="h-8 w-8 text-red-500" />
               </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Networking
-              </h3>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">INNOVACIÓN</h3>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Conecta con otras organizaciones comprometidas con el desarrollo social.
+                Participa en proyectos innovadores que transforman comunidades usando metodologías probadas internacionalmente.
               </p>
             </div>
 
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-red-100 dark:bg-red-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Lightbulb className="h-8 w-8 text-red-600 dark:text-red-400" />
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-6">
+                <Shield className="h-8 w-8 text-yellow-500" />
               </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Innovación
-              </h3>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">TRANSPARENCIA</h3>
               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Participa en proyectos innovadores que transforman comunidades.
-              </p>
-            </div>
-
-            <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-              <div className="bg-teal-100 dark:bg-teal-900/30 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-8 w-8 text-teal-600 dark:text-teal-400" />
-              </div>
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-2">
-                Transparencia
-              </h3>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Trabajamos con total transparencia y rendición de cuentas.
+                Trabajamos con total transparencia y rendición de cuentas, proporcionando reportes detallados del impacto.
               </p>
             </div>
           </div>
@@ -282,19 +278,20 @@ export default function AliadosEstrategicosPage() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-12 bg-orange-500 dark:bg-orange-600 text-white dark:text-white relative overflow-hidden">
+      <section className="py-20 bg-orange-500 dark:bg-orange-600 text-white dark:text-white relative overflow-hidden">
+        {/* Fondo decorativo */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
           <div className="absolute top-40 right-20 w-24 h-24 bg-yellow-200 rounded-full blur-2xl"></div>
           <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-orange-200 rounded-full blur-3xl"></div>
         </div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-8">
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-16">
             <span className="inline-block bg-orange-200 text-orange-800 dark:bg-orange-300 dark:text-orange-900 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
               ÚNETE COMO ALIADO ESTRATÉGICO
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white dark:text-white leading-tight font-condensed">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white dark:text-white leading-tight font-condensed">
               ¿QUIERES SER PARTE DE NUESTRA RED DE ALIADOS?
             </h2>
             <p className="text-xl text-white dark:text-white max-w-3xl mx-auto mt-4">
@@ -310,15 +307,18 @@ export default function AliadosEstrategicosPage() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-orange-600 font-bold font-condensed" asChild>
+            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-orange-600 font-bold font-condensed transition-all duration-300 hover:scale-105" asChild>
               <Link href="/nosotros">
                 CONOCER MÁS SOBRE NOSOTROS
-                <ArrowLeft className="ml-2 h-5 w-5" />
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </div>
   );
 }
+

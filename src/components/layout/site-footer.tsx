@@ -14,7 +14,7 @@ export function SiteFooter() {
               Trabajamos para cambiar vidas y crear un futuro mejor para los niños y sus comunidades.
             </p>
             <div className="flex space-x-4">
-              <Button size="sm" variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900">
+              <Button size="sm" variant="outline" className="border-white text-primary hover:bg-primary hover:text-primary-foreground">
                 <Heart className="h-4 w-4 mr-2" />
                 Donar
               </Button>

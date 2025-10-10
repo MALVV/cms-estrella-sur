@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useEffect, use } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -9,9 +8,9 @@ import {
   Calendar,
   User,
   Share2,
-  Heart,
   Clock,
-  ExternalLink
+  ExternalLink,
+  Heart
 } from 'lucide-react';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -263,71 +262,6 @@ export default function StoryDetailPage({ params }: StoryDetailPageProps) {
               </div>
             </div>
           </article>
-
-          {/* Información adicional */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Información de la story */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
-                  Información de la Historia
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Creada:</span>
-                    <span>{formatDate(story.createdAt)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Actualizada:</span>
-                    <span>{formatDate(story.updatedAt)}</span>
-                  </div>
-                  {story.author && (
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark">Autor:</span>
-                      <span>{story.author.name}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Acciones relacionadas */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <ExternalLink className="h-5 w-5 text-primary" />
-                  Acciones Relacionadas
-                </h3>
-                <div className="space-y-3">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => router.push('/historias-impacto')}
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Ver todas las historias
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => router.push('/proyectos')}
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Ver proyectos relacionados
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => router.push('/programas')}
-                  >
-                    <Heart className="mr-2 h-4 w-4" />
-                    Conocer nuestros programas
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Footer de navegación */}
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">

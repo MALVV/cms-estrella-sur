@@ -13,7 +13,6 @@ import {
   Grid3X3,
   List,
   Video,
-  Image as ImageIcon,
   FileText,
   ExternalLink,
   Clock
@@ -55,7 +54,7 @@ export default function HistoriasImpactoPage() {
   const [videos, setVideos] = useState<VideoTestimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'videos' | 'casos' | 'galeria'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'casos'>('videos');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'featured'>('all');
@@ -253,7 +252,7 @@ export default function HistoriasImpactoPage() {
               {/* Información adicional sobre historias */}
               <div className="pt-4">
                 <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  Explora nuestras historias organizadas por categorías: videos testimoniales, casos de éxito documentados y galería multimedia.
+                  Explora nuestras historias organizadas por categorías: videos testimoniales y casos de éxito documentados.
                 </p>
             </div>
             </div>
@@ -266,9 +265,7 @@ export default function HistoriasImpactoPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
-              {activeTab === 'videos' ? 'VIDEOS TESTIMONIALES' : 
-               activeTab === 'casos' ? 'CASOS DE ÉXITO' : 
-               'GALERÍA MULTIMEDIA'}
+              {activeTab === 'videos' ? 'VIDEOS TESTIMONIALES' : 'CASOS DE ÉXITO'}
             </h1>
             <div className="flex space-x-2 md:space-x-4">
               {/* Selector de pestañas */}
@@ -283,12 +280,6 @@ export default function HistoriasImpactoPage() {
                 onClick={() => setActiveTab('casos')}
               >
                 CASOS
-              </button>
-              <button 
-                className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'galeria' ? 'bg-yellow-400 text-gray-800' : 'text-subtext-light dark:text-subtext-dark hover:text-primary dark:hover:text-primary'}`}
-                onClick={() => setActiveTab('galeria')}
-              >
-                GALERÍA
               </button>
             </div>
           </div>
@@ -545,18 +536,6 @@ export default function HistoriasImpactoPage() {
             </div>
           )}
 
-          {/* Galería Multimedia Tab */}
-          {activeTab === 'galeria' && (
-                <div className="text-center py-16">
-                  <ImageIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
-                Galería Multimedia
-                  </h3>
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Próximamente tendremos una galería multimedia con fotos, videos y documentos que muestran nuestro trabajo.
-              </p>
-            </div>
-          )}
         </div>
       </section>
     </div>

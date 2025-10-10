@@ -1,58 +1,28 @@
 'use client';
 
 import Image from 'next/image';
+import { NumberTicker } from '@/components/ui/number-ticker';
 
 export default function MetricsSection() {
   return (
-    <div className="relative w-full bg-orange-200 dark:bg-orange-900 text-gray-800 dark:text-gray-200 overflow-hidden px-4 py-16 md:py-20">
-      {/* Fondo del mapa mundial */}
-      <div 
-        className="absolute inset-0 opacity-15"
-        style={{
-          backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuCmkIwZ5NXu4XQH2Go2M4UQ80Nbe7p8fVryk4gHxOPg-WusYnLYKsq4JrLtCwHty3ajg-LZRvaWeALB-hytD4Wr7vKJ0T7BzlJhjvvPzRUGXiPyqK1pGZvh0irAm4x1kVctEDgp33gIfiARb6R3M77SHNFz3gIybnKtu1nuE3NmVP3tsIxp6tij429lZCJ5j9YDCAIF25FpzKfKMGznvM5b7aaYmYOXAuPN3i1Raus5scH5iuMZ3V-b7DSTgaQHu0PrALzwbf-U2L4')`,
-          backgroundSize: '70%',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
+    <div className="relative w-full bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 overflow-hidden px-4 py-16 md:py-20">
+      {/* Imagen de fondo en blanco y negro */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="https://images.pexels.com/photos/9034108/pexels-photo-9034108.jpeg"
+          alt="Fondo de métricas"
+          fill
+          className="object-cover grayscale opacity-50"
+        />
+        {/* Overlay oscuro para mejor contraste */}
+        <div className="absolute inset-0 bg-black/30"></div>
+      </div>
 
-      {/* Imágenes de niños posicionadas */}
-      <Image
-        alt="Niña sonriente 1"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmkIwZ5NXu4XQH2Go2M4UQ80Nbe7p8fVryk4gHxOPg-WusYnLYKsq4JrLtCwHty3ajg-LZRvaWeALB-hytD4Wr7vKJ0T7BzlJhjvvPzRUGXiPyqK1pGZvh0irAm4x1kVctEDgp33gIfiARb6R3M77SHNFz3gIybnKtu1nuE3NmVP3tsIxp6tij429lZCJ5j9YDCAIF25FpzKfKMGznvM5b7aaYmYOXAuPN3i1Raus5scH5iuMZ3V-b7DSTgaQHu0PrALzwbf-U2L4"
-        width={80}
-        height={80}
-        className="absolute top-20 left-16 w-20 h-20 rounded-full object-cover shadow-lg"
-      />
-      
-      <Image
-        alt="Niña sonriente 2"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmkIwZ5NXu4XQH2Go2M4UQ80Nbe7p8fVryk4gHxOPg-WusYnLYKsq4JrLtCwHty3ajg-LZRvaWeALB-hytD4Wr7vKJ0T7BzlJhjvvPzRUGXiPyqK1pGZvh0irAm4x1kVctEDgp33gIfiARb6R3M77SHNFz3gIybnKtu1nuE3NmVP3tsIxp6tij429lZCJ5j9YDCAIF25FpzKfKMGznvM5b7aaYmYOXAuPN3i1Raus5scH5iuMZ3V-b7DSTgaQHu0PrALzwbf-U2L4"
-        width={80}
-        height={80}
-        className="absolute top-20 right-16 w-20 h-20 rounded-full object-cover shadow-lg"
-      />
-      
-      <Image
-        alt="Niño sonriente 3"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmkIwZ5NXu4XQH2Go2M4UQ80Nbe7p8fVryk4gHxOPg-WusYnLYKsq4JrLtCwHty3ajg-LZRvaWeALB-hytD4Wr7vKJ0T7BzlJhjvvPzRUGXiPyqK1pGZvh0irAm4x1kVctEDgp33gIfiARb6R3M77SHNFz3gIybnKtu1nuE3NmVP3tsIxp6tij429lZCJ5j9YDCAIF25FpzKfKMGznvM5b7aaYmYOXAuPN3i1Raus5scH5iuMZ3V-b7DSTgaQHu0PrALzwbf-U2L4"
-        width={80}
-        height={80}
-        className="absolute bottom-20 right-16 w-20 h-20 rounded-full object-cover shadow-lg"
-      />
-
-      <Image
-        alt="Niña sonriente 4"
-        src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmkIwZ5NXu4XQH2Go2M4UQ80Nbe7p8fVryk4gHxOPg-WusYnLYKsq4JrLtCwHty3ajg-LZRvaWeALB-hytD4Wr7vKJ0T7BzlJhjvvPzRUGXiPyqK1pGZvh0irAm4x1kVctEDgp33gIfiARb6R3M77SHNFz3gIybnKtu1nuE3NmVP3tsIxp6tij429lZCJ5j9YDCAIF25FpzKfKMGznvM5b7aaYmYOXAuPN3i1Raus5scH5iuMZ3V-b7DSTgaQHu0PrALzwbf-U2L4"
-        width={80}
-        height={80}
-        className="absolute bottom-20 left-16 w-20 h-20 rounded-full object-cover shadow-lg"
-      />
 
       {/* Contenido principal */}
       <div className="relative z-10 text-center w-full max-w-6xl mx-auto">
         {/* Badge */}
-        <span className="inline-block text-gray-800 dark:text-gray-200 text-sm font-semibold mb-6">
+        <span className="inline-block bg-primary text-white px-3 py-1 rounded text-sm font-semibold mb-6">
           EL IMPACTO QUE GENERAMOS
         </span>
 
@@ -64,7 +34,11 @@ export default function MetricsSection() {
         {/* Número principal */}
         <div className="my-10">
           <p className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-yellow-500 tracking-tighter">
-            7,200+
+            <NumberTicker 
+              value={7200} 
+              className="text-6xl sm:text-7xl lg:text-8xl font-extrabold text-yellow-500 tracking-tighter"
+              delay={0.5}
+            />+
           </p>
           <p className="text-lg font-semibold tracking-wider text-gray-800 dark:text-gray-200">
             NIÑAS, NIÑOS, ADOLESCENTES Y JÓVENES
@@ -74,19 +48,37 @@ export default function MetricsSection() {
         {/* Métricas secundarias */}
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
           <div className="text-center">
-            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">55,000+</p>
+            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">
+              <NumberTicker 
+                value={55000} 
+                className="text-4xl font-extrabold text-gray-800 dark:text-gray-200"
+                delay={0.2}
+              />+
+            </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Estudiantes
             </p>
           </div>
           <div className="text-center">
-            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">5,700</p>
+            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">
+              <NumberTicker 
+                value={5700} 
+                className="text-4xl font-extrabold text-gray-800 dark:text-gray-200"
+                delay={0.2}
+              />
+            </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Familias
             </p>
           </div>
           <div className="text-center">
-            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">120</p>
+            <p className="text-4xl font-extrabold text-gray-800 dark:text-gray-200">
+              <NumberTicker 
+                value={120} 
+                className="text-4xl font-extrabold text-gray-800 dark:text-gray-200"
+                delay={0.2}
+              />
+            </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               Unidades Educativas
             </p>

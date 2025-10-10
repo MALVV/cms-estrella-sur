@@ -12,9 +12,7 @@ import {
   DollarSign, 
   Share2, 
   ExternalLink,
-  Clock,
-  Heart,
-  ArrowLeft
+  Clock
 } from 'lucide-react';
 import Image from 'next/image';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -226,14 +224,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 <Share2 className="mr-2 h-4 w-4" />
                 Compartir
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => router.push('/proyectos')}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver a Proyectos
-              </Button>
             </div>
           </header>
 
@@ -301,79 +291,45 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             </div>
           </article>
 
-          {/* Información adicional */}
+          {/* Información específica del proyecto */}
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Información del proyecto */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
-                  Información del Proyecto
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">ID:</span>
-                    <span className="font-mono text-xs">{project.id}</span>
+            {/* Aliados Estratégicos */}
+            {project.strategicAllies && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Aliados Estratégicos
+                  </h3>
+                  <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    {project.strategicAllies.split('\n').map((paragraph, index) => (
+                      <p key={index} className="mb-3 last:mb-0">
+                        {paragraph}
+                      </p>
+                    ))}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Estado:</span>
-                    <span>{project.isActive ? 'Activo' : 'Inactivo'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Período:</span>
-                    <span>{formatPeriod(project.executionStart, project.executionEnd)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Creado:</span>
-                    <span>{formatDate(project.createdAt)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary-light dark:text-text-secondary-dark">Actualizado:</span>
-                    <span>{formatDate(project.updatedAt)}</span>
-                  </div>
-                  {project.creator && (
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark">Creador:</span>
-                      <span>{project.creator.name}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
 
-            {/* Información adicional */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <ExternalLink className="h-5 w-5 text-primary" />
-                  Información Adicional
-                </h3>
-                <div className="space-y-4">
-                  {project.strategicAllies && (
-                    <div>
-                      <h4 className="font-medium text-text-light dark:text-text-dark mb-2 flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Aliados Estratégicos
-                      </h4>
-                      <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        {project.strategicAllies}
+            {/* Financiamiento */}
+            {project.financing && (
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-primary" />
+                    Financiamiento
+                  </h3>
+                  <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    {project.financing.split('\n').map((paragraph, index) => (
+                      <p key={index} className="mb-3 last:mb-0">
+                        {paragraph}
                       </p>
-                    </div>
-                  )}
-                  {project.financing && (
-                    <div>
-                      <h4 className="font-medium text-text-light dark:text-text-dark mb-2 flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        Financiamiento
-                      </h4>
-                      <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        {project.financing}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Noticias Relacionadas */}
@@ -387,7 +343,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
 
           {/* Footer de navegación */}
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-end">
+            <div className="flex justify-start">
               <Button 
                 onClick={() => router.push('/proyectos')}
               >

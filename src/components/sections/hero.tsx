@@ -25,7 +25,7 @@ export const Hero: React.FC = () => {
         <div className="flex items-center min-h-[60vh] sm:min-h-[70vh]">
           <div className="w-full lg:w-2/3 z-10">
             {/* Banner pequeño */}
-            <div className="inline-block bg-yellow-400 text-black px-3 py-2 text-sm font-bold mb-4 rounded font-condensed">
+            <div className="inline-block bg-yellow-400 text-black px-3 py-2 text-xs font-semibold mb-4 rounded font-condensed">
               OFRECEMOS ESPERANZA QUE PUEDES AYUDAR
             </div>
             
@@ -37,9 +37,9 @@ export const Hero: React.FC = () => {
             </h1>
             
             {/* Botón de llamada a la acción */}
-            <a className="mt-4 sm:mt-6 inline-flex items-center bg-gray-800 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg text-base sm:text-lg font-bold hover:bg-gray-700 dark:bg-gray-200 dark:text-black dark:hover:bg-gray-300 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#about">
+            <a className="mt-4 sm:mt-6 inline-flex items-center bg-gray-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-bold hover:bg-gray-700 dark:bg-gray-200 dark:text-black dark:hover:bg-gray-300 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="/nosotros">
               SABER MÁS
-              <span className="ml-2 text-lg sm:text-xl">→</span>
+              <span className="ml-2 text-sm sm:text-base">→</span>
             </a>
           </div>
         </div>

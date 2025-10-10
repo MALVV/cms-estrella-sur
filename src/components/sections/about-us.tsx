@@ -19,7 +19,7 @@ export const AboutUs: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-16">
           <motion.span 
-            className="bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold"
+            className="bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold"
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}

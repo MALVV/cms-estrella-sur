@@ -38,7 +38,7 @@ export default function OurHistorySection() {
       <div className="container mx-auto px-4 py-16 md:py-24">
         {/* Título de la sección */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold mb-4">
+          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
             NUESTRA HISTORIA
           </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
@@ -71,7 +71,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2004</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>
@@ -101,7 +101,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2010</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>
@@ -131,7 +131,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2011</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>
@@ -161,7 +161,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2019</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>
@@ -191,7 +191,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2020</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>
@@ -221,7 +221,7 @@ export default function OurHistorySection() {
             <div className="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 relative">
               <h2 className="text-5xl font-bold text-subtle-light dark:text-subtle-dark">2024</h2>
               {/* Bullet al lado derecho del año */}
-              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-0.5rem) translateY(-50%)' }}></div>
+              <div className="absolute right-0 top-1/2 w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full hidden md:block shadow-lg z-10" style={{ transform: 'translateX(-1.75rem) translateY(-50%)' }}></div>
             </div>
             <div className="relative md:w-3/4 pl-8 md:pl-0">
               <div className="timeline-decorator md:hidden"></div>

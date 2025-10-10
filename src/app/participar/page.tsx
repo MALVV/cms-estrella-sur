@@ -3,6 +3,7 @@
 import React from 'react';
 import { SiteHeader } from '@/components/layout/site-header';
 import { ArrowRight, Check } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ParticiparPage() {
   return (
@@ -30,18 +31,18 @@ export default function ParticiparPage() {
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNoowQe1sA533prRb3qVjIH4HNB9OCrmnSUR2XzryNwkABDCTZ9LWo9OVo1lXpKph9XpF-wPcWrWoTNZqaONOkI37zRZ_hf0nldguKJ45KH1ekiarPbDLCLK2ASQBGo119zft00SZ5Ork0I5LSz8hpx6BMofowkZrogwSIl4TaXz1T3vyLRx56jqcwBAUU9fyWQ4yqtGOE2607InXbNTNFV5WsMSv0FWZsVScRaxcoMEf53Ynp-yOTccA-TENqZ_YXB0MbV3Qiyw"
             />
             <h2 className="text-2xl font-bold mb-4 text-[#1F2937] dark:text-[#E2E8F0]">
-              FORMULARIO VOLUNTARIADOS
+              CONVOCATORIAS
             </h2>
             <p className="mb-6 text-[#1F2937] dark:text-[#E2E8F0]/80">
-              Únete como voluntario y contribuye con tus habilidades ayudando en programas de liderazgo, eventos especiales y actividades recreativas.
+              Explora nuestras convocatorias de trabajo y consultorías. Únete a nuestro equipo y contribuye al desarrollo social de Bolivia.
             </p>
-            <a 
+            <Link 
               className="mt-auto bg-white dark:bg-gray-800 text-[#1F2937] dark:text-[#E2E8F0] font-bold py-3 px-6 rounded-lg inline-flex items-center transition-transform hover:scale-105" 
-              href="#formulario"
+              href="/convocatorias"
             >
-              COMPLETAR FORMULARIO
+              VER CONVOCATORIAS
               <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
+            </Link>
           </div>
 
           {/* Donar Card */}
@@ -57,13 +58,13 @@ export default function ParticiparPage() {
             <p className="mb-6 text-[#1F2937] dark:text-[#E2E8F0]/80">
               Tu donación tiene el poder de transformar vidas. Contribuye con recursos económicos para apoyar nuestros programas y proyectos sociales.
             </p>
-            <a 
+            <Link 
               className="mt-auto bg-white dark:bg-gray-800 text-[#1F2937] dark:text-[#E2E8F0] font-bold py-3 px-6 rounded-lg inline-flex items-center transition-transform hover:scale-105" 
-              href="#donar"
+              href="/donar"
             >
               HACER DONACIÓN
               <ArrowRight className="ml-2 h-5 w-5" />
-            </a>
+            </Link>
           </div>
 
           {/* Alianzas Corporativas Card */}
@@ -74,16 +75,16 @@ export default function ParticiparPage() {
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwubKoaz0rnyaviAG8NrwJC7nmDrzfksWo9dzxw_lVV6mVL3cUp8HeJKc6r7xF0Zk1HSa8hajdJsMfB85SMbUrRMqS6N67JRiZRIlG5eJeIWg-a3eqcvIIyIVZnJ8sSTKMiajzgTnvfwlvVSdOT2kOiizvJEYrUCvkQzZ5ML0B9p-OQN-JIOpPmmF1y6nOYxrocFUBPA1alY8Ui3C6xqPQ1dBuVvhewL_UoAmYS7X0i427dzwOeeS_WIcl2Ex3zmBNEVXDhWuXjQ"
             />
             <h2 className="text-2xl font-bold mb-4 text-[#1F2937] dark:text-[#E2E8F0]">
-              ALIANZAS CORPORATIVAS
+              VOLUNTARIADOS
             </h2>
             <p className="mb-6 text-[#1F2937] dark:text-[#E2E8F0]/80">
-              Únete como empresa aliada y forma parte de la transformación social. Establece alianzas estratégicas para maximizar el impacto.
+              Únete como voluntario y contribuye con tus habilidades ayudando en programas de liderazgo, eventos especiales y actividades recreativas.
             </p>
             <a 
               className="mt-auto bg-white dark:bg-gray-800 text-[#1F2937] dark:text-[#E2E8F0] font-bold py-3 px-6 rounded-lg inline-flex items-center transition-transform hover:scale-105" 
-              href="#alianzas"
+              href="#formulario"
             >
-              CONTACTAR PARA ALIANZA
+              COMPLETAR FORMULARIO
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>
           </div>

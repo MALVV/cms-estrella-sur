@@ -3,12 +3,10 @@
 import React, { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Users, Target, Calendar, Lightbulb, Heart, Shield, CheckCircle } from 'lucide-react';
+import { Users, Target, Lightbulb, Heart, Shield, Share2, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
-import { RelatedNewsCarousel } from '@/components/sections/related-news-carousel';
 import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Methodology {
@@ -47,15 +45,21 @@ export default function MethodologyDetailPage({ params }: MethodologyDetailPageP
   const fetchMethodology = async () => {
     try {
       setLoading(true);
+      console.log('🔍 Buscando metodología con ID:', resolvedParams.id);
       const response = await fetch(`/api/public/methodologies/${resolvedParams.id}`);
+      console.log('📡 Respuesta de la API:', response.status, response.statusText);
+      
       if (!response.ok) {
-        throw new Error('Metodología no encontrada');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Error de la API:', errorData);
+        throw new Error(`Metodología no encontrada (${response.status})`);
       }
       const data = await response.json();
+      console.log('✅ Metodología encontrada:', data.title);
       setMethodology(data);
     } catch (error) {
-      console.error('Error al cargar metodología:', error);
-      setError('Error al cargar la metodología');
+      console.error('❌ Error al cargar metodología:', error);
+      setError(error instanceof Error ? error.message : 'Error al cargar la metodología');
     } finally {
       setLoading(false);
     }
@@ -64,6 +68,20 @@ export default function MethodologyDetailPage({ params }: MethodologyDetailPageP
   useEffect(() => {
     fetchMethodology();
   }, [resolvedParams.id]);
+
+  const handleShare = async () => {
+    if (navigator.share && methodology) {
+      try {
+        await navigator.share({
+          title: methodology.title,
+          text: methodology.description.substring(0, 200),
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.log('Error al compartir:', err);
+      }
+    }
+  };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -135,173 +153,142 @@ export default function MethodologyDetailPage({ params }: MethodologyDetailPageP
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      {/* Header con gradiente del home */}
-      <div className="relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full z-0">
-          <div className="w-full h-full bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 dark:from-emerald-900/20 dark:via-blue-900/20 dark:to-purple-900/20"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background-light/90 via-background-light/70 to-background-light dark:from-background-dark/90 dark:via-background-dark/70 dark:to-background-dark"></div>
-        </div>
-        
-        <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12 md:py-16">
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
           {/* Header de la metodología */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              {getCategoryIcon(methodology.category)}
-              <Badge className={getCategoryColor(methodology.category)}>
-                {methodology.category}
+          <header className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge className="bg-primary text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
+                METODOLOGÍA
               </Badge>
+              <div className="flex items-center gap-2">
+                {getCategoryIcon(methodology.category)}
+                <Badge className={getCategoryColor(methodology.category)}>
+                  {methodology.category}
+                </Badge>
+              </div>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark mb-4 font-condensed">
+            <h1 className="text-4xl md:text-5xl font-black text-text-light dark:text-text-dark leading-tight mb-6">
               {methodology.title}
             </h1>
-            
-            <p className="text-xl text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto mb-6">
-              {methodology.description}
-            </p>
 
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+            {/* Metadatos */}
+            <div className="flex flex-wrap items-center gap-6 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span>{methodology.ageGroup}</span>
+                <Users className="h-4 w-4" />
+                <span>Grupo etario: {methodology.ageGroup}</span>
               </div>
+              
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-primary" />
-                <span>{methodology.targetAudience}</span>
+                <Target className="h-4 w-4" />
+                <span>Público objetivo: {methodology.targetAudience}</span>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Contenido Principal */}
-      <main className="container mx-auto px-4 py-8 sm:py-12 md:py-16">
-        <div className="max-w-4xl mx-auto">
-          {/* Imagen Principal */}
+            {/* Botones de acción */}
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleShare}
+              >
+                <Share2 className="mr-2 h-4 w-4" />
+                Compartir
+              </Button>
+            </div>
+          </header>
+
+          {/* Imagen principal */}
           {methodology.imageUrl && (
             <div className="mb-8">
-              <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
+              <div className="relative rounded-lg overflow-hidden shadow-lg">
                 <Image
                   src={methodology.imageUrl}
                   alt={methodology.imageAlt || methodology.title}
-                  fill
-                  className="object-cover"
+                  width={800}
+                  height={400}
+                  className="w-full h-auto object-cover"
+                  priority
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
               </div>
             </div>
           )}
 
-          {/* Información Detallada */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Objetivos */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="h-5 w-5 text-primary" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark font-condensed">Objetivos</h3>
+          {/* Contenido principal */}
+          <article className="prose prose-lg max-w-none">
+            <div className="space-y-8">
+              {/* Descripción */}
+              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm border-l-4 border-primary">
+                <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">
+                  Descripción de la Metodología
+                </h2>
+                <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
+                  {methodology.description.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4 last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))}
                 </div>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.objectives}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Implementación */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark font-condensed">Implementación</h3>
-                </div>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.implementation}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Metodología */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Lightbulb className="h-5 w-5 text-primary" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark font-condensed">Metodología</h3>
-                </div>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.methodology || 'Metodología detallada en desarrollo...'}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Resultados */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark font-condensed">Resultados</h3>
-                </div>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.results}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Recursos y Evaluación */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-            {/* Recursos */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-4 font-condensed">Recursos Necesarios</h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.resources || 'Lista de recursos en desarrollo...'}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Evaluación */}
-            <Card className="bg-card-light dark:bg-card-dark">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-4 font-condensed">Sistema de Evaluación</h3>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                  {methodology.evaluation || 'Sistema de evaluación en desarrollo...'}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Galería de Fotos */}
-          <Card className="bg-card-light dark:bg-card-dark mb-12">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-6 font-condensed">Galería de Fotos</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Placeholder para fotos */}
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="relative h-48 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="material-symbols-outlined text-4xl text-gray-400">image</span>
-                    </div>
-                  </div>
-                ))}
               </div>
-            </CardContent>
-          </Card>
 
-          {/* Botones de Acción */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold font-condensed" asChild>
-              <Link href="/metodologias">Ver Otras Metodologías</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="font-condensed">
-              Contactar para Implementación
-            </Button>
+              {/* Objetivos */}
+              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
+                  Objetivos de la Metodología
+                </h2>
+                <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
+                  {methodology.objectives.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4 last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Implementación */}
+              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
+                  Implementación
+                </h2>
+                <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
+                  {methodology.implementation.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4 last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              {/* Resultados */}
+              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
+                  Resultados Esperados
+                </h2>
+                <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
+                  {methodology.results.split('\n').map((paragraph, index) => (
+                    <p key={index} className="mb-4 last:mb-0">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+
+          {/* Footer de navegación */}
+          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-start">
+              <Button 
+                onClick={() => window.history.back()}
+              >
+                Ver más metodologías
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Noticias Relacionadas */}
-          <RelatedNewsCarousel 
-            methodologyId={resolvedParams.id}
-            title="Noticias Relacionadas con esta Metodología"
-            limit={6}
-          />
         </div>
       </main>
 

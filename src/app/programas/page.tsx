@@ -1,9 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Play, Newspaper, Image as ImageIcon, Target } from 'lucide-react';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -132,7 +129,7 @@ export default function ProgramasPage() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {programas.map((programa, index) => {
               // Imágenes de fallback para programas sin imagen personalizada
               const fallbackImages = [
@@ -160,63 +157,65 @@ export default function ProgramasPage() {
                   : programa.nombreSector;
               
               return (
-                <Card key={programa.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 group">
-                  {/* Imagen de fondo */}
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
+                <div key={programa.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20">
+                  {/* Imagen del programa */}
+                  <div className="relative h-48 sm:h-56">
+                    <img
                       src={currentImage}
                       alt={imageAlt}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                    
-                    {/* Badges */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-1">
-                      {programa.isFeatured && (
-                        <Badge className="bg-yellow-400 text-black text-xs font-bold">Destacado</Badge>
-                      )}
-                    </div>
-                    
-                    {/* Título sobre la imagen */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 drop-shadow-lg">
-                        {programa.nombreSector}
-                      </h3>
-                    </div>
+                    {/* Overlay con gradiente sutil */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
                   </div>
                   
-                  <CardContent className="p-4 space-y-4">
-                      <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm line-clamp-3">
+                  {/* Información del programa */}
+                  <div className="p-2.5">
+                    <div className="text-left">
+                      {/* Título del programa */}
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5">
+                        {programa.nombreSector}
+                      </h3>
+                      
+                      {/* Descripción del programa */}
+                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-1.5 line-clamp-2">
                         {programa.descripcion}
                       </p>
                       
-                      <div className="flex items-center gap-4 text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                      {/* Metadatos */}
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-2">
                         <div className="flex items-center gap-1">
                           <Newspaper className="h-3 w-3" />
-                          {programa._count.news} noticias
+                          <span>{programa._count.news} noticias</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <ImageIcon className="h-3 w-3" />
-                          {programa._count.imageLibrary} imágenes
+                          <span>{programa._count.imageLibrary} imágenes</span>
                         </div>
                       </div>
 
+                      {/* Botones de acción */}
                       <div className="flex gap-2">
-                        <Button asChild className="flex-1">
-                          <Link href={`/programas/${programa.id}`}>
-                            Ver Detalles
-                          </Link>
-                        </Button>
+                        <Link 
+                          href={`/programas/${programa.id}`}
+                          className="flex-1 bg-primary text-white text-xs font-bold py-2 px-3 rounded hover:bg-opacity-90 transition-colors text-center"
+                        >
+                          Ver Detalles
+                        </Link>
                         {programa.videoPresentacion && (
-                          <Button variant="outline" size="sm" asChild>
-                            <a href={programa.videoPresentacion} target="_blank" rel="noopener noreferrer">
-                              <Play className="h-4 w-4" />
-                            </a>
-                          </Button>
+                          <a 
+                            href={programa.videoPresentacion} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium py-2 px-3 rounded border border-white/30 dark:border-gray-500/30 hover:bg-opacity-80 transition-colors"
+                          >
+                            <Play className="h-3 w-3" />
+                          </a>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
+                </div>
               );
             })}
               </div>

@@ -28,6 +28,7 @@ interface Methodology {
 
 export default function MethodologiesPage() {
   const [loading, setLoading] = useState(true);
+  const [methodologies, setMethodologies] = useState<Methodology[]>([]);
   const [selectedMethodology, setSelectedMethodology] = useState<Methodology | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,6 +46,7 @@ export default function MethodologiesPage() {
       }
       const data = await response.json();
       console.log('📊 Datos recibidos:', data);
+      setMethodologies(data);
     } catch (error) {
       console.error('❌ Error al cargar metodologías:', error);
     } finally {
@@ -141,6 +143,8 @@ export default function MethodologiesPage() {
       objectives: 'Fomentar el pensamiento crítico y la colaboración',
       implementation: 'Proyectos interdisciplinarios de 8 semanas',
       results: 'Mejora del 40% en habilidades de resolución de problemas',
+      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
+      imageAlt: 'Estudiantes trabajando en proyectos colaborativos',
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -156,6 +160,8 @@ export default function MethodologiesPage() {
       objectives: 'Reducir enfermedades prevenibles en un 60%',
       implementation: 'Talleres mensuales y seguimiento personalizado',
       results: 'Reducción del 45% en consultas por enfermedades prevenibles',
+      imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
+      imageAlt: 'Profesionales de salud trabajando con la comunidad',
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -171,6 +177,8 @@ export default function MethodologiesPage() {
       objectives: 'Fortalecer la organización comunitaria',
       implementation: 'Talleres participativos y planificación conjunta',
       results: 'Formación de 15 organizaciones comunitarias',
+      imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
+      imageAlt: 'Reunión comunitaria participativa',
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -186,13 +194,15 @@ export default function MethodologiesPage() {
       objectives: 'Conservar 500 hectáreas de bosque',
       implementation: 'Monitoreo comunitario y reforestación',
       results: 'Conservación de 300 hectáreas en el primer año',
+      imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
+      imageAlt: 'Comunidad participando en conservación ambiental',
       isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
   ];
 
-  const methodologiesToShow = exampleMethodologies;
+  const methodologiesToShow = methodologies.length > 0 ? methodologies : exampleMethodologies;
 
   if (loading) {
     return (
@@ -211,38 +221,40 @@ export default function MethodologiesPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      {/* Hero Section con gradiente del home */}
-      <main className="relative overflow-hidden min-h-[60vh]">
-        {/* Fondo con gradiente similar al home */}
-        <div className="absolute top-0 left-0 w-full h-full z-0">
-          <div className="w-full h-full bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 dark:from-emerald-900/20 dark:via-blue-900/20 dark:to-purple-900/20"></div>
-          {/* Patrón de fondo decorativo */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-20 left-10 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
-            <div className="absolute top-40 right-20 w-24 h-24 bg-blue-400 rounded-full blur-2xl"></div>
-            <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-purple-400 rounded-full blur-3xl"></div>
+      {/* Hero Section con imagen de fondo */}
+      <main className="relative min-h-screen flex items-center bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600')"}}>
+        <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <div className="max-w-2xl text-white text-center">
+            <div className="mb-4">
+              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+                Metodologías innovadoras
+              </span>
           </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-background-light/90 via-background-light/70 to-background-light dark:from-background-dark/90 dark:via-background-dark/70 dark:to-background-dark"></div>
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white text-center">
+              <span className="block">METODOLOGÍAS</span>
+              <span className="block">DE IMPACTO</span>
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-gray-200">
+              Metodologías innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios.
+            </p>
+            <p className="mt-4 text-lg md:text-xl text-gray-200">
+              Descubre cómo nuestras metodologías están transformando comunidades y creando un mejor futuro para todos.
+            </p>
+            <div className="mt-8">
+              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#metodologias">
+                EXPLORA NUESTRAS METODOLOGÍAS
+                <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
+                </svg>
+              </a>
         </div>
-        
-        <div className="relative z-10 text-center py-24 px-4 sm:px-6 lg:px-8">
-          {/* Badge similar al home */}
-          <div className="inline-block bg-yellow-400 text-black px-3 py-2 text-sm font-bold mb-6 rounded font-condensed">
-            METODOLOGÍAS INNOVADORAS
           </div>
-          
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-text-light dark:text-text-dark leading-tight mb-6 sm:mb-8 font-condensed">
-            INNOVACIONES QUE<br/>TRANSFORMAN<br/>COMUNIDADES
-          </h1>
-          
-          <p className="text-xl max-w-3xl mx-auto mb-8 text-text-secondary-light dark:text-text-secondary-dark">
-            Metodologías innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios
-          </p>
         </div>
       </main>
 
       {/* Ruta de Metodologías */}
-      <section className="py-20 bg-background-light dark:bg-background-dark">
+      <section id="metodologias" className="py-20 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <span className="inline-block bg-green-200 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
@@ -320,7 +332,7 @@ export default function MethodologiesPage() {
                           {methodology.shortDescription}
                         </p>
                         
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
                           <a 
                             className="text-sm font-semibold text-text-light dark:text-text-dark hover:text-primary transition-colors"
                             href={`/metodologias/${methodology.id}`}
@@ -456,8 +468,8 @@ export default function MethodologiesPage() {
                 </div>
               </div>
               
-              {/* Botones de acción */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4 border-t border-border-light dark:border-border-dark">
+              {/* Botón de acción */}
+              <div className="flex justify-center pt-4 border-t border-border-light dark:border-border-dark">
                  <Button 
                    size="lg"
                    className="bg-primary hover:bg-primary/90 text-white font-bold font-condensed"
@@ -466,13 +478,6 @@ export default function MethodologiesPage() {
                    <Link href={`/metodologias/${selectedMethodology.id}`}>
                      Ver Metodología Completa
                    </Link>
-                 </Button>
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="font-condensed"
-                >
-                  Contactar para Implementación
                 </Button>
               </div>
             </div>

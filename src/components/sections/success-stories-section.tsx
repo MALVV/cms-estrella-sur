@@ -240,7 +240,7 @@ export default function SuccessStoriesSection() {
       <div className="max-w-7xl mx-auto">
         {/* Título de la sección */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-accent-green text-primary px-3 py-1 rounded-full text-xs md:text-sm font-bold mb-4">
+          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
             HISTORIAS DESTACADAS
           </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">

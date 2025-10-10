@@ -1,10 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Calendar, User, Target, ExternalLink } from 'lucide-react';
+import { Target, ExternalLink, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
@@ -145,7 +142,7 @@ export default function ProjectsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
             {projects.map((project, index) => {
               // Imágenes de fallback para proyectos sin imagen personalizada
               const fallbackImages = [
@@ -167,74 +164,79 @@ export default function ProjectsPage() {
               const imageAlt = project.imageAlt || project.title;
               
               return (
-                <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 group">
-                  {/* Imagen de fondo */}
-                  <div className="relative h-48 overflow-hidden">
+                <div key={project.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20">
+                  {/* Imagen del proyecto */}
+                  <div className="relative h-48 sm:h-56">
                     <img
                       src={currentImage}
                       alt={imageAlt}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                    
-                    {/* Badges */}
-                    <div className="absolute top-3 right-3 flex flex-col gap-1">
-                      {project.isFeatured && (
-                        <Badge className="bg-yellow-400 text-black text-xs font-bold">Destacado</Badge>
-                      )}
-                      </div>
-                    
-                    {/* Título sobre la imagen */}
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 drop-shadow-lg">
+                    {/* Overlay con gradiente sutil */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                  </div>
+                  
+                  {/* Información del proyecto */}
+                  <div className="p-2.5">
+                    <div className="text-left">
+                      {/* Título del proyecto */}
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5">
                         {project.title}
                       </h3>
-                    </div>
-              </div>
-                  
-                  <CardContent className="p-4 space-y-4">
-                    {/* Período de ejecución */}
-                    <div className="flex items-center gap-2 text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                      <Calendar className="h-3 w-3" />
-                      <span>{formatPeriod(project.executionStart, project.executionEnd)}</span>
-                </div>
-                    
-                    {/* Contexto del proyecto */}
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm line-clamp-3">
-                      {project.context}
-                    </p>
-                    
-                    {/* Metadatos */}
-                    <div className="flex items-center gap-4 text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                      <div className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
-                        <span>{project.creator?.name || 'Admin'}</span>
-              </div>
+                      
+                      {/* Fechas de ejecución minimalistas */}
+                      <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-1.5">
+                        <Calendar className="h-3 w-3" />
+                        <span className="font-medium">
+                          {new Date(project.executionStart).toLocaleDateString('es-ES', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                        <span className="text-gray-400">-</span>
+                        <span className="font-medium">
+                          {new Date(project.executionEnd).toLocaleDateString('es-ES', { 
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                      </div>
+                      
+                      {/* Contexto del proyecto */}
+                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-1.5 line-clamp-2">
+                        {project.context}
+                      </p>
+                      
+                      {/* Metadatos */}
                       {project._count?.news && (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
                           <Target className="h-3 w-3" />
                           <span>{project._count.news} noticias</span>
                         </div>
                       )}
-                    </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex gap-2">
-                      <Button asChild className="flex-1">
-                        <Link href={`/proyectos/${project.id}`}>
+                      {/* Botones de acción */}
+                      <div className="flex gap-2">
+                        <Link 
+                          href={`/proyectos/${project.id}`}
+                          className="flex-1 bg-primary text-white text-xs font-bold py-2 px-3 rounded hover:bg-opacity-90 transition-colors text-center"
+                        >
                           Ver Detalles
                         </Link>
-                      </Button>
-                      {project.strategicAllies && (
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/proyectos/${project.id}#aliados`}>
-                            <ExternalLink className="h-4 w-4" />
+                        {project.strategicAllies && (
+                          <Link 
+                            href={`/proyectos/${project.id}#aliados`}
+                            className="bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium py-2 px-3 rounded border border-white/30 dark:border-gray-500/30 hover:bg-opacity-80 transition-colors"
+                          >
+                            <ExternalLink className="h-3 w-3" />
                           </Link>
-                        </Button>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
                 );
             })}
           </div>
