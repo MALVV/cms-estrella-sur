@@ -7,6 +7,7 @@ import { Users, Heart, Lightbulb, Shield, Target, Calendar, ArrowRight, CheckCir
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Methodology {
   id: string;
@@ -42,13 +43,16 @@ export default function MethodologiesPage() {
       console.log('📡 Respuesta recibida:', response.status);
       
       if (!response.ok) {
-        throw new Error('Error al cargar metodologías');
+        throw new Error(`Error al cargar metodologías: ${response.status}`);
       }
       const data = await response.json();
       console.log('📊 Datos recibidos:', data);
+      console.log('📊 Cantidad de metodologías:', data.length);
       setMethodologies(data);
     } catch (error) {
       console.error('❌ Error al cargar metodologías:', error);
+      // En caso de error, mantener metodologías vacías para mostrar mensaje de error
+      setMethodologies([]);
     } finally {
       setLoading(false);
     }
@@ -202,7 +206,8 @@ export default function MethodologiesPage() {
     }
   ];
 
-  const methodologiesToShow = methodologies.length > 0 ? methodologies : exampleMethodologies;
+  // Siempre mostrar las metodologías reales de la base de datos
+  const methodologiesToShow = methodologies;
 
   if (loading) {
     return (
@@ -221,25 +226,23 @@ export default function MethodologiesPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      {/* Hero Section con imagen de fondo */}
-      <main className="relative min-h-screen flex items-center bg-cover bg-center" style={{backgroundImage: "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1600')"}}>
+      {/* Hero Section */}
+      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+        <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-2xl text-white text-center">
             <div className="mb-4">
               <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
-                Metodologías innovadoras
+                Metodologías Innovadoras
               </span>
-          </div>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white text-center">
-              <span className="block">METODOLOGÍAS</span>
-              <span className="block">DE IMPACTO</span>
+            </div>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+              METODOLOGÍAS<br/>
+              DE IMPACTO<br/>
+              SOCIAL
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200">
+            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
               Metodologías innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios.
-            </p>
-            <p className="mt-4 text-lg md:text-xl text-gray-200">
-              Descubre cómo nuestras metodologías están transformando comunidades y creando un mejor futuro para todos.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#metodologias">
@@ -248,10 +251,10 @@ export default function MethodologiesPage() {
                   <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
                 </svg>
               </a>
-        </div>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Ruta de Metodologías */}
       <section id="metodologias" className="py-20 bg-background-light dark:bg-background-dark">
@@ -275,7 +278,8 @@ export default function MethodologiesPage() {
             
             {/* Metodologías en línea de tiempo */}
             <div className="space-y-16">
-              {methodologiesToShow.map((methodology, index) => (
+              {methodologiesToShow.length > 0 ? (
+                methodologiesToShow.map((methodology, index) => (
                 <article key={methodology.id} className="relative">
                   {/* Bullet numerado en la línea central */}
                   <div 
@@ -345,7 +349,26 @@ export default function MethodologiesPage() {
                     </div>
                   </div>
                 </article>
-              ))}
+                ))
+              ) : (
+                <div className="text-center py-16">
+                  <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                    <div className="text-6xl mb-4">📚</div>
+                    <h3 className="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
+                      No hay metodologías disponibles
+                    </h3>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6">
+                      Actualmente no tenemos metodologías publicadas. Vuelve pronto para ver nuestras metodologías innovadoras.
+                    </p>
+                    <Button 
+                      onClick={() => window.location.reload()}
+                      className="bg-primary hover:bg-primary/90 text-white"
+                    >
+                      Actualizar página
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -421,50 +444,50 @@ export default function MethodologiesPage() {
                 </p>
               </div>
               
-              {/* Información detallada en grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-4">
-                    <h4 className="font-semibold text-text-light dark:text-text-dark mb-3 font-condensed flex items-center gap-2">
-                      <Target className="h-5 w-5 text-primary" />
-                      Objetivos
-                    </h4>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                      {selectedMethodology.objectives}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-4">
-                    <h4 className="font-semibold text-text-light dark:text-text-dark mb-3 font-condensed flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      Implementación
-                    </h4>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                      {selectedMethodology.implementation}
-                    </p>
-                  </div>
+              {/* Información detallada en grid simétrico */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 gap-6">
+                {/* Objetivos */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Objetivos
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedMethodology.objectives}
+                  </p>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-4">
-                    <h4 className="font-semibold text-text-light dark:text-text-dark mb-3 font-condensed flex items-center gap-2">
-                      <Users className="h-5 w-5 text-primary" />
-                      Público Objetivo
-                    </h4>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                      {selectedMethodology.targetAudience}
-                    </p>
-                  </div>
-                  
-                  <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-4">
-                    <h4 className="font-semibold text-text-light dark:text-text-dark mb-3 font-condensed flex items-center gap-2">
-                      <CheckCircle className="h-5 w-5 text-primary" />
-                      Resultados
-                    </h4>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                      {selectedMethodology.results}
-                    </p>
-                  </div>
+                {/* Público Objetivo */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Público Objetivo
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedMethodology.targetAudience}
+                  </p>
+                </div>
+                
+                {/* Implementación */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    Implementación
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedMethodology.implementation}
+                  </p>
+                </div>
+                
+                {/* Resultados */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    Resultados
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedMethodology.results}
+                  </p>
                 </div>
               </div>
               
@@ -484,6 +507,8 @@ export default function MethodologiesPage() {
           </div>
         </div>
       )}
+
+      <SiteFooter />
     </div>
   );
 }

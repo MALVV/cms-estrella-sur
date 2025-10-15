@@ -74,10 +74,6 @@ export const ProgramaCardWrapper: React.FC<ProgramaCardWrapperProps> = ({
         imageAlt={programa.imageAlt}
         isActive={programa.isActive}
         createdAt={programa.createdAt}
-        creator={{
-          name: programa.creator.name,
-          email: programa.creator.email
-        }}
         type="program"
         selectedItems={selectedProgramas}
         onSelectItem={onSelectPrograma}

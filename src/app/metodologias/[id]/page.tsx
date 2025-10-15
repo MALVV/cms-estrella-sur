@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
+import { RelatedNewsCarousel } from '@/components/sections/related-news-carousel';
 
 interface Methodology {
   id: string;
@@ -277,15 +278,42 @@ export default function MethodologyDetailPage({ params }: MethodologyDetailPageP
             </div>
           </article>
 
-          {/* Footer de navegación */}
+          {/* Noticias Relacionadas */}
+          <div className="mt-12">
+            <RelatedNewsCarousel 
+              methodologyId={resolvedParams.id}
+              title="Noticias Relacionadas con esta Metodología"
+              limit={6}
+            />
+          </div>
+
+          {/* CTA Section */}
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-start">
-              <Button 
-                onClick={() => window.history.back()}
-              >
-                Ver más metodologías
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
+            <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-lg p-8 text-center">
+              <h3 className="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
+                ¿Te interesa conocer más sobre nuestros proyectos?
+              </h3>
+              <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark mb-6 max-w-2xl mx-auto">
+                Descubre cómo aplicamos estas metodologías en proyectos reales que transforman comunidades y generan impacto social positivo.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  asChild
+                  className="bg-black hover:bg-gray-800 text-white px-8 py-3 text-lg font-semibold"
+                >
+                  <Link href="/proyectos">
+                    Ver nuestros proyectos
+                    <ExternalLink className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.history.back()}
+                  className="px-6 py-3"
+                >
+                  Ver más metodologías
+                </Button>
+              </div>
             </div>
           </div>
 

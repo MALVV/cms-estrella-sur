@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Navbar } from '@/components/layout/navbar';
 import { Header } from '@/components/layout/header';
+import { SiteFooter } from '@/components/layout/site-footer';
 
 export default function NewsEventsPublicPage() {
   const { news, events, featuredNews, loading, error } = useNewsAndEvents();
@@ -113,28 +114,7 @@ export default function NewsEventsPublicPage() {
         />
       </main>
 
-      {/* Footer with additional links */}
-      <footer className="bg-background-light dark:bg-background-dark py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex flex-wrap justify-center gap-6 mb-4">
-            <Link href="/" className="text-text-secondary-light hover:text-text-light dark:text-text-secondary-dark dark:hover:text-text-dark">
-              Inicio
-            </Link>
-            <Link href="/about" className="text-text-secondary-light hover:text-text-light dark:text-text-secondary-dark dark:hover:text-text-dark">
-              Nosotros
-            </Link>
-            <Link href="/contact" className="text-text-secondary-light hover:text-text-light dark:text-text-secondary-dark dark:hover:text-text-dark">
-              Contacto
-            </Link>
-            <Link href="/donate" className="text-text-secondary-light hover:text-text-light dark:text-text-secondary-dark dark:hover:text-text-dark">
-              Donar
-            </Link>
-          </div>
-          <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-            © 2024 Estrella Sur. Todos los derechos reservados.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

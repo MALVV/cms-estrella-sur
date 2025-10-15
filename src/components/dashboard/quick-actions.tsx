@@ -4,14 +4,11 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { 
-  Users, 
-  FileText, 
-  BookOpen, 
-  Calendar, 
-  Plus,
-  Eye,
-  Settings,
-  TrendingUp
+  FileText,
+  Newspaper,
+  Target,
+  Upload,
+  Settings
 } from 'lucide-react'
 import { usePermissions } from '@/hooks/use-permissions'
 
@@ -19,59 +16,53 @@ export function QuickActions() {
   const { canManageUsers, canManageContent } = usePermissions()
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Acceso Rápido</CardTitle>
-          <CardDescription>
-            Accede rápidamente a las funciones más utilizadas
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {canManageUsers() && (
-            <Button asChild variant="outline" className="w-full justify-start">
-              <Link href="/dashboard/users">
-                <Users className="mr-2 h-4 w-4" />
-                Gestión de Usuarios
+    <Card>
+      <CardHeader>
+        <CardTitle>Acciones Rápidas</CardTitle>
+        <CardDescription>
+          Crear contenido rápidamente
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {canManageContent() && (
+          <>
+            <Button asChild variant="default" className="w-full justify-start">
+              <Link href="/dashboard/stories/new">
+                <FileText className="mr-2 h-4 w-4" />
+                Nueva Historia
               </Link>
             </Button>
-          )}
-          
-          {canManageContent() && (
-            <>
-              <Button asChild variant="outline" className="w-full justify-start">
-                <Link href="/dashboard/stories">
-                  <FileText className="mr-2 h-4 w-4" />
-                  Gestión de Historias
-                </Link>
-              </Button>
-              
-            </>
-          )}
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
-          <CardDescription>
-            Crear nuevo contenido rápidamente
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {canManageContent() && (
-            <>
-              <Button asChild variant="default" className="w-full justify-start">
-                <Link href="/dashboard/stories">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nueva Historia
-                </Link>
-              </Button>
-              
-            </>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            <Button asChild variant="default" className="w-full justify-start">
+              <Link href="/dashboard/news/new">
+                <Newspaper className="mr-2 h-4 w-4" />
+                Nueva Noticia
+              </Link>
+            </Button>
+
+            <Button asChild variant="default" className="w-full justify-start">
+              <Link href="/dashboard/projects/new">
+                <Target className="mr-2 h-4 w-4" />
+                Nuevo Proyecto
+              </Link>
+            </Button>
+          </>
+        )}
+
+        <Button asChild variant="secondary" className="w-full justify-start">
+          <Link href="/dashboard/galeria-imagenes/upload">
+            <Upload className="mr-2 h-4 w-4" />
+            Subir Imágenes
+          </Link>
+        </Button>
+
+        <Button asChild variant="secondary" className="w-full justify-start">
+          <Link href="/dashboard/settings">
+            <Settings className="mr-2 h-4 w-4" />
+            Configuración
+          </Link>
+        </Button>
+      </CardContent>
+    </Card>
   )
 }

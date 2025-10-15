@@ -35,6 +35,7 @@ interface FormData {
   experience: string;
   documents: FileList | null;
   driveLink: string;
+  acceptPolicies: boolean;
 }
 
 export default function ConvocatoriaDetailPage({ params }: { params: { id: string } }) {
@@ -46,7 +47,8 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
     phone: '',
     experience: '',
     documents: null,
-    driveLink: ''
+    driveLink: '',
+    acceptPolicies: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -127,10 +129,10 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
   };
 
@@ -475,6 +477,23 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
                         className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
                       />
                     </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      name="acceptPolicies"
+                      checked={formData.acceptPolicies}
+                      onChange={handleInputChange}
+                      className="mt-1 h-4 w-4 text-primary focus:ring-primary border-gray-300 dark:border-gray-600 rounded"
+                      required
+                    />
+                    <label className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                      Declaro que reconozco las políticas de la organización, 
+                      incluyendo el código de conducta, políticas de confidencialidad y 
+                      procedimientos de seguridad. Acepto participar de manera responsable 
+                      y comprometida con los valores y objetivos de la institución. *
+                    </label>
                   </div>
 
                   <Button 

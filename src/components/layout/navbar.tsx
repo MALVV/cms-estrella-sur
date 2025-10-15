@@ -165,112 +165,6 @@ export const Navbar: React.FC = () => {
               )}
             </div>
             
-            {/* Menú desplegable de Historias (hover) */}
-            <div className="relative historias-dropdown">
-              <button
-                ref={setHistoriasButtonRef}
-                onMouseEnter={() => setIsHistoriasOpen(true)}
-                onMouseLeave={() => setIsHistoriasOpen(false)}
-                onClick={() => {
-                  setIsHistoriasOpen(false);
-                  window.location.href = '/historias-impacto';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
-              >
-                Historias
-                <span className={`ml-1 transition-transform duration-200 ${isHistoriasOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
-              
-              {/* Dropdown con portal para evitar cortes */}
-              {isHistoriasOpen && historiasButtonRef && typeof window !== 'undefined' && createPortal(
-                <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
-                  style={{
-                    top: historiasButtonRef.getBoundingClientRect().bottom + 4,
-                    left: historiasButtonRef.getBoundingClientRect().left + (historiasButtonRef.getBoundingClientRect().width / 2) - 90,
-                  }}
-                  onMouseEnter={() => setIsHistoriasOpen(true)}
-                  onMouseLeave={() => setIsHistoriasOpen(false)}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsHistoriasOpen(false);
-                        window.location.href = '/historias-impacto';
-                      }}
-                    >
-                      Historias de Impacto
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsHistoriasOpen(false);
-                        window.location.href = '/stories';
-                      }}
-                    >
-                      Testimonios
-                    </button>
-                  </div>
-                </div>,
-                document.body
-              )}
-            </div>
-            
-            {/* Menú desplegable de Participar (hover) */}
-            <div className="relative participar-dropdown">
-              <button
-                ref={setParticiparButtonRef}
-                onMouseEnter={() => setIsParticiparOpen(true)}
-                onMouseLeave={() => setIsParticiparOpen(false)}
-                onClick={() => {
-                  setIsParticiparOpen(false);
-                  window.location.href = '/participar';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
-              >
-                Participar
-                <span className={`ml-1 transition-transform duration-200 ${isParticiparOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
-              
-              {/* Dropdown con portal para evitar cortes */}
-              {isParticiparOpen && participarButtonRef && typeof window !== 'undefined' && createPortal(
-                <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
-                  style={{
-                    top: participarButtonRef.getBoundingClientRect().bottom + 4,
-                    left: participarButtonRef.getBoundingClientRect().left + (participarButtonRef.getBoundingClientRect().width / 2) - 80,
-                  }}
-                  onMouseEnter={() => setIsParticiparOpen(true)}
-                  onMouseLeave={() => setIsParticiparOpen(false)}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsParticiparOpen(false);
-                        window.location.href = '/participar';
-                      }}
-                    >
-                      Cómo Participar
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsParticiparOpen(false);
-                        window.location.href = '/programas';
-                      }}
-                    >
-                      Programas
-                    </button>
-                  </div>
-                </div>,
-                document.body
-              )}
-            </div>
-            
             {/* Menú desplegable de Transparencia (hover) */}
             <div className="relative transparencia-dropdown">
               <button
@@ -370,6 +264,121 @@ export const Navbar: React.FC = () => {
                       }}
                     >
                       Videos
+                    </button>
+                  </div>
+                </div>,
+                document.body
+              )}
+            </div>
+            
+            {/* Menú desplegable de Participar (hover) */}
+            <div className="relative participar-dropdown">
+              <button
+                ref={setParticiparButtonRef}
+                onMouseEnter={() => setIsParticiparOpen(true)}
+                onMouseLeave={() => setIsParticiparOpen(false)}
+                onClick={() => {
+                  setIsParticiparOpen(false);
+                  window.location.href = '/participar';
+                }}
+                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+              >
+                Participar
+                <span className={`ml-1 transition-transform duration-200 ${isParticiparOpen ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              
+              {/* Dropdown con portal para evitar cortes */}
+              {isParticiparOpen && participarButtonRef && typeof window !== 'undefined' && createPortal(
+                <div 
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
+                  style={{
+                    top: participarButtonRef.getBoundingClientRect().bottom + 4,
+                    left: participarButtonRef.getBoundingClientRect().left + (participarButtonRef.getBoundingClientRect().width / 2) - 80,
+                  }}
+                  onMouseEnter={() => setIsParticiparOpen(true)}
+                  onMouseLeave={() => setIsParticiparOpen(false)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="py-1">
+                    <button 
+                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      onClick={() => {
+                        setIsParticiparOpen(false);
+                        window.location.href = '/participar';
+                      }}
+                    >
+                      Cómo Participar
+                    </button>
+                    <button 
+                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      onClick={() => {
+                        setIsParticiparOpen(false);
+                        window.location.href = '/voluntariados';
+                      }}
+                    >
+                      Voluntariados
+                    </button>
+                    <button 
+                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      onClick={() => {
+                        setIsParticiparOpen(false);
+                        window.location.href = '/convocatorias';
+                      }}
+                    >
+                      Convocatorias
+                    </button>
+                  </div>
+                </div>,
+                document.body
+              )}
+            </div>
+            
+            {/* Menú desplegable de Historias (hover) */}
+            <div className="relative historias-dropdown">
+              <button
+                ref={setHistoriasButtonRef}
+                onMouseEnter={() => setIsHistoriasOpen(true)}
+                onMouseLeave={() => setIsHistoriasOpen(false)}
+                onClick={() => {
+                  setIsHistoriasOpen(false);
+                  window.location.href = '/historias-impacto';
+                }}
+                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+              >
+                Historias
+                <span className={`ml-1 transition-transform duration-200 ${isHistoriasOpen ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              
+              {/* Dropdown con portal para evitar cortes */}
+              {isHistoriasOpen && historiasButtonRef && typeof window !== 'undefined' && createPortal(
+                <div 
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
+                  style={{
+                    top: historiasButtonRef.getBoundingClientRect().bottom + 4,
+                    left: historiasButtonRef.getBoundingClientRect().left + (historiasButtonRef.getBoundingClientRect().width / 2) - 90,
+                  }}
+                  onMouseEnter={() => setIsHistoriasOpen(true)}
+                  onMouseLeave={() => setIsHistoriasOpen(false)}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="py-1">
+                    <button 
+                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      onClick={() => {
+                        setIsHistoriasOpen(false);
+                        window.location.href = '/historias-impacto';
+                      }}
+                    >
+                      Historias de Impacto
+                    </button>
+                    <button 
+                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      onClick={() => {
+                        setIsHistoriasOpen(false);
+                        window.location.href = '/stories';
+                      }}
+                    >
+                      Testimonios
                     </button>
                   </div>
                 </div>,
@@ -480,8 +489,8 @@ export const Navbar: React.FC = () => {
                 <Link href="/" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
                 <Link href="/nosotros" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Nosotros</Link>
                 <Link href="/iniciativas" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Iniciativas</Link>
-                <Link href="/historias-impacto" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Historias</Link>
                 <Link href="/participar" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Participar</Link>
+                <Link href="/historias-impacto" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Historias</Link>
                 <Link href="/transparencia" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Transparencia</Link>
                 <Link href="/recursos" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Recursos</Link>
                 

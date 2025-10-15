@@ -120,42 +120,38 @@ export default function ConvocatoriasPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <section className="text-center mb-16">
-          <div className="max-w-4xl mx-auto">
-            <Badge className="bg-primary text-white px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-sm mb-6">
-              <FileText className="mr-2 h-4 w-4" />
-              CONVOCATORIAS
-            </Badge>
-            
-            <h1 className="text-4xl md:text-6xl font-black text-text-light dark:text-text-dark leading-tight mb-6">
-              Únete a Nuestro
-              <br />
-              <span className="text-primary">Equipo</span>
+      {/* Hero Section */}
+      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+        <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
+        <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <div className="max-w-2xl text-white text-center">
+            <div className="mb-4">
+              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+                Oportunidades de Trabajo
+              </span>
+            </div>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+              ÚNETE A<br/>
+              NUESTRO<br/>
+              EQUIPO
             </h1>
-            
-            <p className="text-xl text-text-secondary-light dark:text-text-secondary-dark mb-8 leading-relaxed">
+            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
               Descubre las oportunidades de trabajo y consultorías que tenemos disponibles. 
               Forma parte de nuestro equipo y contribuye al desarrollo social de Bolivia.
             </p>
-
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-text-secondary-light dark:text-text-secondary-dark">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>Oportunidades profesionales</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>Fechas de vigencia claras</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>Documentos descargables</span>
-              </div>
+            <div className="mt-8">
+              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#convocatorias">
+                VER CONVOCATORIAS
+                <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
+                </svg>
+              </a>
             </div>
           </div>
-        </section>
+        </main>
+      </div>
+
+      <main className="container mx-auto px-4 py-8" id="convocatorias">
 
         {/* Convocatorias List */}
         <section className="mb-16">

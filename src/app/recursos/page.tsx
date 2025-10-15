@@ -24,6 +24,7 @@ import {
   PlayCircle
 } from 'lucide-react';
 import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Resource {
   id: string;
@@ -144,54 +145,35 @@ export default function ResourcesPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <main className="relative min-h-[80vh] flex items-center justify-center bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDxj7aF9-tpq6_zWnwVuojHHQc6bgc0eYuTVzXoE54LfjueardQbB6d3EFqZK3uv57oPTiHleVgH-Yi34c27AzoP75Qy1KG7aX02vlCFgOrykyPM-7ngRDNctmwl-uvyGeoidjSDqXHYXwBToi1ZuwUrOC0WEgjGrmw6E2n9SWGVuA-jl7O9o8Jpy99P817v_9-SFCIO7Y4FJ-vvLo2jZnXag1G1XwpbZuRBQKvKBtEKeA195mYIaDVYeWR_qsqQvyMmN5lHxaP-Q4')"}}>
-        <div className="absolute inset-0 bg-white/80 dark:bg-black/70"></div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="relative p-4">
-              <div className="absolute inset-0 -z-10">
-                <img 
-                  alt="Recursos multimedia" 
-                  className="w-full h-full object-contain opacity-60" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6OIceM-_FT9G0DLEA6WqHqXlzlJU-VaRCRGc9YmiIowGpPowBftussI75QEvZB9_--dBx4PzUuEEy0IcDa2c_UceyI_2xYkO_HVTFssrxGoPHIw0omP5gMXjqYTSnA_3dvjAM7Lb8_71gI8ZwulPak0-RTUB6qMvKe9x6m10z9cuTF0uFGMHTQssgmxQqn0wX99_XKgOj86JVeNCaD1e0wfnzKVk4cA5Eww2nGD1KmW7CVDBSXCZjOxdgaJwWkcVw931k71FPm98"
-                />
-              </div>
-              <div className="relative transform -rotate-6 max-w-sm mx-auto">
-                <img 
-                  alt="Centro multimedia" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0DKGKMYw36YxwT9YsJXl1eVtdB-GCWJZ_4WjzDxUdML2vGmj6xbZ9_DwGHVQvh1D0lRny2Gki7pbHQWxUau_Inz0RHWtE6GevDh5_mykpglJ_LQSgxeGtCVCdHkXj_urWqkI8DkcmEH4EBrDXR-5153a4nN5xOuPvOr4Vs2y0Ii2HOYhPTuOpXEheDFlaSvA3XCpWfhe04uSO1aOu70z8qif64ppIm4lQWU2hWjlhHF-fSMDaXrbvE9MC_5dHxtbxBKygXs0JoO0"
-                />
-              </div>
-              <div className="relative transform rotate-3 mt-[-15%] ml-[20%] max-w-xs">
-                <img 
-                  alt="Biblioteca digital" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcojMb_tNeqCrnNo1DH8v1vKFm2shH7i9X_UrDGDxoSUU6JdshPCdQy99xuAfZp_78sh87ME9W706dQ75iClppApHElnQaU0Svwngv46AOmz3-ke1ulDNpRN02F5Iujger72_L06XMRQBNEq3zPIXy7Jw7GPUm4rKpHEUBemS2jq5vmMKX_KQ3c7R0qRF0B2ZWlgIBFoMbn6UOXdsCepwN_iRMrzWpzQGLKhhitD8rxMKlOOlgf2mz6zhwgpXJV_NXcrTDU92VGkE"
-                />
-              </div>
-            </div>
-            <div className="text-left">
-              <span className="inline-block bg-orange-400 text-gray-800 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm mb-4">
-                Recursos
+      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+        <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
+        <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
+          <div className="max-w-2xl text-white text-center">
+            <div className="mb-4">
+              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+                Centro de Recursos Multimedia
               </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-light dark:text-text-dark leading-tight">
-                CENTRO DE<br/>
-                RECURSOS<br/>
-                MULTIMEDIA
-              </h1>
-              <p className="mt-6 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Accede a nuestro centro multimedia con videos educativos, audios, biblioteca digital 
-                y recursos descargables que enriquecen el aprendizaje y la formación.
-              </p>
-              <p className="mt-4 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Explora nuestra colección de publicaciones, guías prácticas y manuales 
-                diseñados para apoyar el desarrollo comunitario.
-              </p>
+            </div>
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+              CENTRO DE<br/>
+              RECURSOS<br/>
+              MULTIMEDIA
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
+              Accede a nuestro centro multimedia con videos educativos, audios, biblioteca digital 
+              y recursos descargables que enriquecen el aprendizaje y la formación comunitaria.
+            </p>
+            <div className="mt-8">
+              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#recursos">
+                EXPLORAR RECURSOS
+                <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
+                </svg>
+              </a>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Filtros y Búsqueda */}
       <section className="py-8 bg-background-light dark:bg-background-dark">
@@ -550,6 +532,8 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+      
+      <SiteFooter />
     </div>
   );
 }

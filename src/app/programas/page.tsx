@@ -80,7 +80,7 @@ export default function ProgramasPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-2xl text-white text-center">
@@ -89,11 +89,13 @@ export default function ProgramasPage() {
                 Nuestros Programas
               </span>
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white">
-              PROGRAMAS ESTRATÉGICOS
-          </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200">
-              Descubre nuestros programas integrales de largo plazo que abordan las causas raíz de los problemas sociales, creando soluciones sostenibles y transformadoras para las comunidades más vulnerables.
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+              PROGRAMAS<br/>
+              ESTRATÉGICOS<br/>
+              DE IMPACTO
+            </h1>
+            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
+              Descubre nuestros programas integrales de largo plazo que abordan las causas raíz de los problemas sociales, creando soluciones sostenibles y transformadoras.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#programas">
@@ -105,7 +107,7 @@ export default function ProgramasPage() {
             </div>
           </div>
         </main>
-        </div>
+      </div>
 
       <main className="container mx-auto px-4 py-8" id="programas">
         {/* Introducción */}
@@ -202,12 +204,22 @@ export default function ProgramasPage() {
                         >
                           Ver Detalles
                         </Link>
+                        {programa._count.imageLibrary > 0 && (
+                          <Link 
+                            href={`/programas/${programa.id}/galeria`}
+                            className="bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium py-2 px-3 rounded border border-white/30 dark:border-gray-500/30 hover:bg-opacity-80 transition-colors"
+                            title="Ver galería de imágenes"
+                          >
+                            <ImageIcon className="h-3 w-3" />
+                          </Link>
+                        )}
                         {programa.videoPresentacion && (
                           <a 
                             href={programa.videoPresentacion} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium py-2 px-3 rounded border border-white/30 dark:border-gray-500/30 hover:bg-opacity-80 transition-colors"
+                            title="Ver video"
                           >
                             <Play className="h-3 w-3" />
                           </a>

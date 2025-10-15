@@ -151,13 +151,6 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
               <p className="text-lg md:text-xl text-gray-200 max-w-3xl">
                     {programa.descripcion}
                   </p>
-              {programa.isFeatured && (
-                <div className="mt-6">
-                  <Badge className="bg-yellow-400 text-black text-sm font-bold px-4 py-2">
-                    Programa Destacado
-                  </Badge>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -205,7 +198,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                     <div className="grid grid-cols-2 gap-3">
                       {programa.imageLibrary.slice(0, 6).map((image) => (
                         <div key={image.id} className="group cursor-pointer">
-                          <div className="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
+                          <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
                             <img
                               src={image.imageUrl}
                               alt={image.imageAlt || image.title || `Imagen del programa ${programa.nombreSector}`}
@@ -224,22 +217,15 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                       ))}
                     </div>
                     
-                    {programa.imageLibrary.length > 6 && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <Link href={`/programas/${programa.id}#galeria`}>
-                            Ver Todas las Imágenes ({programa.imageLibrary.length})
-                          </Link>
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {programa.imageLibrary.length === 0 && (
-                      <div className="text-center py-8 text-text-secondary-light dark:text-text-secondary-dark">
-                        <ImageIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p className="text-sm">No hay imágenes disponibles</p>
-                      </div>
-                    )}
+                    {/* Botón para acceder a la galería completa */}
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <Button variant="outline" size="sm" className="w-full" asChild>
+                        <Link href={`/programas/${programa.id}/galeria`}>
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          Ver Galería Completa ({programa.imageLibrary.length} imagen{programa.imageLibrary.length !== 1 ? 'es' : ''})
+                        </Link>
+                      </Button>
+                    </div>
                 </CardContent>
               </Card>
             )}

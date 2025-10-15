@@ -88,24 +88,22 @@ export default function ProjectsPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-cover bg-center" style={{backgroundImage: "url('https://images.pexels.com/photos/9543732/pexels-photo-9543732.jpeg')"}}>
+      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-2xl text-white text-center">
             <div className="mb-4">
               <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
-                Nuestros proyectos
+                Nuestros Proyectos
               </span>
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
               PROYECTOS<br/>
-              DE IMPACTO
+              DE IMPACTO<br/>
+              SOCIAL
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200">
+            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
               Cada proyecto representa un paso hacia un futuro más justo y sostenible, trabajando directamente con las comunidades para generar un impacto real y duradero.
-            </p>
-            <p className="mt-4 text-lg md:text-xl text-gray-200">
-              Descubre cómo nuestros proyectos están cambiando vidas y construyendo un mejor mañana para todos.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#proyectos">
@@ -117,7 +115,7 @@ export default function ProjectsPage() {
             </div>
           </div>
         </main>
-        </div>
+      </div>
 
       <main className="container mx-auto px-4 py-8" id="proyectos">
         {/* Introducción */}

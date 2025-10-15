@@ -15,11 +15,13 @@ import {
   Video,
   FileText,
   ExternalLink,
-  Clock
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
+import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Story {
   id: string;
@@ -195,73 +197,57 @@ export default function HistoriasImpactoPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      {/* Hero Section - Estilo Blog */}
-      <section className="py-16 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            
-            {/* Lado izquierdo - Imagen principal */}
-            <div className="rounded-lg overflow-hidden shadow-lg h-full">
-              <img 
-                alt="Voluntarios distribuyendo ayuda comunitaria" 
-                className="w-full h-full object-cover" 
-                src="https://images.pexels.com/photos/6646918/pexels-photo-6646918.jpeg"
-              />
-        </div>
-        
-            {/* Lado derecho - Contenido */}
-            <div className="space-y-6">
-          {/* Badge */}
-              <div className="inline-block bg-primary text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                Historias e impacto
-          </div>
-          
-              {/* Título principal */}
-              <h1 className="text-4xl md:text-5xl font-black text-text-light dark:text-text-dark leading-tight">
-                HISTORIAS<br/>
-                QUE TRANSFORMAN<br/>
-                COMUNIDADES
-          </h1>
-          
-              {/* Descripción enfocada en historias */}
-              <div className="space-y-4">
-                <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                  Cada historia que compartimos es una ventana a las vidas que hemos tocado, los sueños que hemos ayudado a cumplir y las comunidades que hemos fortalecido.
-                </p>
-                <p className="text-base text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                  Desde testimonios en video hasta casos de éxito documentados, nuestras historias muestran el impacto real de la colaboración y el compromiso.
-                </p>
-              </div>
-
-              {/* Estadísticas actualizadas */}
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{stories.length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Historias</div>
-                </div>
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{videos.length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Videos</div>
-                </div>
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{videos.filter(v => v.isFeatured).length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Destacados</div>
-                </div>
-              </div>
-
-              {/* Información adicional sobre historias */}
-              <div className="pt-4">
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  Explora nuestras historias organizadas por categorías: videos testimoniales y casos de éxito documentados.
-                </p>
+      {/* Hero Section - Estilo Convergente */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-24">
+          <div className="flex flex-col gap-6">
+            <div>
+              <span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-md">HISTORIAS E IMPACTO</span>
             </div>
+            <h1 className="text-5xl md:text-6xl font-extrabold font-display uppercase tracking-tight text-gray-900 dark:text-white">
+              Historias que transforman comunidades
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Cada historia que compartimos es una ventana a las vidas que hemos tocado, los sueños que hemos ayudado a cumplir y las comunidades que hemos fortalecido.
+            </p>
+            {/* Estadísticas actualizadas */}
+            <div className="grid grid-cols-3 gap-4 pt-6">
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{stories.length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Historias</div>
+              </div>
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{videos.length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Videos</div>
+              </div>
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{videos.filter(v => v.isFeatured).length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Destacados</div>
+              </div>
+            </div>
+
+            {/* Información adicional sobre historias */}
+            <div className="pt-4">
+              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                Explora nuestras historias organizadas por categorías: videos testimoniales y casos de éxito documentados.
+              </p>
             </div>
           </div>
+          
+          {/* Hero Image */}
+          <div className="relative h-[500px]">
+            <img 
+              alt="Voluntarios distribuyendo ayuda comunitaria" 
+              className="w-full h-full object-cover rounded-xl shadow-lg" 
+              src="https://images.pexels.com/photos/6646918/pexels-photo-6646918.jpeg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
+          </div>
         </div>
-      </section>
+      </div>
 
       {/* Navigation Tabs - Estilo LATEST NEWS */}
-      <section className="py-16 bg-background-light dark:bg-background-dark">
+      <section id="contenido" className="py-16 bg-background-light dark:bg-background-dark">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
@@ -538,6 +524,8 @@ export default function HistoriasImpactoPage() {
 
         </div>
       </section>
+      
+      <SiteFooter />
     </div>
   );
 }

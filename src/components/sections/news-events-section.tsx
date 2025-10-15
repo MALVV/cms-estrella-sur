@@ -117,86 +117,65 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
 
   return (
     <>
-      {/* Hero Section - Estilo Historias e Impacto */}
-      <section className="py-16 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            
-            {/* Lado izquierdo - Imagen principal */}
-            <div className="rounded-lg overflow-hidden shadow-lg">
-              {featuredNews?.imageUrl ? (
-                <img 
-                  alt={featuredNews.imageAlt || featuredNews.title} 
-                  className="w-full h-full object-cover" 
-                    src={featuredNews.imageUrl}
-                  />
-                ) : (
-                <img 
-                  alt="Noticias e información actualizada" 
-                  className="w-full h-full object-cover" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSWrkgWeHL0vlHIirIGgCNz9iP7vshmaXQ82M0Fqdfr-GPDzM0oVSKDiJOAQjmDDWwEeZlwbBzEf4hVam5I4hzy_wbPGYc7bXszrV5y7Bsp5bzKtXHEEc_4py6_U2kEopOC9lr4ExAR8VMfbcQr5qhmxkrizRCbkmrNyS0scB0fGazr_rD7_cA3FdAswlN9HUlB6JXcMpIhEmmbk9P6dUemCGC8AGBRa5fwRClXh5Mw4dFC9sMQM4ja0c_PvoFJDBd1V9eDWgtG04"
-                />
-              )}
+      {/* Hero Section - Estilo Convergente */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="grid lg:grid-cols-2 gap-8 items-center mb-4">
+          <div className="flex flex-col gap-4">
+            <div>
+              <span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-md">NOTICIAS E INFORMACIÓN</span>
             </div>
-            
-            {/* Lado derecho - Contenido */}
-            <div className="space-y-6">
-              {/* Badge */}
-              <div className="inline-block bg-primary text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                Noticias e información
-                  </div>
-              
-              {/* Título principal */}
-              <h1 className="text-4xl md:text-5xl font-black text-text-light dark:text-text-dark leading-tight">
-                MANTENTE<br/>
-                INFORMADO<br/>
-                CON NUESTRAS NOTICIAS
-              </h1>
-              
-              {/* Descripción enfocada en noticias */}
-              <div className="space-y-4">
-                <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                  Descubre las últimas noticias, eventos y actualizaciones de nuestros programas. Mantente al día con el impacto que estamos generando en las comunidades.
-                </p>
-                <p className="text-base text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                  Desde historias de éxito hasta eventos especiales, nuestras noticias te conectan con el trabajo que realizamos día a día.
-                </p>
+            <h1 className="text-5xl md:text-6xl font-extrabold font-display uppercase tracking-tight text-gray-900 dark:text-white">
+              Mantente informado con nuestras noticias
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              Mantente al día con las últimas noticias, eventos y actualizaciones de Estrella del Sur. Descubre cómo nuestras acciones están transformando comunidades y creando un impacto positivo.
+            </p>
+            {/* Estadísticas enfocadas en contenido */}
+            <div className="grid grid-cols-3 gap-4 pt-2">
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{newsItems.length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Noticias</div>
               </div>
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{eventItems.length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Eventos</div>
+              </div>
+              <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
+                <div className="text-2xl font-bold text-primary mb-1">{newsItems.filter(n => n.isFeatured).length + eventItems.filter(e => e.isFeatured).length}</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Destacados</div>
+              </div>
+            </div>
 
-              {/* Estadísticas enfocadas en contenido */}
-              <div className="grid grid-cols-3 gap-4 pt-4">
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{newsItems.length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Noticias</div>
-                </div>
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{eventItems.length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Eventos</div>
-                </div>
-                <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
-                  <div className="text-2xl font-bold text-primary mb-1">{newsItems.filter(n => n.isFeatured).length + eventItems.filter(e => e.isFeatured).length}</div>
-                  <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Destacados</div>
-                </div>
-              </div>
-
-              {/* Información adicional sobre noticias */}
-              <div className="pt-4">
-                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  Explora nuestras noticias organizadas por categorías y mantente informado sobre nuestros programas y eventos.
-                </p>
-              </div>
-              </div>
+            {/* Información adicional sobre noticias */}
+            <div className="pt-2">
+              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                Explora nuestras noticias organizadas por categorías y mantente informado sobre nuestros programas y eventos.
+              </p>
             </div>
           </div>
-        </section>
+          
+          {/* Hero Image */}
+          <div className="relative h-[400px]">
+            <img 
+              alt="Noticias e información actualizada" 
+              className="w-full h-full object-cover rounded-xl shadow-lg" 
+              src="https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
+          </div>
+        </div>
+      </div>
 
+      {/* Separador visual */}
+      <div className="border-t border-gray-200 dark:border-gray-700 mx-4"></div>
+      
       {/* Grid Section */}
-      <section className="py-16 bg-background-light dark:bg-background-dark">
+      <section className="py-12 bg-background-light dark:bg-background-dark">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
               {activeTab === 'news' ? 'ÚLTIMAS NOTICIAS' : 'PRÓXIMOS EVENTOS'}
-            </h1>
+            </h2>
             <div className="flex space-x-2 md:space-x-4">
               {/* Selector de pestañas */}
               <button 

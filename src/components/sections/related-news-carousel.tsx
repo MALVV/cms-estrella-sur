@@ -82,9 +82,9 @@ export function RelatedNewsCarousel({
           <Newspaper className="h-6 w-6 text-blue-600" />
           {title}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex gap-6 overflow-x-auto pb-4">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="flex-shrink-0 w-80 animate-pulse">
               <CardContent className="p-6">
                 <div className="h-4 bg-gray-200 rounded mb-2"></div>
                 <div className="h-3 bg-gray-200 rounded mb-4"></div>
@@ -116,9 +116,9 @@ export function RelatedNewsCarousel({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
         {news.map((article) => (
-          <Card key={article.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+          <Card key={article.id} className="flex-shrink-0 w-80 overflow-hidden hover:shadow-lg transition-all duration-300 group">
             {/* Imagen */}
             {article.imageUrl ? (
               <div className="aspect-video bg-gray-100 overflow-hidden">

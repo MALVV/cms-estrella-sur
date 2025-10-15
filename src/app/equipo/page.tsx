@@ -12,64 +12,10 @@ export default function EquipoPage() {
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <SiteHeader />
       
-      {/* Hero Section */}
-      <main className="relative min-h-[60vh] flex items-center justify-center bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDxj7aF9-tpq6_zWnwVuojHHQc6bgc0eYuTVzXoE54LfjueardQbB6d3EFqZK3uv57oPTiHleVgH-Yi34c27AzoP75Qy1KG7aX02vlCFgOrykyPM-7ngRDNctmwl-uvyGeoidjSDqXHYXwBToi1ZuwUrOC0WEgjGrmw6E2n9SWGVuA-jl7O9o8Jpy99P817v_9-SFCIO7Y4FJ-vvLo2jZnXag1G1XwpbZuRBQKvKBtEKeA195mYIaDVYeWR_qsqQvyMmN5lHxaP-Q4')"}}>
-        <div className="absolute inset-0 bg-white/80 dark:bg-black/70"></div>
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="relative p-4">
-              <div className="absolute inset-0 -z-10">
-                <Image 
-                  alt="Team collaboration" 
-                  className="w-full h-full object-contain opacity-60" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6OIceM-_FT9G0DLEA6WqHqXlzlJU-VaRCRGc9YmiIowGpPowBftussI75QEvZB9_--dBx4PzUuEEy0IcDa2c_UceyI_2xYkO_HVTFssrxGoPHIw0omP5gMXjqYTSnA_3dvjAM7Lb8_71gI8ZwulPak0-RTUB6qMvKe9x6m10z9cuTF0uFGMHTQssgmxQqn0wX99_XKgOj86JVeNCaD1e0wfnzKVk4cA5Eww2nGD1KmW7CVDBSXCZjOxdgaJwWkcVw931k71FPm98"
-                  width={400}
-                  height={300}
-                />
-              </div>
-              <div className="relative transform -rotate-6 max-w-sm mx-auto">
-                <Image 
-                  alt="Team meeting" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0DKGKMYw36YxwT9YsJXl1eVtdB-GCWJZ_4WjzDxUdML2vGmj6xbZ9_DwGHVQvh1D0lRny2Gki7pbHQWxUau_Inz0RHWtE6GevDh5_mykpglJ_LQSgxeGtCVCdHkXj_urWqkI8DkcmEH4EBrDXR-5153a4nN5xOuPvOr4Vs2y0Ii2HOYhPTuOpXEheDFlaSvA3XCpWfhe04uSO1aOu70z8qif64ppIm4lQWU2hWjlhHF-fSMDaXrbvE9MC_5dHxtbxBKygXs0JoO0"
-                  width={400}
-                  height={300}
-                />
-              </div>
-              <div className="relative transform rotate-3 mt-[-15%] ml-[20%] max-w-xs">
-                <Image 
-                  alt="Professional team" 
-                  className="rounded-lg shadow-2xl w-full" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcojMb_tNeqCrnNo1DH8v1vKFm2shH7i9X_UrDGDxoSUU6JdshPCdQy99xuAfZp_78sh87ME9W706dQ75iClppApHElnQaU0Svwngv46AOmz3-ke1ulDNpRN02F5Iujger72_L06XMRQBNEq3zPIXy7Jw7GPUm4rKpHEUBemS2jq5vmMKX_KQ3c7R0qRF0B2ZWlgIBFoMbn6UOXdsCepwN_iRMrzWpzQGLKhhitD8rxMKlOOlgf2mz6zhwgpXJV_NXcrTDU92VGkE"
-                  width={300}
-                  height={200}
-                />
-              </div>
-            </div>
-            <div className="text-left">
-              <span className="inline-block bg-orange-400 text-gray-800 px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm mb-4">
-                Nuestro equipo
-              </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-text-light dark:text-text-dark leading-tight">
-                PROFESIONALES<br/>
-                COMPROMETIDOS<br/>
-                CON EL CAMBIO
-              </h1>
-              <p className="mt-6 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Un equipo multidisciplinario de profesionales apasionados por el desarrollo social y la transformación comunitaria.
-              </p>
-              <p className="mt-4 text-base text-text-light dark:text-text-dark/80 max-w-xl">
-                Cada miembro de nuestro equipo aporta experiencia única y compromiso genuino para crear un impacto positivo en las comunidades que servimos.
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-
       {/* Executive Team Section */}
-      <section className="py-12 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
+      <section className="py-8 bg-background-light dark:bg-background-dark">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
             <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-sm mb-4">
               EQUIPO EJECUTIVO
             </span>
@@ -111,8 +57,8 @@ export default function EquipoPage() {
       </section>
 
       {/* Board Members Section */}
-      <section className="py-8 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-8">
+      <section className="py-4 bg-background-light dark:bg-background-dark">
+        <div className="container mx-auto px-4 py-4">
           <div className="text-center mb-8">
             <span className="inline-block bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-sm mb-4">
               NUESTROS VOLUNTARIOS
