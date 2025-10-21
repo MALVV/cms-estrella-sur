@@ -35,7 +35,7 @@ export const POST = withRole(UserRole.ADMINISTRADOR)(async (request: NextRequest
       email,
       password: temporaryPassword,
       name,
-      role: role || UserRole.TECNICO,
+      role: role || UserRole.GESTOR,
       isTemporaryPassword: true,
       createdBy: (request as { user?: { id: string } }).user?.id // ID del administrador actual
     })

@@ -56,7 +56,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al crear story')
+        throw new Error(errorData.error || 'Error al crear historia')
       }
 
       const newStory = await response.json()
@@ -73,8 +73,8 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       
     } catch (error) {
       toast({
-        title: "Error al crear story",
-        description: error instanceof Error ? error.message : "Hubo un problema al crear la story. Inténtalo de nuevo.",
+        title: "Error al crear historia",
+        description: error instanceof Error ? error.message : "Hubo un problema al crear la historia. Inténtalo de nuevo.",
         variant: "destructive",
       })
     } finally {
@@ -105,14 +105,14 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Crear Story
+          Crear Historia
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Crear Nueva Story</DialogTitle>
+          <DialogTitle>Crear Nueva Historia</DialogTitle>
           <DialogDescription>
-            Completa la información para crear una nueva story de éxito.
+            Completa la información para crear una nueva historia de éxito.
           </DialogDescription>
         </DialogHeader>
 
@@ -124,7 +124,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
               </label>
               <Input
                 id="title"
-                placeholder="Ingresa el título de la story"
+                placeholder="Ingresa el título de la historia"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 maxLength={100}
@@ -138,7 +138,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
               </label>
               <textarea
                 id="content"
-                placeholder="Escribe el contenido completo de la story..."
+                placeholder="Escribe el contenido completo de la historia..."
                 value={formData.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
                 maxLength={2000}
@@ -153,7 +153,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
               </label>
               <textarea
                 id="summary"
-                placeholder="Escribe un resumen breve de la story..."
+                placeholder="Escribe un resumen breve de la historia..."
                 value={formData.summary}
                 onChange={(e) => handleInputChange('summary', e.target.value)}
                 maxLength={300}
@@ -202,7 +202,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
               Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Story'}
+              {loading ? 'Creando...' : 'Crear Historia'}
             </Button>
           </div>
         </form>
@@ -214,10 +214,10 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-green-600">
               <FileText className="h-5 w-5" />
-              ¡Story Creada Exitosamente!
+              ¡Historia Creada Exitosamente!
             </DialogTitle>
             <DialogDescription>
-              La story ha sido creada y está lista para ser publicada.
+              La historia ha sido creada y está lista para ser publicada.
             </DialogDescription>
           </DialogHeader>
           

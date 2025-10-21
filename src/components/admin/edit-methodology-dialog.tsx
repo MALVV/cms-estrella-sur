@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { Edit } from 'lucide-react';
@@ -18,7 +18,7 @@ interface Methodology {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -54,7 +54,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
     imageUrl: '',
     imageAlt: '',
     ageGroup: '',
-    category: 'EDUCACION' as 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL',
+    sectors: [] as ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[],
     targetAudience: '',
     objectives: '',
     implementation: '',
@@ -65,7 +65,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
   });
   const [loading, setLoading] = useState(false);
 
-  // Inicializar el formulario con los datos de la metodología
+  // Inicializar el formulario con los datos de la iniciativa
   useEffect(() => {
     if (methodology) {
       setFormData({
@@ -75,7 +75,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
         imageUrl: methodology.imageUrl || '',
         imageAlt: methodology.imageAlt || '',
         ageGroup: methodology.ageGroup,
-        category: methodology.category,
+        sectors: methodology.sectors || [],
         targetAudience: methodology.targetAudience,
         objectives: methodology.objectives,
         implementation: methodology.implementation,
@@ -89,6 +89,15 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSectorChange = (sector: 'SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS', checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      sectors: checked 
+        ? [...prev.sectors, sector]
+        : prev.sectors.filter(s => s !== sector)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,7 +127,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al actualizar la metodología');
+        throw new Error(errorData.error || 'Error al actualizar la iniciativa');
       }
 
       const updatedMethodology = await response.json();
@@ -128,7 +137,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
       }
 
       toast({
-        title: "Metodología actualizada exitosamente",
+        title: "Iniciativa actualizada exitosamente",
         description: "Los cambios han sido guardados correctamente.",
       });
 
@@ -136,8 +145,8 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
       
     } catch (error) {
       toast({
-        title: "Error al actualizar metodología",
-        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la metodología. Inténtalo de nuevo.",
+        title: "Error al actualizar iniciativa",
+        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la iniciativa. Inténtalo de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -154,7 +163,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
       imageUrl: methodology.imageUrl || '',
       imageAlt: methodology.imageAlt || '',
       ageGroup: methodology.ageGroup,
-      category: methodology.category,
+      sectors: methodology.sectors || [],
       targetAudience: methodology.targetAudience,
       objectives: methodology.objectives,
       implementation: methodology.implementation,
@@ -175,10 +184,10 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
-            Editar Metodología
+            Editar Iniciativa
           </DialogTitle>
           <DialogDescription>
-            Modifica la información de la metodología.
+            Modifica la información de la iniciativa.
           </DialogDescription>
         </DialogHeader>
 
@@ -190,7 +199,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </label>
               <Input
                 id="title"
-                placeholder="Ingresa el título de la metodología"
+                placeholder="Ingresa el título de la iniciativa"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 maxLength={100}
@@ -204,7 +213,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </label>
               <Input
                 id="shortDescription"
-                placeholder="Descripción breve de la metodología"
+                placeholder="Descripción breve de la iniciativa"
                 value={formData.shortDescription}
                 onChange={(e) => handleInputChange('shortDescription', e.target.value)}
                 maxLength={200}
@@ -218,7 +227,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </label>
               <textarea
                 id="description"
-                placeholder="Describe la metodología en detalle..."
+                placeholder="Describe la iniciativa en detalle..."
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
                 maxLength={500}
@@ -242,20 +251,38 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="category" className="text-sm font-medium">
-                  Categoría *
+                <label htmlFor="sectors" className="text-sm font-medium">
+                  Sector Programático *
                 </label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona una categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EDUCACION">Educación</SelectItem>
-                    <SelectItem value="SALUD">Salud</SelectItem>
-                    <SelectItem value="SOCIAL">Social</SelectItem>
-                    <SelectItem value="AMBIENTAL">Ambiental</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg">
+                  {[
+                    { value: 'SALUD', label: 'Salud' },
+                    { value: 'EDUCACION', label: 'Educación' },
+                    { value: 'MEDIOS_DE_VIDA', label: 'Medios de Vida' },
+                    { value: 'PROTECCION', label: 'Protección' },
+                    { value: 'SOSTENIBILIDAD', label: 'Sostenibilidad' },
+                    { value: 'DESARROLLO_INFANTIL_TEMPRANO', label: 'Desarrollo Infantil Temprano' },
+                    { value: 'NINEZ_EN_CRISIS', label: 'Niñez en Crisis' }
+                  ].map((sector) => (
+                    <div key={sector.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={sector.value}
+                        checked={formData.sectors.includes(sector.value as any)}
+                        onCheckedChange={(checked) => handleSectorChange(sector.value as any, checked as boolean)}
+                      />
+                      <label htmlFor={sector.value} className="text-sm font-normal">
+                        {sector.label}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.sectors.map((sector) => (
+                    <span key={sector} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {sector.replace(/_/g, ' ')}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -278,7 +305,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </label>
               <textarea
                 id="objectives"
-                placeholder="Describe los objetivos de la metodología..."
+                placeholder="Describe los objetivos de la iniciativa..."
                 value={formData.objectives}
                 onChange={(e) => handleInputChange('objectives', e.target.value)}
                 className="w-full min-h-[80px] px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
@@ -292,7 +319,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               </label>
               <textarea
                 id="implementation"
-                placeholder="Describe cómo implementar la metodología..."
+                placeholder="Describe cómo implementar la iniciativa..."
                 value={formData.implementation}
                 onChange={(e) => handleInputChange('implementation', e.target.value)}
                 className="w-full min-h-[80px] px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"

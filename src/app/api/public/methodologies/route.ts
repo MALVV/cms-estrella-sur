@@ -6,7 +6,7 @@ import { verifyAuth } from '@/lib/auth-middleware';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
+    const sectors = searchParams.get('sectors');
     const ageGroup = searchParams.get('ageGroup');
     const limit = parseInt(searchParams.get('limit') || '10');
 
@@ -14,8 +14,12 @@ export async function GET(request: NextRequest) {
       isActive: true,
     };
 
-    if (category) {
-      where.category = category;
+    if (sectors) {
+      where.sectors = {
+        some: {
+          name: sectors
+        }
+      };
     }
 
     if (ageGroup) {
@@ -72,7 +76,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       imageAlt,
       ageGroup,
-      category,
+      sectors,
       targetAudience,
       objectives,
       implementation,
@@ -82,7 +86,7 @@ export async function POST(request: NextRequest) {
       evaluation,
     } = body;
 
-    if (!title || !description || !shortDescription || !ageGroup || !category || !targetAudience || !objectives || !implementation || !results) {
+    if (!title || !description || !shortDescription || !ageGroup || !sectors || !targetAudience || !objectives || !implementation || !results) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos' },
         { status: 400 }
@@ -97,7 +101,7 @@ export async function POST(request: NextRequest) {
         imageUrl,
         imageAlt,
         ageGroup,
-        category,
+        sectors,
         targetAudience,
         objectives,
         implementation,

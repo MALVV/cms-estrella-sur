@@ -15,7 +15,7 @@ interface SimplifiedMethodologyCardProps {
   shortDescription: string;
   imageUrl?: string;
   imageAlt?: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
   isActive: boolean;
   createdAt: string;
   creator?: {
@@ -34,15 +34,21 @@ interface SimplifiedMethodologyCardProps {
 const categoryLabels = {
   EDUCACION: 'Educación',
   SALUD: 'Salud',
-  SOCIAL: 'Social',
-  AMBIENTAL: 'Ambiental'
+  MEDIOS_DE_VIDA: 'Medios de Vida',
+  PROTECCION: 'Protección',
+  SOSTENIBILIDAD: 'Sostenibilidad',
+  DESARROLLO_INFANTIL_TEMPRANO: 'Desarrollo Infantil Temprano',
+  NINEZ_EN_CRISIS: 'Niñez en Crisis'
 };
 
 const categoryColors = {
   EDUCACION: 'bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-900',
   SALUD: 'bg-red-100 text-red-800 dark:bg-red-200 dark:text-red-900',
-  SOCIAL: 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900',
-  AMBIENTAL: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-200 dark:text-emerald-900'
+  MEDIOS_DE_VIDA: 'bg-purple-100 text-purple-800 dark:bg-purple-200 dark:text-purple-900',
+  PROTECCION: 'bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900',
+  SOSTENIBILIDAD: 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900',
+  DESARROLLO_INFANTIL_TEMPRANO: 'bg-pink-100 text-pink-800 dark:bg-pink-200 dark:text-pink-900',
+  NINEZ_EN_CRISIS: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-200 dark:text-yellow-900'
 };
 
 export const SimplifiedMethodologyCard: React.FC<SimplifiedMethodologyCardProps> = ({
@@ -51,7 +57,7 @@ export const SimplifiedMethodologyCard: React.FC<SimplifiedMethodologyCardProps>
   shortDescription,
   imageUrl,
   imageAlt,
-  category,
+  sectors,
   isActive,
   createdAt,
   creator,
@@ -105,9 +111,13 @@ export const SimplifiedMethodologyCard: React.FC<SimplifiedMethodologyCardProps>
       <CardContent className="p-4 flex-1 flex flex-col">
         {/* Tipo y Estado */}
         <div className="flex justify-between items-center mb-3">
-          <span className={`${categoryColors[category]} text-xs font-semibold px-2.5 py-0.5 rounded`}>
-            {categoryLabels[category]}
-          </span>
+          <div className="flex flex-wrap gap-1">
+            {sectors.map((sector) => (
+              <span key={sector} className={`${categoryColors[sector]} text-xs font-semibold px-2.5 py-0.5 rounded`}>
+                {categoryLabels[sector]}
+              </span>
+            ))}
+          </div>
           <Badge variant={getStatusBadgeVariant(isActive)}>
             {isActive ? 'Activo' : 'Inactivo'}
           </Badge>

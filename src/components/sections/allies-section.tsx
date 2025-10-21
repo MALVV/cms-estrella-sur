@@ -54,14 +54,11 @@ export const AlliesSection: React.FC = () => {
       <section className="py-6 sm:py-8 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4 w-full max-w-7xl">
           <div className="text-center mb-16">
-            <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
-              ALIADOS ESTRATÉGICOS
-            </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
-              JUNTOS CREAMOS EL CAMBIO
+              NUESTROS ALIADOS ESTRATÉGICOS
             </h1>
             <p className="text-lg text-text-light dark:text-text-dark max-w-4xl mx-auto">
-              Trabajamos junto a organizaciones, empresas y personas comprometidas que comparten nuestra visión de crear un mundo mejor para los niños y sus familias.
+              Trabajamos junto a instituciones públicas, privadas, otras organizaciones de sociedad civil y personas comprometidas que comparten nuestra visión de formar comunidades y familias donde la niñez goza de protección y bienestar integral.
             </p>
           </div>
           <div className="text-center">
@@ -77,14 +74,11 @@ export const AlliesSection: React.FC = () => {
       <section className="py-6 sm:py-8 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4 w-full max-w-7xl">
           <div className="text-center mb-16">
-            <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
-              ALIADOS ESTRATÉGICOS
-            </span>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
-              JUNTOS CREAMOS EL CAMBIO
+              NUESTROS ALIADOS ESTRATÉGICOS
             </h1>
             <p className="text-lg text-text-light dark:text-text-dark max-w-4xl mx-auto">
-              Trabajamos junto a organizaciones, empresas y personas comprometidas que comparten nuestra visión de crear un mundo mejor para los niños y sus familias.
+              Trabajamos junto a instituciones públicas, privadas, otras organizaciones de sociedad civil y personas comprometidas que comparten nuestra visión de formar comunidades y familias donde la niñez goza de protección y bienestar integral.
             </p>
           </div>
           <div className="text-center">
@@ -100,14 +94,11 @@ export const AlliesSection: React.FC = () => {
       <div className="container mx-auto px-4 w-full max-w-7xl">
         {/* Encabezado */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
-            LOS ALIADOS
-          </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
-            ALIADOS ESTRATÉGICOS
+            NUESTROS ALIADOS ESTRATÉGICOS
           </h1>
           <p className="text-lg text-text-light dark:text-text-dark max-w-4xl mx-auto">
-            Trabajamos junto a organizaciones, empresas y personas comprometidas que comparten nuestra visión de crear un mundo mejor para los niños y sus familias.
+            Trabajamos junto a instituciones públicas, privadas, otras organizaciones de sociedad civil y personas comprometidas que comparten nuestra visión de formar comunidades y familias donde la niñez goza de protección y bienestar integral.
           </p>
         </div>
 

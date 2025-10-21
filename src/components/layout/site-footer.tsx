@@ -31,8 +31,8 @@ export function SiteFooter() {
               <Link href="/nosotros" className="block text-gray-300 hover:text-white transition-colors">
                 Nosotros
               </Link>
-              <Link href="/iniciativas" className="block text-gray-300 hover:text-white transition-colors">
-                Iniciativas
+              <Link href="/impacto" className="block text-gray-300 hover:text-white transition-colors">
+                Impacto
               </Link>
               <Link href="/historias-impacto" className="block text-gray-300 hover:text-white transition-colors">
                 Historias de Impacto
@@ -43,25 +43,25 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Iniciativas destacadas */}
+          {/* Impacto destacado */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Nuestras Iniciativas</h4>
+            <h4 className="text-lg font-semibold">Nuestro Impacto</h4>
             <div className="space-y-2">
-              <Link href="/iniciativas" className="block text-gray-300 hover:text-white transition-colors">
+              <Link href="/impacto" className="block text-gray-300 hover:text-white transition-colors">
                 <Target className="inline h-4 w-4 mr-2" />
                 Educación Infantil
               </Link>
-              <Link href="/iniciativas" className="block text-gray-300 hover:text-white transition-colors">
+              <Link href="/impacto" className="block text-gray-300 hover:text-white transition-colors">
                 <Users className="inline h-4 w-4 mr-2" />
                 Salud Comunitaria
               </Link>
-              <Link href="/iniciativas" className="block text-gray-300 hover:text-white transition-colors">
+              <Link href="/impacto" className="block text-gray-300 hover:text-white transition-colors">
                 <Heart className="inline h-4 w-4 mr-2" />
                 Protección Infantil
               </Link>
-              <Link href="/iniciativas" className="block text-gray-300 hover:text-white transition-colors">
+              <Link href="/impacto" className="block text-gray-300 hover:text-white transition-colors">
                 <ArrowRight className="inline h-4 w-4 mr-2" />
-                Ver Todas las Iniciativas
+                Ver Todo el Impacto
               </Link>
             </div>
           </div>

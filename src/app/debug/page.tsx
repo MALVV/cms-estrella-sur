@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 
 export default function DebugPage() {
   const { data: session, status } = useSession()
-  const { isAdmin, isSupervisor, isTechnician } = usePermissions()
+  const { isAdmin } = usePermissions()
   const [cookies, setCookies] = useState<string>('')
 
   useEffect(() => {
@@ -37,8 +37,6 @@ export default function DebugPage() {
           <h2 className="text-xl font-semibold mb-4">Permisos</h2>
           <div className="space-y-2 text-sm">
             <p><strong>Es Administrador:</strong> {isAdmin() ? 'Sí' : 'No'}</p>
-            <p><strong>Es Supervisor:</strong> {isSupervisor() ? 'Sí' : 'No'}</p>
-            <p><strong>Es Técnico:</strong> {isTechnician() ? 'Sí' : 'No'}</p>
           </div>
         </div>
 

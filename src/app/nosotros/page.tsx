@@ -13,10 +13,46 @@ import {
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
-import InteractiveMap from '@/components/maps/interactive-map';
+import InteractiveMap, { getMapStatistics } from '@/components/maps/interactive-map';
 
 export default function AboutUsPage() {
   const [selectedTeam, setSelectedTeam] = useState<1 | 2 | 3 | 4>(1);
+  
+  // Importar las ubicaciones para calcular estadísticas dinámicas
+  const allLocations = [
+    // Oficinas activas en Oruro
+    { id: '1', name: 'Oficina de Quirquincho', coordinates: [-17.9760202, -67.0897769], status: 'active', department: 'Oruro' },
+    { id: '2', name: 'Oficina de CEPROK', coordinates: [-17.9481736, -67.1016477], status: 'active', department: 'Oruro' },
+    { id: '3', name: 'Oficina de Villa Challacollo', coordinates: [-17.9986445, -67.1385181], status: 'active', department: 'Oruro' },
+    { id: '4', name: 'Oficina de San Benito - Pumas', coordinates: [-17.99495, -67.06797], status: 'active', department: 'Oruro' },
+    { id: '5', name: 'Oficina de Vinto', coordinates: [-17.977845021337828, -67.05317770715818], status: 'active', department: 'Oruro' },
+    { id: '6', name: 'Oficina de Villa Dorina', coordinates: [-17.935245212211523, -67.09675865414872], status: 'active', department: 'Oruro' },
+    
+    // Oficinas futuras
+    { id: '7', name: 'Oficina de Cobija', coordinates: [-11.0267, -68.7692], status: 'future', department: 'Pando' },
+    { id: '8', name: 'Oficina de Guayaramerín', coordinates: [-10.8369, -65.3614], status: 'future', department: 'Pando' },
+    { id: '9', name: 'Oficina de El Alto', coordinates: [-16.5000, -68.1500], status: 'future', department: 'La Paz' }
+  ];
+  
+  // Solo usar oficinas activas para las estadísticas de cobertura
+  const activeLocations = allLocations.filter(loc => loc.status === 'active').map(loc => ({
+    ...loc,
+    description: `Oficina en ${loc.department}`,
+    type: 'office' as const,
+    programs: [],
+    beneficiaries: 0,
+    icon: null,
+    color: '#3B82F6',
+    address: loc.name,
+    department: loc.department,
+    status: loc.status as 'active' | 'future',
+    contact: '',
+    schedule: '',
+    number: 0,
+    image: '',
+    coordinates: loc.coordinates as [number, number]
+  }));
+  const stats = getMapStatistics(activeLocations);
 
   // Efecto para cambiar automáticamente las imágenes
   useEffect(() => {
@@ -49,37 +85,37 @@ export default function AboutUsPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+      <div className="relative min-h-screen flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-          <div className="max-w-2xl text-white text-center">
+          <div className="max-w-4xl text-white text-center">
             <motion.div 
-              className="mb-4"
+              className="mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.3 }}
             >
-              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
-                Transformando Comunidades Vulnerables
+              <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
+                TRANSFORMANDO VIDAS
               </span>
             </motion.div>
             <motion.h1 
-              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white"
+              className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 2, delay: 0.6 }}
             >
               CAMBIAMOS LA<br/>
               HISTORIA DE<br/>
-              LOS NIÑOS
+              FAMILIAS Y COMUNIDADES
             </motion.h1>
             <motion.p 
-              className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto"
+              className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 0.9 }}
             >
-              Cada niño merece un hogar seguro y amoroso. Estamos dedicados a brindar apoyo inmediato y duradero a niños en situación de vulnerabilidad. Nuestra misión es romper el ciclo de la pobreza y el abandono.
+              Cada niña, niño, adolescente, joven merece un hogar protegido y amoroso, con nuestro apoyo buscamos transformar sus vidas, la de sus familias y comunidades a partir de Programas de Desarrollo Integral.
             </motion.p>
             <motion.div 
               className="mt-8"
@@ -87,7 +123,7 @@ export default function AboutUsPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1.5, delay: 1.2 }}
             >
-              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#mision">
+              <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#mision">
                 CONOCE CÓMO LO HACEMOS
                 <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
@@ -96,97 +132,197 @@ export default function AboutUsPage() {
             </motion.div>
           </div>
         </main>
-        </div>
+      </div>
 
       {/* Misión y Propósito Section */}
       <section id="mision" className="py-6 bg-background-light dark:bg-background-dark">
         <div className="container mx-auto px-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-                MISIÓN Y PROPÓSITO
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
-                QUÉ NOS HACE DIFERENTES
-              </h1>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-300 text-lg">
-                Somos una fundación nacional trabajando para transformar las esperanzas y la felicidad de niños y jóvenes que enfrentan vulnerabilidades, exclusión y falta de oportunidades.
-              </p>
-                </div>
-                </div>
+          <div className="text-center mb-12">
+            <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+              MISIÓN Y PROPÓSITO
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
+              MISIÓN Y PROPÓSITO
+            </h1>
+          </div>
           
           <motion.div 
-            className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 gap-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 1.5, delay: 0.6 }}
             viewport={{ once: true }}
           >
             <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
-                <span className="material-symbols-outlined text-orange-500 text-3xl">groups</span>
-                </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COMPARTIR</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Compartimos sentimientos y apoyo espiritual con los más necesitados, niños alrededor del mundo, ayudándolos a integrarse en la comunidad.
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
+                <span className="material-symbols-outlined text-blue-500 text-3xl">flag</span>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">NUESTRA MISIÓN</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Buscamos que la niñez, la juventud, sus familias y comunidades logren su desarrollo integral y protección.
               </p>
             </motion.div>
             
             <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 1.2, delay: 0.4 }}
               viewport={{ once: true }}
             >
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
-                <span className="material-symbols-outlined text-green-500 text-3xl">hub</span>
+                <span className="material-symbols-outlined text-green-500 text-3xl">visibility</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COMUNIDAD</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Ayudamos a organizaciones locales a acceder al financiamiento, herramientas, capacitación y apoyo que necesitan para ser más efectivas.
-            </p>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">NUESTRA VISIÓN</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Comunidades y familias donde la niñez goza de protección y bienestar integral.
+              </p>
+            </motion.div>
+          </motion.div>
+          
+          <div className="text-center mt-16 mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark leading-tight">
+              NUESTROS VALORES
+            </h2>
+          </div>
+          
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.6 }}
+            viewport={{ once: true }}
+          >
+            {/* Primera fila - 4 tarjetas */}
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
+                <span className="material-symbols-outlined text-blue-500 text-3xl">balance</span>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">IGUALDAD</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Una premisa que plantea desarrollar esfuerzos en todos los ámbitos de la organización, buscando que todas las acciones deben ser encaradas en busca de la igualdad, a fin de garantizar una vida digna para todas.
+              </p>
+            </motion.div>
+            
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
+                <span className="material-symbols-outlined text-green-500 text-3xl">verified</span>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">INTEGRIDAD</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Manifestamos nuestra búsqueda de la integridad como una cualidad que implica entereza moral, rectitud y honradez en la conducta y en el comportamiento.
+              </p>
             </motion.div>
 
             <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.6 }}
+              transition={{ duration: 1.2, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-6">
-                <span className="material-symbols-outlined text-red-500 text-3xl">favorite</span>
-                  </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">RESPONSABILIDADES</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Compartimos sentimientos y apoyo espiritual con los más necesitados, niños alrededor del mundo, ayudándolos a integrarse en la comunidad.
-              </p>
-                </motion.div>
-            
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-cyan-100 dark:bg-cyan-900 mb-6">
-                <span className="material-symbols-outlined text-cyan-500 text-3xl">handshake</span>
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
+                <span className="material-symbols-outlined text-purple-500 text-3xl">psychology</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COLABORACIÓN</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Las alianzas en todos los sectores hacen posible todo nuestro trabajo para niños y jóvenes.
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">EMPATÍA</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Cultivamos la capacidad de comprender la vida emocional de otra persona, casi en toda su complejidad, a partir de la escucha activa, la comprensión y el apoyo emocional.
               </p>
             </motion.div>
+            
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
+                <span className="material-symbols-outlined text-orange-500 text-3xl">handshake</span>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">RESPETO</h3>
+              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                Nuestra organización se fundamenta en la consideración y valoración especial que se le tiene a alguien o a algo, al que se le reconoce valor social o especial diferencia.
+              </p>
+            </motion.div>
+
+          </motion.div>
+          
+          {/* Segunda fila - 3 tarjetas centradas */}
+          <motion.div 
+            className="flex justify-center mt-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.8 }}
+            viewport={{ once: true }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl">
+              <motion.div 
+                className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, delay: 0.5 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 dark:bg-red-900 mb-6">
+                  <span className="material-symbols-outlined text-red-500 text-3xl">star</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COMPROMISO</h3>
+                <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                  Promovemos el desarrollo del compromiso como una capacidad de entender la importancia que tenemos con el trabajo, las responsabilidades y obligaciones dentro de los tiempos o acuerdos establecidos en diferentes ámbitos.
+                </p>
+              </motion.div>
+
+              <motion.div 
+                className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-cyan-100 dark:bg-cyan-900 mb-6">
+                  <span className="material-symbols-outlined text-cyan-500 text-3xl">lightbulb</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">INNOVACIÓN</h3>
+                <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                  Buscamos trabajar en formas diversas, creativas y nuevas para satisfacer las necesidades y expectativas de las poblaciones objetivo.
+                </p>
+              </motion.div>
+
+              <motion.div 
+                className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, delay: 0.7 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-6">
+                  <span className="material-symbols-outlined text-yellow-500 text-3xl">assignment</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">RESPONSABILIDAD</h3>
+                <p className="text-gray-600 dark:text-gray-400 flex-grow">
+                  Trabajamos en base a la responsabilidad como valor, que significa el cumplimiento de las obligaciones y el cuidado al hacer o decidir algo, porque ello incide en los resultados de la organización.
+                </p>
+              </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -317,7 +453,7 @@ export default function AboutUsPage() {
                 transition={{ duration: 0.6, delay: 0.2 }}
                 viewport={{ once: true }}
               >
-                CHILDFUND ALLIANCE
+                CHILDFUND BOLIVIA
               </motion.span>
               <motion.h1 
                 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight"
@@ -336,7 +472,7 @@ export default function AboutUsPage() {
               viewport={{ once: true }}
             >
               <p className="text-gray-600 dark:text-gray-300 text-lg">
-                Somos parte de ChildFund Alliance, una red global de organizaciones independientes trabajando juntas para ayudar a los niños más vulnerables del mundo.
+                Somos parte de ChildFund Bolivia, una red Nacional de Organizaciones independientes trabajando juntas para ayudar a las niñas, niños, sus familias y comunidades más vulnerables de Bolivia.
             </p>
             </motion.div>
           </div>
@@ -363,29 +499,29 @@ export default function AboutUsPage() {
               >
                 UNA RED GLOBAL DE TRANSFORMACIÓN
               </motion.h3>
-              <motion.p 
+              <motion.div 
                 className="text-lg text-text-secondary-light dark:text-text-secondary-dark mb-6"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 1.0 }}
                 viewport={{ once: true }}
               >
-                ChildFund Alliance es una red global de 12 organizaciones independientes que trabajan 
-                en más de 60 países para ayudar a los niños más vulnerables del mundo. Nuestra misión 
-                compartida es crear oportunidades para que los niños y jóvenes desarrollen su potencial 
-                y se conviertan en líderes del cambio positivo.
-              </motion.p>
-              <motion.p 
-                className="text-lg text-text-secondary-light dark:text-text-secondary-dark mb-8"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1.2 }}
-                viewport={{ once: true }}
-              >
-                Como parte de esta alianza, tenemos acceso a metodologías probadas internacionalmente, 
-                recursos especializados y una red de apoyo que nos permite amplificar nuestro impacto 
-                y aprender de las mejores prácticas globales.
-              </motion.p>
+                <p className="mb-4">
+                  <strong>ChildFund Bolivia</strong> trabaja en acción con organizaciones locales que planifican y realizan acciones con las comunidades donde se aplican los proyectos, programas, patrocinio, incidencia, entre otras. Las organizaciones socias coordinan con la población e instituciones locales, y como socios del ChildFund internacional en Bolivia tienen objetivos, misión y visión similares a nuestra organización.
+                </p>
+                <p className="mb-4">
+                  <strong>Actualmente, colaboran con 4 socios locales, en 5 departamentos y 20 municipios del país:</strong>
+                </p>
+                <div className="text-base">
+                  <strong>• CEMSE:</strong> Santa Cruz, La Paz, El Alto, Pailas, Tiquipaya, Colcapirhua y Cochabamba.
+                  <br/>
+                  <strong>• Moqol Sawaya Anzaldo:</strong> Arbieto, Cliza, Punata, Sacabamba, San Benito, Santiváñez, Tarata, Tolata, Villa Gualberto Villarroel.
+                  <br/>
+                  <strong>• Organización Estrella del Sur:</strong> Oruro.
+                  <br/>
+                  <strong>• Organización Esperanza Bolivia:</strong> Tarija (Cercado) y San Lorenzo.
+                </div>
+              </motion.div>
               
               <motion.div 
                 className="grid grid-cols-2 gap-6"
@@ -401,8 +537,11 @@ export default function AboutUsPage() {
                   transition={{ duration: 0.5, delay: 1.6 }}
                   viewport={{ once: true }}
                 >
-                  <h4 className="font-bold text-text-light dark:text-text-dark mb-1">60+ Países</h4>
-                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Presencia Global</p>
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="material-symbols-outlined text-blue-500 text-2xl mr-2">groups</span>
+                    <h4 className="font-bold text-text-light dark:text-text-dark mb-1">4 Organizaciones Socios Locales</h4>
+                  </div>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Datos Clave</p>
                 </motion.div>
                 <motion.div 
                   className="text-center"
@@ -411,8 +550,11 @@ export default function AboutUsPage() {
                   transition={{ duration: 0.5, delay: 1.8 }}
                   viewport={{ once: true }}
                 >
-                  <h4 className="font-bold text-text-light dark:text-text-dark mb-1">12 Organizaciones</h4>
-                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Red de Aliados</p>
+                  <div className="flex items-center justify-center mb-2">
+                    <span className="material-symbols-outlined text-green-500 text-2xl mr-2">location_on</span>
+                    <h4 className="font-bold text-text-light dark:text-text-dark mb-1">20 Municipios de Intervención</h4>
+                  </div>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Cobertura Nacional</p>
                 </motion.div>
               </motion.div>
             </motion.div>
@@ -425,9 +567,9 @@ export default function AboutUsPage() {
               viewport={{ once: true }}
             >
               <motion.img 
-                src="https://images.pexels.com/photos/5029919/pexels-photo-5029919.jpeg"
-                alt="ChildFund Alliance - Niños y familias trabajando juntos"
-                className="w-full h-96 object-cover rounded-lg shadow-xl"
+                src="/static-images/sections/seccion-childfund.jpg"
+                alt="ChildFund Alliance - Red Global de Impacto"
+                className="w-full h-auto object-cover rounded-lg shadow-xl"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.8 }}
@@ -484,83 +626,6 @@ export default function AboutUsPage() {
             <InteractiveMap />
           </div>
 
-          {/* Estadísticas del Impacto */}
-          <motion.div 
-            className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-          >
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
-                <MapPin className="h-8 w-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">UBICACIONES</h3>
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">6</div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Oficinas estratégicamente ubicadas en el departamento de Oruro para brindar atención integral a nuestras comunidades.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
-                <Users className="h-8 w-8 text-green-600 dark:text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">ATENCIÓN</h3>
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-2">6</div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Puntos de atención especializados con horarios flexibles para adaptarse a las necesidades de cada comunidad.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.0 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
-                <Heart className="h-8 w-8 text-orange-600 dark:text-orange-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">SERVICIOS</h3>
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-2">18+</div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Servicios especializados que incluyen desarrollo comunitario, capacitación y apoyo social integral.
-              </p>
-            </motion.div>
-
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 1.2 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
-                <Map className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COBERTURA</h3>
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">Oruro</div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Departamento de Bolivia donde concentramos nuestros esfuerzos para maximizar el impacto en las comunidades locales.
-              </p>
-            </motion.div>
-          </motion.div>
-              
           {/* Leyenda del Mapa */}
           <div className="mt-8 bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm">
             <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-6">
@@ -585,7 +650,7 @@ export default function AboutUsPage() {
                 <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold">3</div>
                 <div>
                   <h4 className="font-semibold text-text-light dark:text-text-dark text-sm">Villa Challacollo</h4>
-                  <p className="text-gray-600 dark:text-gray-400 text-xs">Daniel Calvo #990</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">Villa Challacollo</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -609,8 +674,89 @@ export default function AboutUsPage() {
                   <p className="text-gray-600 dark:text-gray-400 text-xs">Carretera Oruro-Cochabamba</p>
                 </div>
               </div>
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">7</div>
+                <div>
+                  <h4 className="font-semibold text-text-light dark:text-text-dark text-sm">Cobija</h4>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">Pando (Próximamente)</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">8</div>
+                <div>
+                  <h4 className="font-semibold text-text-light dark:text-text-dark text-sm">Guayaramerín</h4>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">Pando (Próximamente)</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm font-bold">9</div>
+                <div>
+                  <h4 className="font-semibold text-text-light dark:text-text-dark text-sm">El Alto</h4>
+                  <p className="text-gray-600 dark:text-gray-400 text-xs">La Paz (Próximamente)</p>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Estadísticas del Impacto */}
+          <motion.div 
+            className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
+                <MapPin className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">UBICACIONES</h3>
+              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">{stats.activeOffices}</div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Oficinas activas estratégicamente ubicadas para brindar atención integral a nuestras comunidades.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.0 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
+                <Map className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">COBERTURA</h3>
+              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400 mb-2">{stats.departments}</div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Departamentos donde concentramos nuestros esfuerzos para maximizar el impacto en las comunidades locales.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.2 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 dark:bg-yellow-900 mb-6">
+                <MapPin className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">EXPANSIÓN FUTURA</h3>
+              <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mb-2">3</div>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Pronto tendremos sedes en Cobija, Guayaramerín y El Alto con población afiliada también.
+              </p>
+            </motion.div>
+          </motion.div>
 
         </div>
       </section>

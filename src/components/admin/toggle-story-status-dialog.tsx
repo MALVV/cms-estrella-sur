@@ -40,14 +40,14 @@ export function ToggleStoryStatusDialog({ story, onStatusChanged, children }: To
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al actualizar estado de la story')
+        throw new Error(errorData.error || 'Error al actualizar estado de la historia')
       }
 
       // Llamar callback para actualizar el estado local
       onStatusChanged(story.id, newStatus)
 
       toast({
-        title: `Story ${actionText} exitosamente`,
+        title: `Historia ${actionText} exitosamente`,
         description: `"${story.title}" ha sido ${actionText} en el sistema.`,
       })
 
@@ -55,7 +55,7 @@ export function ToggleStoryStatusDialog({ story, onStatusChanged, children }: To
     } catch (error) {
       toast({
         title: "Error al cambiar estado",
-        description: error instanceof Error ? error.message : "Hubo un problema al cambiar el estado de la story.",
+        description: error instanceof Error ? error.message : "Hubo un problema al cambiar el estado de la historia.",
         variant: "destructive",
       })
     } finally {
@@ -71,23 +71,23 @@ export function ToggleStoryStatusDialog({ story, onStatusChanged, children }: To
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isCurrentlyActive ? 'Desactivar Story' : 'Activar Story'}
+            {isCurrentlyActive ? 'Desactivar Historia' : 'Activar Historia'}
           </DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <p className="text-sm text-gray-600">
-            ¿Estás seguro de que quieres {actionText} la story 
+            ¿Estás seguro de que quieres {actionText} la historia 
             <strong> "{story.title}"</strong>?
           </p>
           {isCurrentlyActive && (
             <p className="text-sm text-gray-500 mt-2">
-              La story no será visible para los usuarios públicos.
+              La historia no será visible para los usuarios públicos.
             </p>
           )}
           {!isCurrentlyActive && (
             <p className="text-sm text-gray-500 mt-2">
-              La story será visible para los usuarios públicos.
+              La historia será visible para los usuarios públicos.
             </p>
           )}
         </div>

@@ -33,7 +33,7 @@ interface LocationData {
   name: string;
   description: string;
   coordinates: [number, number];
-  type: 'program' | 'project' | 'community' | 'office';
+  type: 'program' | 'project' | 'community' | 'office' | 'future';
   programs: string[];
   beneficiaries: number;
   icon: React.ReactNode;
@@ -42,9 +42,13 @@ interface LocationData {
   contact: string;
   schedule: string;
   number: number;
+  image: string;
+  status: 'active' | 'future';
+  department: string;
 }
 
 const locations: LocationData[] = [
+  // Oficinas activas en Oruro
   {
     id: '1',
     name: 'Oficina de Quirquincho',
@@ -58,7 +62,10 @@ const locations: LocationData[] = [
     address: 'Prolongación Adolfo Mier esq. Juan Mendoza (Barrio San Miguel)',
     contact: '52-65173',
     schedule: 'Lunes a Viernes 08:30 - 12:30 | 14:30 - 18:30',
-    number: 1
+    number: 1,
+    image: '/static-images/sections/seccion-childfund.jpg',
+    status: 'active',
+    department: 'Oruro'
   },
   {
     id: '2',
@@ -73,7 +80,10 @@ const locations: LocationData[] = [
     address: 'Calle 7 entre C y D sector Kantuta',
     contact: '52-53384',
     schedule: 'Lunes a Viernes 08:30 - 12:30 | 14:30 - 18:30',
-    number: 2
+    number: 2,
+    image: '/static-images/sections/tarjeta-metodologias.jpg',
+    status: 'active',
+    department: 'Oruro'
   },
   {
     id: '3',
@@ -88,7 +98,10 @@ const locations: LocationData[] = [
     address: 'Daniel Calvo #990 esquina Aguirre (Villa challacollo)',
     contact: '52-64381',
     schedule: 'Lunes a Viernes 08:30 - 12:30 | 14:30 - 18:30',
-    number: 3
+    number: 3,
+    image: '/static-images/sections/tarjeta-programas.jpg',
+    status: 'active',
+    department: 'Oruro'
   },
   {
     id: '4',
@@ -103,7 +116,10 @@ const locations: LocationData[] = [
     address: 'Mercado Pumas Andinos',
     contact: '69832703',
     schedule: 'Lunes, Miércoles y Viernes 08:30 - 12:30 | 14:30 - 18:30',
-    number: 4
+    number: 4,
+    image: '/static-images/sections/tarjeta-proyectos.jpg',
+    status: 'active',
+    department: 'Oruro'
   },
   {
     id: '5',
@@ -118,7 +134,10 @@ const locations: LocationData[] = [
     address: 'A. Arce entre C. 6 de Agosto',
     contact: '69832702',
     schedule: 'Martes y Jueves 08:30 - 12:30 | 14:30 - 18:30',
-    number: 5
+    number: 5,
+    image: '/static-images/sections/seccion-impato-generado.jpg',
+    status: 'active',
+    department: 'Oruro'
   },
   {
     id: '6',
@@ -133,12 +152,93 @@ const locations: LocationData[] = [
     address: 'Urbanización Villa Dorina cerca a la Carretera Oruro-Cochabamba',
     contact: '69832702',
     schedule: 'Martes, Miércoles y Jueves 08:30 - 12:30 | 14:30 - 18:30',
-    number: 6
+    number: 6,
+    image: '/static-images/sections/seccion-childfund.jpg',
+    status: 'active',
+    department: 'Oruro'
+  },
+  
+  // Oficinas futuras
+  {
+    id: '7',
+    name: 'Oficina de Cobija',
+    description: 'Próxima oficina en el municipio de Cobija, Pando. Expandiremos nuestros servicios al norte de Bolivia.',
+    coordinates: [-11.0267, -68.7692],
+    type: 'future',
+    programs: ['Servicios Regionales', 'Desarrollo Comunitario', 'Atención Integral'],
+    beneficiaries: 0,
+    icon: <MapPin className="h-4 w-4" />,
+    color: 'bg-gray-400',
+    address: 'Municipio de Cobija (Próximamente)',
+    contact: 'Por definir',
+    schedule: 'Por definir',
+    number: 7,
+    image: '/static-images/sections/seccion-childfund.jpg',
+    status: 'future',
+    department: 'Pando'
+  },
+  {
+    id: '8',
+    name: 'Oficina de Guayaramerín',
+    description: 'Próxima oficina en Guayaramerín, Pando. Llevaremos nuestros servicios a la frontera con Brasil.',
+    coordinates: [-10.8369, -65.3614],
+    type: 'future',
+    programs: ['Servicios Fronterizos', 'Desarrollo Comunitario', 'Atención Integral'],
+    beneficiaries: 0,
+    icon: <MapPin className="h-4 w-4" />,
+    color: 'bg-gray-400',
+    address: 'Municipio de Guayaramerín (Próximamente)',
+    contact: 'Por definir',
+    schedule: 'Por definir',
+    number: 8,
+    image: '/static-images/sections/tarjeta-metodologias.jpg',
+    status: 'future',
+    department: 'Pando'
+  },
+  {
+    id: '9',
+    name: 'Oficina de El Alto',
+    description: 'Próxima oficina en El Alto, La Paz. Expandiremos nuestros servicios al altiplano paceño.',
+    coordinates: [-16.5000, -68.1500],
+    type: 'future',
+    programs: ['Servicios Urbanos', 'Desarrollo Comunitario', 'Atención Integral'],
+    beneficiaries: 0,
+    icon: <MapPin className="h-4 w-4" />,
+    color: 'bg-gray-400',
+    address: 'Ciudad de El Alto (Próximamente)',
+    contact: 'Por definir',
+    schedule: 'Por definir',
+    number: 9,
+    image: '/static-images/sections/tarjeta-programas.jpg',
+    status: 'future',
+    department: 'La Paz'
   }
 ];
 
+// Función para calcular el centro del mapa basado en todas las ubicaciones
+const calculateMapCenter = (locations: LocationData[]): [number, number] => {
+  if (locations.length === 0) return [-17.9760202, -67.0897769]; // Centro por defecto en Oruro
+  
+  const sumLat = locations.reduce((sum, loc) => sum + loc.coordinates[0], 0);
+  const sumLng = locations.reduce((sum, loc) => sum + loc.coordinates[1], 0);
+  
+  return [sumLat / locations.length, sumLng / locations.length];
+};
+
+// Función para obtener los departamentos únicos
+const getUniqueDepartments = (locations: LocationData[]): string[] => {
+  const departments = locations.map(loc => loc.department);
+  return [...new Set(departments)];
+};
+
+
 const InteractiveMap: React.FC = () => {
   const [isLeafletReady, setIsLeafletReady] = React.useState(false);
+  
+  // Calcular estadísticas dinámicas
+  const stats = getMapStatistics(locations);
+  // Centro fijo en Oruro, Bolivia
+  const mapCenter: [number, number] = [-17.9760202, -67.0897769];
 
   useEffect(() => {
     // Importar CSS de Leaflet dinámicamente
@@ -181,19 +281,19 @@ const InteractiveMap: React.FC = () => {
           </div>
         </div>
       )}
-      <MapContainer
-        center={[-17.9760202, -67.0897769]} // Centro en Oruro, Bolivia
-        zoom={11}
-        style={{ height: '100%', width: '100%' }}
-        className="z-0"
-        scrollWheelZoom={false}
-        doubleClickZoom={false}
-        zoomControl={true}
-        dragging={true}
-        touchZoom={false}
-        boxZoom={false}
-        keyboard={false}
-      >
+       <MapContainer
+         center={mapCenter} // Centro fijo en Oruro, Bolivia
+         zoom={11} // Zoom apropiado para Oruro y sus alrededores
+         style={{ height: '100%', width: '100%' }}
+         className="z-0"
+         scrollWheelZoom={false}
+         doubleClickZoom={false}
+         zoomControl={true}
+         dragging={true}
+         touchZoom={false}
+         boxZoom={false}
+         keyboard={false}
+       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -208,8 +308,8 @@ const InteractiveMap: React.FC = () => {
               icon={icon}
             >
             <Popup className="custom-popup">
-              <div className="p-3 max-w-72">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="p-3 max-w-80">
+                <div className="flex items-center gap-2 mb-3">
                   <div className={`w-6 h-6 ${location.color} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
                     {location.number}
                   </div>
@@ -217,7 +317,24 @@ const InteractiveMap: React.FC = () => {
                     <h3 className="font-bold text-base text-gray-900 dark:text-gray-100">
                       {location.name}
                     </h3>
+                    {location.status === 'future' && (
+                      <span className="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
+                        Próximamente
+                      </span>
+                    )}
                   </div>
+                </div>
+                
+                {/* Imagen del lugar */}
+                <div className="mb-3">
+                  <img 
+                    src={location.image} 
+                    alt={location.name}
+                    className="w-full h-32 object-cover rounded-lg shadow-sm"
+                    onError={(e) => {
+                      e.currentTarget.src = '/placeholder-image.svg';
+                    }}
+                  />
                 </div>
                 
                 <p className="text-gray-600 dark:text-gray-300 mb-3 text-xs">
@@ -239,21 +356,10 @@ const InteractiveMap: React.FC = () => {
                     <span className="font-semibold text-gray-900 dark:text-gray-100">🕒 </span>
                     <span className="text-gray-600 dark:text-gray-300">{location.schedule}</span>
                   </div>
-                </div>
-                
-                <div className="mt-3">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 text-xs">
-                    Servicios:
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {location.programs.map((program, index) => (
-                      <span
-                        key={index}
-                        className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded"
-                      >
-                        {program}
-                      </span>
-                    ))}
+                  
+                  <div>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">🏛️ </span>
+                    <span className="text-gray-600 dark:text-gray-300">{location.department}</span>
                   </div>
                 </div>
               </div>
@@ -289,6 +395,20 @@ const InteractiveMap: React.FC = () => {
       `}</style>
     </div>
   );
+};
+
+// Exportar estadísticas para uso en otros componentes
+export const getMapStatistics = (locations: LocationData[]) => {
+  const activeOffices = locations.filter(loc => loc.status === 'active').length;
+  const futureOffices = locations.filter(loc => loc.status === 'future').length;
+  const departments = getUniqueDepartments(locations);
+  
+  return {
+    totalOffices: locations.length,
+    activeOffices,
+    futureOffices,
+    departments: departments.join(', ')
+  };
 };
 
 export default InteractiveMap;

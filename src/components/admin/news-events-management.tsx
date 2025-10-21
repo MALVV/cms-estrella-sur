@@ -22,7 +22,6 @@ interface NewsItem {
   excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
-  category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
   isActive: boolean;
   isFeatured: boolean;
   publishedAt: string;
@@ -49,12 +48,6 @@ interface EventItem {
   };
 }
 
-const categoryLabels = {
-  NOTICIAS: 'Noticias',
-  FUNDRAISING: 'Fundraising',
-  COMPAÑIA: 'Compañía',
-  SIN_CATEGORIA: 'Sin Categoría'
-};
 
 interface NewsEventsManagementProps {
   defaultTab?: 'news' | 'events';
@@ -81,7 +74,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
     excerpt: '',
     imageUrl: '',
     imageAlt: '',
-    category: 'NOTICIAS' as 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA',
     isFeatured: false,
     isActive: true,
     // Event specific
@@ -129,7 +121,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
       excerpt: '',
       imageUrl: '',
       imageAlt: '',
-      category: 'NOTICIAS',
       isFeatured: false,
       isActive: true,
       description: '',
@@ -148,7 +139,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
             excerpt: formData.excerpt,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
-            category: formData.category,
             isFeatured: formData.isFeatured,
           }
         : {
@@ -202,7 +192,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
             excerpt: formData.excerpt,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
-            category: formData.category,
             isFeatured: formData.isFeatured,
             isActive: formData.isActive,
           }
@@ -358,7 +347,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
       excerpt: 'excerpt' in item ? item.excerpt || '' : '',
       imageUrl: item.imageUrl || '',
       imageAlt: item.imageAlt || '',
-      category: 'category' in item ? item.category : 'NOTICIAS',
       isFeatured: item.isFeatured,
       isActive: item.isActive,
       description: 'description' in item ? item.description : '',
@@ -444,19 +432,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                       placeholder="Resumen breve"
                       rows={3}
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Categoría</label>
-                    <Select value={formData.category} onValueChange={(value: any) => setFormData({ ...formData, category: value })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(categoryLabels).map(([key, label]) => (
-                          <SelectItem key={key} value={key}>{label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
                 </>
               ) : (
@@ -729,19 +704,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                     placeholder="Resumen breve"
                     rows={3}
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Categoría</label>
-                  <Select value={formData.category} onValueChange={(value: any) => setFormData({ ...formData, category: value })}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(categoryLabels).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </>
             ) : (

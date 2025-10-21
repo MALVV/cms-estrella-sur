@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MapPin, ArrowRight, Search, Filter, Grid3X3, List, Star } from 'lucide-react';
+import { MapPin, ArrowRight, Search, Star } from 'lucide-react';
 
 interface NewsItem {
   id: string;
@@ -16,7 +16,6 @@ interface NewsItem {
   content?: string;
   imageUrl?: string;
   imageAlt?: string;
-  category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
   publishedAt: string;
   author?: string;
   isFeatured?: boolean;
@@ -39,20 +38,6 @@ interface NewsEventsSectionProps {
   eventItems?: EventItem[];
 }
 
-const categoryLabels = {
-  NOTICIAS: 'Noticias',
-  FUNDRAISING: 'Fundraising',
-  COMPAÑIA: 'Compañía',
-  SIN_CATEGORIA: 'Sin Categoría'
-};
-
-const categoryColors = {
-  NOTICIAS: 'bg-blue-100 text-blue-800 dark:bg-blue-200 dark:text-blue-800',
-  FUNDRAISING: 'bg-orange-100 text-orange-800 dark:bg-orange-200 dark:text-orange-900',
-  COMPAÑIA: 'bg-green-100 text-green-800 dark:bg-green-200 dark:text-green-900',
-  SIN_CATEGORIA: 'bg-gray-100 text-gray-800 dark:bg-gray-200 dark:text-gray-900'
-};
-
 export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
   featuredNews,
   newsItems = [],
@@ -61,8 +46,8 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
   const [activeTab, setActiveTab] = useState<'news' | 'events'>('news');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [activeFilter, setActiveFilter] = useState<'all' | 'featured'>('all');
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<string>('');
   const itemsPerPage = 9;
 
   // Filtrar elementos según búsqueda y filtros
@@ -84,17 +69,27 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
       }
     }
     
-    // Filtrar por destacados
-    if (activeFilter === 'featured') {
+    // Filtrar por fecha
+    if (selectedMonth || selectedYear) {
       if (activeTab === 'news') {
-        items = (items as NewsItem[]).filter(item => item.isFeatured);
+        items = (items as NewsItem[]).filter(item => {
+          const itemDate = new Date(item.publishedAt);
+          const matchesMonth = !selectedMonth || itemDate.getMonth() + 1 === parseInt(selectedMonth);
+          const matchesYear = !selectedYear || itemDate.getFullYear() === parseInt(selectedYear);
+          return matchesMonth && matchesYear;
+        });
       } else {
-        items = (items as EventItem[]).filter(item => item.isFeatured);
+        items = (items as EventItem[]).filter(item => {
+          const itemDate = new Date(item.eventDate);
+          const matchesMonth = !selectedMonth || itemDate.getMonth() + 1 === parseInt(selectedMonth);
+          const matchesYear = !selectedYear || itemDate.getFullYear() === parseInt(selectedYear);
+          return matchesMonth && matchesYear;
+        });
       }
     }
     
     return items;
-  }, [activeTab, newsItems, eventItems, searchTerm, activeFilter]);
+  }, [activeTab, newsItems, eventItems, searchTerm, selectedMonth, selectedYear]);
 
   // Calcular elementos para la página actual
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -105,7 +100,7 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
   // Resetear página cuando cambie la pestaña, búsqueda o filtros
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab, searchTerm, activeFilter]);
+  }, [activeTab, searchTerm, selectedMonth, selectedYear]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -118,20 +113,19 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
   return (
     <>
       {/* Hero Section - Estilo Convergente */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="grid lg:grid-cols-2 gap-8 items-center mb-4">
-          <div className="flex flex-col gap-4">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
+          <div className="flex flex-col gap-6">
             <div>
-              <span className="bg-primary text-white text-xs font-bold px-3 py-1 rounded-md">NOTICIAS E INFORMACIÓN</span>
+              <h1 className="text-5xl md:text-6xl font-extrabold font-display uppercase tracking-tight text-gray-900 dark:text-white">
+                Mantente informado con nuestras noticias
+              </h1>
             </div>
-            <h1 className="text-5xl md:text-6xl font-extrabold font-display uppercase tracking-tight text-gray-900 dark:text-white">
-              Mantente informado con nuestras noticias
-            </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
               Mantente al día con las últimas noticias, eventos y actualizaciones de Estrella del Sur. Descubre cómo nuestras acciones están transformando comunidades y creando un impacto positivo.
             </p>
             {/* Estadísticas enfocadas en contenido */}
-            <div className="grid grid-cols-3 gap-4 pt-2">
+            <div className="grid grid-cols-3 gap-4 pt-6">
               <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
                 <div className="text-2xl font-bold text-primary mb-1">{newsItems.length}</div>
                 <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Noticias</div>
@@ -147,7 +141,7 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
             </div>
 
             {/* Información adicional sobre noticias */}
-            <div className="pt-2">
+            <div className="pt-4">
               <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                 Explora nuestras noticias organizadas por categorías y mantente informado sobre nuestros programas y eventos.
               </p>
@@ -155,22 +149,19 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
           </div>
           
           {/* Hero Image */}
-          <div className="relative h-[400px]">
+          <div className="relative h-[500px]">
             <img 
               alt="Noticias e información actualizada" 
-              className="w-full h-full object-cover rounded-xl shadow-lg" 
-              src="https://images.pexels.com/photos/3760263/pexels-photo-3760263.jpeg"
+              className="w-full h-full object-cover object-center rounded-xl shadow-lg" 
+              src="/static-images/heroes/hero-historias.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
           </div>
         </div>
       </div>
-
-      {/* Separador visual */}
-      <div className="border-t border-gray-200 dark:border-gray-700 mx-4"></div>
       
       {/* Grid Section */}
-      <section className="py-12 bg-background-light dark:bg-background-dark">
+      <section className="py-8 bg-background-light dark:bg-background-dark">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
@@ -212,39 +203,40 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
               </div>
               
               <div className="flex gap-2">
-                <Button
-                  variant={activeFilter === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveFilter('all')}
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="px-3 py-2 border border-border-light dark:border-border-dark rounded-lg bg-card-light dark:bg-card-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  Todos
-                </Button>
-                <Button
-                  variant={activeFilter === 'featured' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveFilter('featured')}
+                  <option value="">Mes</option>
+                  <option value="1">Enero</option>
+                  <option value="2">Febrero</option>
+                  <option value="3">Marzo</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Mayo</option>
+                  <option value="6">Junio</option>
+                  <option value="7">Julio</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Septiembre</option>
+                  <option value="10">Octubre</option>
+                  <option value="11">Noviembre</option>
+                  <option value="12">Diciembre</option>
+                </select>
+                
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="px-3 py-2 border border-border-light dark:border-border-dark rounded-lg bg-card-light dark:bg-card-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <Star className="mr-1 h-4 w-4" />
-                  Destacados
-                </Button>
+                  <option value="">Año</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                </select>
               </div>
               
-              <div className="flex gap-2">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
 
             {/* Contador de resultados */}
@@ -266,17 +258,18 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
               <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4">
                 {searchTerm 
                   ? `No hay resultados para "${searchTerm}". Intenta con otros términos de búsqueda.`
-                  : activeFilter === 'featured' 
-                    ? 'No hay elementos destacados disponibles.'
+                  : (selectedMonth || selectedYear)
+                    ? 'No hay contenido disponible para los filtros seleccionados.'
                     : 'No hay contenido disponible en este momento.'
                 }
               </p>
-              {(searchTerm || activeFilter !== 'all') && (
+              {(searchTerm || selectedMonth || selectedYear) && (
                 <Button 
                   variant="outline" 
                   onClick={() => {
                     setSearchTerm('');
-                    setActiveFilter('all');
+                    setSelectedMonth('');
+                    setSelectedYear('');
                   }}
                 >
                   Limpiar filtros
@@ -284,17 +277,13 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
               )}
             </div>
           ) : (
-            <div className={`grid gap-8 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                : 'grid-cols-1'
-            }`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {activeTab === 'news' ? (
               // Mostrar noticias paginadas
               paginatedItems.map((item) => {
                 const newsItem = item as NewsItem;
                 return (
-                  <Link key={newsItem.id} href={`/news/${newsItem.id}`}>
+                  <Link key={newsItem.id} href={`/noticias/${newsItem.id}`}>
                     <div className="bg-card-light dark:bg-card-dark rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                       {newsItem.imageUrl ? (
                         <Image
@@ -313,8 +302,8 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
                       )}
                       <div className="p-6 flex flex-col flex-grow">
                         <div className="text-sm mb-2">
-                          <span className={`${categoryColors[newsItem.category]} text-xs font-semibold mr-2 px-2.5 py-0.5 rounded`}>
-                            {categoryLabels[newsItem.category]}
+                          <span className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">
+                            Noticia
                           </span>
                           <span className="text-subtext-light dark:text-subtext-dark">{formatDate(newsItem.publishedAt)}</span>
                         </div>
@@ -340,7 +329,7 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
               paginatedItems.map((item) => {
                 const eventItem = item as EventItem;
                 return (
-                  <Link key={eventItem.id} href={`/events/${eventItem.id}`}>
+                  <Link key={eventItem.id} href={`/eventos/${eventItem.id}`}>
                     <div className="bg-card-light dark:bg-card-dark rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
                     {eventItem.imageUrl ? (
                       <Image

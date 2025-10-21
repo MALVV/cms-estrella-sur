@@ -27,8 +27,7 @@ export function UserProfileDropdown({ }: UserProfileDropdownProps) {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return <Shield className="h-3 w-3 text-red-500" />
-      case UserRole.SUPERVISOR: return <Shield className="h-3 w-3 text-blue-500" />
-      case UserRole.TECNICO: return <User className="h-3 w-3 text-green-500" />
+      case UserRole.GESTOR: return <User className="h-3 w-3 text-green-500" />
       default: return <User className="h-3 w-3 text-gray-500" />
     }
   }
@@ -36,8 +35,7 @@ export function UserProfileDropdown({ }: UserProfileDropdownProps) {
   const getRoleLabel = (role: string) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return 'Administrador'
-      case UserRole.SUPERVISOR: return 'Supervisor'
-      case UserRole.TECNICO: return 'Técnico'
+      case UserRole.GESTOR: return 'Gestor de Contenido'
       default: return 'Usuario'
     }
   }
@@ -45,8 +43,7 @@ export function UserProfileDropdown({ }: UserProfileDropdownProps) {
   const getRoleColor = (role: string) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.SUPERVISOR: return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case UserRole.TECNICO: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case UserRole.GESTOR: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }

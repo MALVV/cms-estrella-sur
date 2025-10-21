@@ -100,7 +100,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al actualizar la story')
+        throw new Error(errorData.error || 'Error al actualizar la historia')
       }
 
       const updatedStory = await response.json()
@@ -110,7 +110,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
       }
 
       toast({
-        title: "Story actualizada exitosamente",
+        title: "Historia actualizada exitosamente",
         description: "Los cambios han sido guardados correctamente.",
       })
 
@@ -118,8 +118,8 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
       
     } catch (error) {
       toast({
-        title: "Error al actualizar story",
-        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la story. Inténtalo de nuevo.",
+        title: "Error al actualizar historia",
+        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la historia. Inténtalo de nuevo.",
         variant: "destructive",
       })
     } finally {
@@ -149,10 +149,10 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
-            Editar Story
+            Editar Historia
           </DialogTitle>
           <DialogDescription>
-            Modifica la información de la story de éxito.
+            Modifica la información de la historia de éxito.
           </DialogDescription>
         </DialogHeader>
 
@@ -164,7 +164,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
               </label>
               <Input
                 id="title"
-                placeholder="Ingresa el título de la story"
+                placeholder="Ingresa el título de la historia"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
                 maxLength={100}
@@ -178,7 +178,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
               </label>
               <textarea
                 id="content"
-                placeholder="Escribe el contenido completo de la story..."
+                placeholder="Escribe el contenido completo de la historia..."
                 value={formData.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
                 maxLength={2000}
@@ -193,7 +193,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
               </label>
               <textarea
                 id="summary"
-                placeholder="Escribe un resumen breve de la story..."
+                placeholder="Escribe un resumen breve de la historia..."
                 value={formData.summary}
                 onChange={(e) => handleInputChange('summary', e.target.value)}
                 maxLength={300}
@@ -239,7 +239,7 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label htmlFor="isActive" className="text-sm font-medium">
-                Story activa (visible en el sitio web)
+                Historia activa (visible en el sitio web)
               </label>
             </div>
           </div>

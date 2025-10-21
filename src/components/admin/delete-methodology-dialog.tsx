@@ -48,21 +48,21 @@ export function DeleteMethodologyDialog({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Error al eliminar metodología: ${response.status} ${response.statusText}`);
+        throw new Error(`Error al eliminar iniciativa: ${response.status} ${response.statusText}`);
       }
 
       toast({
         title: 'Éxito',
-        description: 'Metodología eliminada exitosamente',
+        description: 'Iniciativa eliminada exitosamente',
       });
 
       setIsOpen(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Error al eliminar metodología:', error);
+      console.error('Error al eliminar iniciativa:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Error al eliminar la metodología',
+        description: error instanceof Error ? error.message : 'Error al eliminar la iniciativa',
         variant: 'destructive',
       });
     } finally {
@@ -77,12 +77,12 @@ export function DeleteMethodologyDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar Metodología</DialogTitle>
+          <DialogTitle>Eliminar Iniciativa</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <p className="text-sm text-gray-600">
-            ¿Estás seguro de que quieres eliminar la metodología 
+            ¿Estás seguro de que quieres eliminar la iniciativa 
             <strong> "{methodology.title}"</strong>?
           </p>
           <p className="text-sm text-red-600 mt-2 font-medium">

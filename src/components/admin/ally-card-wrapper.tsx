@@ -5,6 +5,9 @@ import { UnifiedCard } from '@/components/admin/unified-card';
 import { EditAllyForm } from '@/components/admin/edit-ally-form';
 import { ToggleAllyStatusDialog } from '@/components/admin/toggle-ally-status-dialog';
 import { DeleteAllyDialog } from '@/components/admin/delete-ally-dialog';
+import { ToggleAllyFeaturedDialog } from '@/components/admin/toggle-ally-featured-dialog';
+import { Button } from '@/components/ui/button';
+import { Star, StarOff } from 'lucide-react';
 
 interface Ally {
   id: string;
@@ -59,28 +62,51 @@ export const AllyCardWrapper: React.FC<AllyCardWrapperProps> = ({
 
   return (
     <>
-      <UnifiedCard
-        id={ally.id}
-        title={ally.name}
-        description={ally.description || ally.role}
-        imageUrl={ally.imageUrl}
-        imageAlt={ally.imageAlt}
-        isActive={ally.status === 'ACTIVE'}
-        isFeatured={ally.isFeatured}
-        createdAt={ally.createdAt}
-        creator={ally.author ? {
-          name: ally.author.name,
-          email: ally.author.email
-        } : undefined}
-        type="ally"
-        selectedItems={selectedAllies}
-        onSelectItem={onSelectAlly}
-        getStatusBadgeVariant={getStatusBadgeVariant}
-        formatDate={formatDate}
-        onEdit={() => editDialogRef.current?.click()}
-        onToggleStatus={() => statusDialogRef.current?.click()}
-        onDelete={() => deleteDialogRef.current?.click()}
-      />
+      <div className="relative">
+        <UnifiedCard
+          id={ally.id}
+          title={ally.name}
+          description={ally.description || ally.role}
+          imageUrl={ally.imageUrl}
+          imageAlt={ally.imageAlt}
+          isActive={ally.status === 'ACTIVE'}
+          isFeatured={ally.isFeatured}
+          createdAt={ally.createdAt}
+          creator={ally.author ? {
+            name: ally.author.name,
+            email: ally.author.email
+          } : undefined}
+          type="ally"
+          selectedItems={selectedAllies}
+          onSelectItem={onSelectAlly}
+          getStatusBadgeVariant={getStatusBadgeVariant}
+          formatDate={formatDate}
+          onEdit={() => editDialogRef.current?.click()}
+          onToggleStatus={() => statusDialogRef.current?.click()}
+          onDelete={() => deleteDialogRef.current?.click()}
+        />
+        
+        {/* Botón de destacar flotante */}
+        <div className="absolute top-2 left-2">
+          <ToggleAllyFeaturedDialog
+            ally={ally}
+            onSuccess={onSuccess}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 bg-white/90 backdrop-blur-sm hover:bg-white"
+              title={ally.isFeatured ? 'Remover de destacados' : 'Destacar'}
+            >
+              {ally.isFeatured ? (
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              ) : (
+                <StarOff className="h-4 w-4 text-gray-400 hover:text-yellow-400" />
+              )}
+            </Button>
+          </ToggleAllyFeaturedDialog>
+        </div>
+      </div>
       
       {/* Diálogos ocultos */}
       <EditAllyForm

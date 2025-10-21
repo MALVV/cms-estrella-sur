@@ -21,11 +21,12 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'TECNICO'
+    role: 'GESTOR'
   })
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [passwordCopied, setPasswordCopied] = useState(false)
+  const [createdUser, setCreatedUser] = useState<{name: string, email: string, role: string} | null>(null)
   const { toast } = useToast()
 
   // Generar contraseña aleatoria
@@ -92,6 +93,13 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
         password: password
       }
 
+      // Almacenar información del usuario creado
+      setCreatedUser({
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role
+      })
+
       // Llamar callback si existe
       if (onUserCreated) {
         onUserCreated(transformedUser)
@@ -103,7 +111,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
       })
 
       // Resetear formulario
-      setFormData({ name: '', email: '', role: 'TECNICO' })
+      setFormData({ name: '', email: '', role: 'GESTOR' })
       
     } catch (error) {
       toast({
@@ -135,10 +143,11 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', role: 'TECNICO' })
+    setFormData({ name: '', email: '', role: 'GESTOR' })
     setGeneratedPassword('')
     setShowPassword(false)
     setPasswordCopied(false)
+    setCreatedUser(null)
   }
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -196,8 +205,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="TECNICO">Técnico</SelectItem>
-                  <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
+                  <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
                   <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
                 </SelectContent>
               </Select>
@@ -225,11 +233,11 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
                 <div className="space-y-2">
                   <Label>Información del Usuario</Label>
                   <div className="space-y-1 text-sm">
-                    <div><strong>Nombre:</strong> {formData.name}</div>
-                    <div><strong>Email:</strong> {formData.email}</div>
+                    <div><strong>Nombre:</strong> {createdUser?.name || formData.name}</div>
+                    <div><strong>Email:</strong> {createdUser?.email || formData.email}</div>
                     <div><strong>Rol:</strong> 
                       <Badge variant="outline" className="ml-2">
-                        {formData.role}
+                        {createdUser?.role || formData.role}
                       </Badge>
                     </div>
                   </div>

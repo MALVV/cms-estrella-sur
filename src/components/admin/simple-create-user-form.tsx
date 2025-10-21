@@ -54,7 +54,7 @@ export function SimpleCreateUserForm({ onUserCreated, onCancel }: SimpleCreateUs
     defaultValues: {
       name: '',
       email: '',
-      role: UserRole.TECNICO,
+      role: UserRole.GESTOR,
       isActive: true,
       mustChangePassword: true
     }
@@ -80,17 +80,15 @@ export function SimpleCreateUserForm({ onUserCreated, onCancel }: SimpleCreateUs
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.SUPERVISOR: return <Briefcase className="h-4 w-4 text-blue-500" />
-      case UserRole.TECNICO: return <Wrench className="h-4 w-4 text-green-500" />
+      case UserRole.GESTOR: return <Briefcase className="h-4 w-4 text-blue-500" />
       default: return <User className="h-4 w-4 text-gray-500" />
     }
   }
 
   const getRoleDescription = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR: return 'Acceso completo al sistema y gestión de usuarios'
-      case UserRole.SUPERVISOR: return 'Supervisión de contenido y gestión de técnicos'
-      case UserRole.TECNICO: return 'Acceso básico para tareas técnicas y soporte'
+      case UserRole.ADMINISTRADOR: return 'Acceso completo al sistema y gestión de usuarios, proyectos, innovaciones y programas'
+      case UserRole.GESTOR: return 'Gestión de contenido: noticias, iniciativas, historias, recursos y demás secciones'
       default: return ''
     }
   }

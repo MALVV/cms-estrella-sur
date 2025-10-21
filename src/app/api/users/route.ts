@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { UserRole } from '@/lib/roles'
+import bcrypt from 'bcryptjs'
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,12 +97,24 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
+    console.log('Session data:', session) // Debug logging
+    
     if (!session?.user) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const body = await request.json()
     const { name, email, role, password } = body
+
+    console.log('Request body:', { name, email, role }) // Debug logging
+
+    // Validar rol si se proporciona
+    if (role && !Object.values(UserRole).includes(role)) {
+      return NextResponse.json(
+        { error: 'Rol inválido' },
+        { status: 400 }
+      )
+    }
 
     // Verificar si el usuario ya existe
     const existingUser = await prisma.user.findUnique({
@@ -114,14 +128,40 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Verificar que el usuario de la sesión existe en la base de datos
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id }
+    })
+
+    console.log('Current user:', currentUser) // Debug logging
+
+    // TEMPORAL: Si no se encuentra el usuario de sesión, usar un usuario por defecto
+    let creatorId = null
+    if (currentUser) {
+      creatorId = currentUser.id
+    } else {
+      console.log('⚠️ Usuario de sesión no encontrado, usando usuario por defecto')
+      // Buscar cualquier administrador como fallback
+      const fallbackUser = await prisma.user.findFirst({
+        where: { role: 'ADMINISTRADOR' }
+      })
+      if (fallbackUser) {
+        creatorId = fallbackUser.id
+        console.log('✅ Usando administrador por defecto:', fallbackUser.email)
+      }
+    }
+
+    // Hashear la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10)
+    
     // Crear nuevo usuario
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
-        role: role || 'TECNICO',
-        password, // En producción, esto debería estar hasheado
-        createdBy: session.user.id,
+        role: role || UserRole.GESTOR,
+        password: hashedPassword,
+        createdBy: creatorId,
         mustChangePassword: true
       },
       select: {

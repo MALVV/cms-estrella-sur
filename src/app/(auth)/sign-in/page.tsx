@@ -72,27 +72,12 @@ function SignInForm() {
       <div className="relative z-10 flex items-center justify-center min-h-screen py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            {/* Logo similar al Hero */}
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl font-condensed">C</span>
-              </div>
+            {/* Logo horizontal de Estrella del Sur */}
+            <div className="flex justify-center mb-8">
+              <h1 className="text-3xl sm:text-4xl font-bold text-text-light dark:text-text-dark font-condensed">
+                <span className="text-primary">Estrella del Sur</span>
+              </h1>
             </div>
-            
-            {/* Badge similar al Hero */}
-            <div className="inline-block bg-yellow-400 text-black px-4 py-2 text-sm font-bold mb-4 rounded font-condensed">
-              INICIAR SESIÓN
-            </div>
-            
-            <h2 className="text-4xl font-bold text-text-light dark:text-text-dark font-condensed mb-2">
-              BIENVENIDO DE VUELTA
-            </h2>
-            <p className="text-text-light dark:text-text-dark opacity-80">
-              ¿No tienes una cuenta?{' '}
-              <Link href="/sign-up" className="font-medium text-primary hover:text-primary/80 transition-colors">
-                Crear cuenta
-              </Link>
-            </p>
           </div>
           
           <div className="bg-card-light dark:bg-card-dark rounded-2xl shadow-2xl p-8 border border-border-light dark:border-border-dark">
@@ -173,6 +158,16 @@ function SignInForm() {
 
             </form>
           </div>
+          
+          {/* Enlace para regresar al inicio */}
+          <div className="text-center mt-6">
+            <Link 
+              href="/" 
+              className="text-text-light dark:text-text-dark hover:text-primary dark:hover:text-primary transition-colors font-medium"
+            >
+              ← Regresar al inicio
+            </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -184,9 +179,9 @@ export default function SignInPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
-            <span className="text-white font-bold text-2xl font-condensed">C</span>
-          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-text-light dark:text-text-dark font-condensed mb-4">
+            <span className="text-primary">Estrella del Sur</span>
+          </h1>
           <p className="text-text-light dark:text-text-dark">Cargando...</p>
         </div>
       </div>

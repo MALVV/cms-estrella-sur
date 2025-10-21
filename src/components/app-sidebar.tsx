@@ -54,18 +54,18 @@ const getNavSections = (userRole: string) => {
           title: "Panel de Control",
           url: "/dashboard",
           icon: Home,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
         {
           title: "Usuarios",
           url: "#",
           icon: Users,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"],
+          showFor: ["ADMINISTRADOR"],
           items: [
             {
               title: "Gestión de Usuarios",
               url: "/dashboard/users",
-              showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+              showFor: ["ADMINISTRADOR"]
             },
           ],
         },
@@ -77,21 +77,21 @@ const getNavSections = (userRole: string) => {
       items: [
         {
           title: "Proyectos",
-          url: "/dashboard/projects",
+          url: "/dashboard/proyectos",
           icon: Briefcase,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
         {
-          title: "Metodologías",
-          url: "/dashboard/methodologies",
+          title: "Iniciativas",
+          url: "/dashboard/metodologias",
           icon: Settings,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
         {
           title: "Programas",
           url: "/dashboard/programas",
           icon: FileText,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
       ]
     },
@@ -103,17 +103,17 @@ const getNavSections = (userRole: string) => {
           title: "Blog",
           url: "#",
           icon: BookOpen,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"],
+          showFor: ["ADMINISTRADOR", "GESTOR"],
           items: [
             {
               title: "Noticias",
-              url: "/dashboard/news",
-              showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+              url: "/dashboard/noticias",
+              showFor: ["ADMINISTRADOR", "GESTOR"]
             },
             {
               title: "Eventos",
-              url: "/dashboard/events",
-              showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+              url: "/dashboard/eventos",
+              showFor: ["ADMINISTRADOR", "GESTOR"]
             },
           ],
         },
@@ -121,17 +121,17 @@ const getNavSections = (userRole: string) => {
           title: "Contenido",
           url: "#",
           icon: FileText,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"],
+          showFor: ["ADMINISTRADOR", "GESTOR"],
           items: [
             {
-              title: "Historias",
-              url: "/dashboard/stories",
-              showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+              title: "Historias de Impacto",
+              url: "/dashboard/historias",
+              showFor: ["ADMINISTRADOR", "GESTOR"]
             },
             {
               title: "Videos",
-              url: "/dashboard/video-testimonials",
-              showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+              url: "/dashboard/videos-testimoniales",
+              showFor: ["ADMINISTRADOR", "GESTOR"]
             },
           ],
         },
@@ -145,13 +145,19 @@ const getNavSections = (userRole: string) => {
           title: "Galería",
           url: "/dashboard/galeria-imagenes",
           icon: Camera,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
         {
           title: "Aliados",
-          url: "/dashboard/allies",
+          url: "/dashboard/aliados",
           icon: Handshake,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
+        },
+        {
+          title: "Recursos",
+          url: "/dashboard/recursos",
+          icon: FolderOpen,
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
       ]
     },
@@ -160,16 +166,10 @@ const getNavSections = (userRole: string) => {
       icon: Shield,
       items: [
         {
-          title: "Gobernanza",
-          url: "/dashboard/transparency",
+          title: "Documentos",
+          url: "/dashboard/transparencia",
           icon: Shield,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
-        },
-        {
-          title: "Recursos",
-          url: "/dashboard/resources",
-          icon: FolderOpen,
-          showFor: ["ADMINISTRADOR", "SUPERVISOR", "TECNICO"]
+          showFor: ["ADMINISTRADOR", "GESTOR"]
         },
       ]
     },
@@ -219,7 +219,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {getNavSections(session?.user?.role || 'TECNICO').map((section) => (
+        {getNavSections(session?.user?.role || 'GESTOR').map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel className="flex items-center gap-2">
               <section.icon className="h-4 w-4" />

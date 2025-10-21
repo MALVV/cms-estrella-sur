@@ -142,7 +142,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
             <div className="text-white">
               <div className="mb-4">
                 <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
-                  Programa Estratégico
+                  Programas de Impacto
                 </span>
                   </div>
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">

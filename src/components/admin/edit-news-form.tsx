@@ -55,7 +55,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
     excerpt: '',
     imageUrl: '',
     imageAlt: '',
-    category: 'NOTICIAS' as 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA',
     isActive: true,
     isFeatured: false,
     programaId: 'none',
@@ -73,7 +72,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         excerpt: news.excerpt || '',
         imageUrl: news.imageUrl || '',
         imageAlt: news.imageAlt || '',
-        category: news.category,
         isActive: news.isActive,
         isFeatured: news.isFeatured,
         programaId: news.programa?.id || 'none',
@@ -107,7 +105,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
           setProjects(projectsData.projects || []);
         }
 
-        // Cargar metodologías
+        // Cargar iniciativas
         const methodologiesResponse = await fetch('/api/admin/methodologies?limit=100', {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
@@ -248,20 +246,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Categoría</label>
-            <Select value={formData.category} onValueChange={(value: any) => handleChange('category', value)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NOTICIAS">Noticias</SelectItem>
-                <SelectItem value="FUNDRAISING">Fundraising</SelectItem>
-                <SelectItem value="COMPAÑIA">Compañía</SelectItem>
-                <SelectItem value="SIN_CATEGORIA">Sin Categoría</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
 
           {/* Relaciones */}
           <div className="space-y-4">
@@ -302,13 +286,13 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
             </div>
 
             <div>
-              <label className="text-sm font-medium">Metodología</label>
+              <label className="text-sm font-medium">Iniciativa</label>
               <Select value={formData.methodologyId} onValueChange={(value) => handleChange('methodologyId', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar metodología" />
+                  <SelectValue placeholder="Seleccionar iniciativa" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sin metodología</SelectItem>
+                  <SelectItem value="none">Sin iniciativa</SelectItem>
                   {methodologies.map((methodology) => (
                     <SelectItem key={methodology.id} value={methodology.id}>
                       {methodology.title}

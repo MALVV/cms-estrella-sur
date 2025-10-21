@@ -53,6 +53,55 @@ const interventionAreas = [
       'Gestión de información en sistemas digitales'
     ],
     image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Protección Infantil',
+    description: 'Garantizar que niños y adolescentes vivan libres de violencia y negligencia.',
+    careers: ['Psicología', 'Sociología', 'Pedagogía'],
+    activities: [
+      'Facilitar talleres de gestión emocional y resiliencia',
+      'Elaborar material psicoeducativo adaptado',
+      'Aplicar protocolos de salvaguarda',
+      'Realizar diagnósticos socioeconómicos'
+    ],
+    image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Medios de Vida',
+    description: 'Fortalecer capacidades económicas para generación de ingresos sostenibles.',
+    careers: ['Economía', 'Administración', 'Ingeniería Comercial/Industrial'],
+    activities: [
+      'Diseñar proyectos de innovación social',
+      'Elaborar planes de negocio',
+      'Fortalecer educación financiera comunitaria',
+      'Promover emprendimientos sostenibles'
+    ],
+    image: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Sostenibilidad Ambiental',
+    description: 'Promover el cuidado del entorno y hábitos responsables.',
+    careers: ['Agronomía', 'Medio Ambiente'],
+    activities: [
+      'Diseñar campañas de educación ambiental',
+      'Ejecutar actividades de conservación',
+      'Desarrollar huertos y compostas',
+      'Gestión ambiental y medios de vida sostenibles'
+    ],
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Tecnologías y Comunicaciones',
+    description: 'Fortalecer la presencia digital y comunicación efectiva de la organización.',
+    careers: ['Ingeniería de Sistemas', 'Comunicación Social', 'Diseño Gráfico', 'Marketing Digital'],
+    activities: [
+      'Desarrollo y mantenimiento de plataformas web',
+      'Gestión de redes sociales y contenido digital',
+      'Diseño de material gráfico y audiovisual',
+      'Implementación de sistemas de información',
+      'Estrategias de comunicación y divulgación'
+    ],
+    image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
   }
 ];
 
@@ -128,118 +177,80 @@ export default function VoluntariadosPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+      <div className="relative min-h-screen flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-          <div className="max-w-2xl text-white text-center">
-            <div className="mb-4">
-              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+          <div className="max-w-4xl text-white text-center">
+            <div className="mb-6">
+              <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
                 Voluntariado
               </span>
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6">
               ÚNETE COMO<br/>
               VOLUNTARIO<br/>
-              SOCIAL
+              O PASANTE
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
-              Forma parte de nuestro equipo de voluntarios y contribuye al desarrollo social de Bolivia. 
+            <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
+              Forma parte de nuestro equipo de voluntarios y pasantes que contribuye al desarrollo social de Bolivia. 
               Tu tiempo y dedicación pueden marcar la diferencia en las vidas de muchas personas.
             </p>
-            <div className="mt-8">
-              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#formulario">
-                APLICAR COMO VOLUNTARIO
-                <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
-                </svg>
-              </a>
-            </div>
           </div>
         </main>
       </div>
 
       <main className="container mx-auto px-4 py-8">
 
-        {/* Áreas de Interés */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-4">
-              Áreas de Participación
-            </h2>
-            <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-2xl mx-auto">
-              Selecciona el área donde te gustaría contribuir con tu tiempo y habilidades
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
-            {areasOfInterest.map((area, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden">
-                <div className="relative h-48">
-                  <Image
-                    src={area.image}
-                    alt={area.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg text-text-light dark:text-text-dark">
-                      {area.name}
-                    </h3>
-                    <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                      {area.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
         {/* Áreas de Intervención */}
-        <section className="mb-16">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-4">
-              Áreas de Intervención
-            </h2>
-            <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-2xl mx-auto">
-              Oportunidades específicas para estudiantes y profesionales en áreas técnicas
-            </p>
+        <section className="py-6 bg-background-light dark:bg-background-dark">
+          <div className="container mx-auto px-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <div>
+                <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+                  ÁREAS DE INTERVENCIÓN
+                </span>
+                <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
+                  DONDE PUEDES CONTRIBUIR
+                </h1>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-lg">
+                  Oportunidades específicas para estudiantes y profesionales en áreas técnicas que buscan aplicar sus conocimientos en proyectos de impacto social.
+                </p>
+              </div>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {interventionAreas.map((area, index) => (
-              <Card key={index} className="hover:shadow-lg transition-all duration-300 border-0 shadow-md overflow-hidden mb-8">
-                <div className="grid md:grid-cols-2 gap-0">
-                  <div className="relative h-64 md:h-auto">
-                    <Image
-                      src={area.image}
-                      alt={area.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-8">
-                    <div className="space-y-6">
+                <div key={index} className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300">
+                  <div className="space-y-6">
+                    <div className="relative h-48 rounded-lg overflow-hidden">
+                      <Image
+                        src={area.image}
+                        alt={area.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="space-y-4">
                       <div>
-                        <h3 className="font-bold text-2xl text-text-light dark:text-text-dark mb-3">
+                        <h3 className="font-bold text-xl text-text-light dark:text-text-dark mb-3">
                           {area.name}
                         </h3>
-                        <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed text-sm">
                           {area.description}
                         </p>
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-lg text-text-light dark:text-text-dark mb-3">
+                        <h4 className="font-semibold text-base text-text-light dark:text-text-dark mb-2">
                           Carreras Requeridas:
                         </h4>
                         <div className="flex flex-wrap gap-2">
                           {area.careers.map((career, careerIndex) => (
                             <span 
                               key={careerIndex}
-                              className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium"
+                              className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
                             >
                               {career}
                             </span>
@@ -248,14 +259,14 @@ export default function VoluntariadosPage() {
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-lg text-text-light dark:text-text-dark mb-3">
+                        <h4 className="font-semibold text-base text-text-light dark:text-text-dark mb-2">
                           Actividades Principales:
                         </h4>
-                        <ul className="space-y-2">
+                        <ul className="space-y-1">
                           {area.activities.map((activity, activityIndex) => (
-                            <li key={activityIndex} className="flex items-start gap-3">
-                              <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                              <span className="text-text-secondary-light dark:text-text-secondary-dark">
+                            <li key={activityIndex} className="flex items-start gap-2">
+                              <div className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                              <span className="text-text-secondary-light dark:text-text-secondary-dark text-sm">
                                 {activity}
                               </span>
                             </li>
@@ -263,10 +274,10 @@ export default function VoluntariadosPage() {
                         </ul>
                       </div>
                     </div>
-                  </CardContent>
+                  </div>
                 </div>
-              </Card>
             ))}
+            </div>
           </div>
         </section>
 
@@ -279,7 +290,7 @@ export default function VoluntariadosPage() {
                   BENEFICIOS Y ACOMPAÑAMIENTO
                 </span>
                 <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
-                  QUÉ OBTIENES COMO VOLUNTARIO
+                  QUÉ OBTIENES COMO VOLUNTARIO/PASANTE
                 </h1>
               </div>
               <div>
@@ -346,7 +357,7 @@ export default function VoluntariadosPage() {
                 </div>
                 <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">CERTIFICACIÓN</h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Certificación y carta de referencia oficial al finalizar tu período de voluntariado.
+                  Certificación y carta de referencia oficial al finalizar tu período de voluntariado o pasantía.
                 </p>
               </div>
             </div>
@@ -442,17 +453,25 @@ export default function VoluntariadosPage() {
         </section>
 
         {/* Formulario de Solicitud */}
-        <section className="max-w-4xl mx-auto">
-          <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl md:text-3xl font-bold text-text-light dark:text-text-dark">
-                Formulario de Solicitud de Voluntariado
-              </CardTitle>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark mt-2">
-                Completa el formulario para iniciar tu proceso de voluntariado con nosotros
-              </p>
-            </CardHeader>
-            <CardContent>
+        <section className="py-6 bg-background-light dark:bg-background-dark">
+          <div className="container mx-auto px-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-8">
+              <div>
+                <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+                  FORMULARIO DE SOLICITUD
+                </span>
+                <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
+                  APLICA COMO VOLUNTARIO/PASANTE
+                </h1>
+              </div>
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-lg">
+                  Completa el formulario para iniciar tu proceso de voluntariado con nosotros y formar parte de nuestro equipo de cambio social.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Información Personal */}
                 <div className="space-y-4">
@@ -701,38 +720,49 @@ export default function VoluntariadosPage() {
                   )}
                 </Button>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </section>
 
         {/* Información Adicional */}
-        <section className="mt-16 max-w-4xl mx-auto">
-          <Card>
-            <CardContent className="p-8">
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-text-light dark:text-text-dark mb-4">
-                  ¿Qué esperar después de enviar tu solicitud?
-                </h3>
-                <div className="grid md:grid-cols-3 gap-6 text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">1</div>
-                    <span className="font-medium">Revisión de tu solicitud</span>
-                    <span>Evaluaremos tu perfil y motivación</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">2</div>
-                    <span className="font-medium">Entrevista personal</span>
-                    <span>Conoceremos mejor tus expectativas</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold">3</div>
-                    <span className="font-medium">Inicio de actividades</span>
-                    <span>Te integraremos a nuestros proyectos</span>
-                  </div>
-                </div>
+        <section className="py-6 bg-background-light dark:bg-background-dark">
+          <div className="container mx-auto px-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-8">
+              <div>
+                <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
+                  PROCESO DE SELECCIÓN
+                </span>
+                <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
+                  QUÉ ESPERAR DESPUÉS
+                </h1>
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <p className="text-gray-600 dark:text-gray-300 text-lg">
+                  Conoce el proceso que seguiremos después de recibir tu solicitud para integrarte a nuestro equipo de voluntarios.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6 items-center">
+              <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">1</div>
+                <h4 className="font-medium text-text-light dark:text-text-dark mb-2">Revisión de tu solicitud</h4>
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Evaluaremos tu perfil y motivación</p>
+              </div>
+              
+              <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">2</div>
+                <h4 className="font-medium text-text-light dark:text-text-dark mb-2">Entrevista personal</h4>
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Conoceremos mejor tus expectativas</p>
+              </div>
+              
+              <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">3</div>
+                <h4 className="font-medium text-text-light dark:text-text-dark mb-2">Inicio de actividades</h4>
+                <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Te integraremos a nuestros proyectos</p>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
       

@@ -1,36 +1,213 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Users,
-  Heart,
-  Shield,
-  Globe,
-  ArrowRight
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, Heart, Lightbulb, Shield, Target, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 
-export default function IniciativasPage() {
+interface Initiative {
+  id: string;
+  title: string;
+  description: string;
+  shortDescription: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  ageGroup: string;
+  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  targetAudience: string;
+  objectives: string;
+  implementation: string;
+  results: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export default function InitiativesPage() {
   const [loading, setLoading] = useState(true);
+  const [initiatives, setInitiatives] = useState<Initiative[]>([]);
+  const [selectedInitiative, setSelectedInitiative] = useState<Initiative | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const popupRef = useRef<HTMLDivElement | null>(null);
+
+  const fetchInitiatives = async () => {
+    try {
+      setLoading(true);
+      console.log('🔄 Cargando iniciativas...');
+      const response = await fetch('/api/public/methodologies');
+      console.log('📡 Respuesta recibida:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`Error al cargar iniciativas: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('📊 Datos recibidos:', data);
+      console.log('📊 Cantidad de iniciativas:', data.length);
+      setInitiatives(data);
+    } catch (error) {
+      console.error('❌ Error al cargar iniciativas:', error);
+      // En caso de error, mantener iniciativas vacías para mostrar mensaje de error
+      setInitiatives([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Ya no necesitamos cargar datos específicos
-      } catch (error) {
-        console.error('Error cargando datos:', error);
-      } finally {
-        setLoading(false);
+    fetchInitiatives();
+  }, []);
+
+  // Cleanup timeout al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
       }
     };
-
-    fetchData();
   }, []);
+
+  const handleInitiativeHover = (initiative: Initiative) => {
+    // Limpiar timeout anterior si existe
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    
+    setSelectedInitiative(initiative);
+    setIsDialogOpen(true);
+  };
+
+  const handleInitiativeLeave = () => {
+    // Solo cerrar si no hay mouse sobre el popup
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsDialogOpen(false);
+      setSelectedInitiative(null);
+    }, 200);
+  };
+
+  const handlePopupMouseEnter = () => {
+    // Cancelar el timeout cuando el mouse entra al popup
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+  };
+
+  const handlePopupMouseLeave = () => {
+    // Cerrar inmediatamente cuando el mouse sale del popup
+    setIsDialogOpen(false);
+    setSelectedInitiative(null);
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'EDUCACION':
+        return <Lightbulb className="h-6 w-6 text-blue-500" />;
+      case 'SALUD':
+        return <Heart className="h-6 w-6 text-red-500" />;
+      case 'SOCIAL':
+        return <Users className="h-6 w-6 text-green-500" />;
+      case 'AMBIENTAL':
+        return <Shield className="h-6 w-6 text-emerald-500" />;
+      default:
+        return <Target className="h-6 w-6 text-gray-500" />;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'EDUCACION':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'SALUD':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'SOCIAL':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'AMBIENTAL':
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  // Datos de ejemplo para la demostración
+  const exampleInitiatives: Initiative[] = [
+    {
+      id: '1',
+      title: 'Aprendizaje Basado en Proyectos',
+      description: 'Iniciativa educativa que involucra a los estudiantes en proyectos del mundo real para desarrollar habilidades del siglo XXI.',
+      shortDescription: 'Desarrollo de habilidades a través de proyectos reales',
+      ageGroup: '6-12 años',
+      category: 'EDUCACION',
+      targetAudience: 'Estudiantes de primaria',
+      objectives: 'Fomentar el pensamiento crítico y la colaboración',
+      implementation: 'Proyectos interdisciplinarios de 8 semanas',
+      results: 'Mejora del 40% en habilidades de resolución de problemas',
+      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
+      imageAlt: 'Estudiantes trabajando en proyectos colaborativos',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: '2',
+      title: 'Salud Comunitaria Preventiva',
+      description: 'Programa integral de salud que empodera a las comunidades para prevenir enfermedades y promover estilos de vida saludables.',
+      shortDescription: 'Prevención y promoción de salud comunitaria',
+      ageGroup: 'Todas las edades',
+      category: 'SALUD',
+      targetAudience: 'Comunidades rurales',
+      objectives: 'Reducir enfermedades prevenibles en un 60%',
+      implementation: 'Talleres mensuales y seguimiento personalizado',
+      results: 'Reducción del 45% en consultas por enfermedades prevenibles',
+      imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
+      imageAlt: 'Profesionales de salud trabajando con la comunidad',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: '3',
+      title: 'Desarrollo Comunitario Participativo',
+      description: 'Iniciativa que involucra activamente a los miembros de la comunidad en la identificación y solución de sus propios problemas.',
+      shortDescription: 'Participación activa de la comunidad en su desarrollo',
+      ageGroup: 'Adultos',
+      category: 'SOCIAL',
+      targetAudience: 'Líderes comunitarios',
+      objectives: 'Fortalecer la organización comunitaria',
+      implementation: 'Talleres participativos y planificación conjunta',
+      results: 'Formación de 15 organizaciones comunitarias',
+      imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
+      imageAlt: 'Reunión comunitaria participativa',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    {
+      id: '4',
+      title: 'Conservación Ambiental Participativa',
+      description: 'Programa que involucra a las comunidades en la protección y conservación de sus recursos naturales locales.',
+      shortDescription: 'Protección participativa del medio ambiente',
+      ageGroup: 'Todas las edades',
+      category: 'AMBIENTAL',
+      targetAudience: 'Comunidades rurales',
+      objectives: 'Conservar 500 hectáreas de bosque',
+      implementation: 'Monitoreo comunitario y reforestación',
+      results: 'Conservación de 300 hectáreas en el primer año',
+      imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
+      imageAlt: 'Comunidad participando en conservación ambiental',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  ];
+
+  // Siempre mostrar las iniciativas reales de la base de datos
+  const initiativesToShow = initiatives;
 
   if (loading) {
     return (
@@ -41,7 +218,6 @@ export default function IniciativasPage() {
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
           </div>
         </main>
-        <SiteFooter />
       </div>
     );
   }
@@ -51,316 +227,286 @@ export default function IniciativasPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+      <div className="relative min-h-screen flex items-center bg-hero-iniciativas">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-          <div className="max-w-2xl text-white text-center">
-            <motion.div 
-              className="mb-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
-                Nuestras Iniciativas
+          <div className="max-w-4xl text-white text-center">
+            <div className="mb-6">
+              <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
+                Iniciativas Innovadoras
               </span>
-            </motion.div>
-            <motion.h1 
-              className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 1, delay: 0.4 }}
-            >
-              NUESTRAS<br/>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6">
               INICIATIVAS<br/>
-              DE IMPACTO
-            </motion.h1>
-            <motion.p 
-              className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              Descubre nuestro trabajo integral que combina programas estratégicos, proyectos específicos y metodologías innovadoras para crear impacto social sostenible.
-            </motion.p>
-            <motion.div 
-              className="mt-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-            >
-              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#mision">
-                CONOCE NUESTRAS INICIATIVAS
+              DE IMPACTO<br/>
+              SOCIAL
+            </h1>
+            <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
+              Iniciativas innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios.
+            </p>
+            <div className="mt-8">
+              <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#iniciativas">
+                EXPLORA NUESTRAS INICIATIVAS
                 <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
                 </svg>
               </a>
-            </motion.div>
+            </div>
           </div>
         </main>
       </div>
 
-      {/* Sección Tríptico - Programas / Proyectos / Metodologías */}
-      <section className="py-12 bg-background-light dark:bg-background-dark relative overflow-hidden">
-        {/* Fondo decorativo sutil */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-blue-400 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-purple-400 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <motion.span 
-              className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4"
-              initial={{ scale: 0 }}
-              whileInView={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              NUESTRAS INICIATIVAS
-            </motion.span>
-            <motion.h2 
-              className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              viewport={{ once: true }}
-            >
-              NUESTRA MISIÓN ES TRANSFORMAR VIDAS
-              <br />
-              A TRAVÉS DE INICIATIVAS CON IMPACTO REAL
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Card Programas */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-            >
-              <Link href="/programas" className="group">
-                <div className="relative rounded-lg overflow-hidden group">
-                  <img
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5c7sgQH1Lc7mtyahGIQYWnnAo2tgVe7SqX7oZBhzKOsF6WT7-tG0K5qhw0bSScIu-DTQJ0XZs_C6nC-0D7DA8RySqIaXkg42tnBW4RdRPnCig5Rj0K_IjHGpt2auGQ1NNfTEso6LHX9rv0CnrRch126cPinPzvkfbhRK_OPE0zN3WMAXo4rjHiy0dj_vbqNfIEgRSIeYTNtdGRDHrVr1YxQTsDXV1IOhOYsnFw07qZXOSsZF5YjszrXliB3LtVb-yTqcQXDVizYQ"
-                    alt="Voluntario sosteniendo alimentos"
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-yellow-300/80 to-yellow-300/0">
-                    <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
-                        PROGRAMAS
-                      </h2>
-                    </div>
-                    <h3 className="text-white font-condensed text-2xl font-bold uppercase">Programas</h3>
-                    <span className="text-white text-sm font-bold tracking-wider mt-2 underline">
-                      VER PROGRAMAS
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-
-            {/* Card Proyectos */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <Link href="/proyectos" className="group">
-                <div className="relative rounded-lg overflow-hidden group">
-                  <img
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfcd1THX-kNBtPUO3yGHeTZXEqtXox42LyzhCfPYktbQc-RvgkPJDmPICrmGJITFvAvYfflo9F1p1wiRHLTKaJM4uAN-6ZyGpcAL0m7kTVJv1pZyM06QJgk84mx4R7V6EHYmEwrnRB0hm_ihJyOndWkRa49kJ_ssPoEMX-YvtfdRtREi24WNHjiaU-_w5EWlJRTO418v5NQDvbaVksG0069Vmang3LLhAxpzMegCdIfTaUvRbx60JgZk4XFmeb2dPcvEzwkKtIwyY"
-                    alt="Voluntarios trabajando en jardín"
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-emerald-400/80 to-emerald-400/0">
-                    <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
-                        PROYECTOS
-                      </h2>
-                    </div>
-                    <h3 className="text-white font-condensed text-2xl font-bold uppercase">Proyectos</h3>
-                    <span className="text-white text-sm font-bold tracking-wider mt-2 underline">
-                      VER PROYECTOS
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-
-            {/* Card Metodologías */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-            >
-              <Link href="/metodologias" className="group">
-                <div className="relative rounded-lg overflow-hidden group">
-                  <img
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD95Djd7grT7KPgWsCpRX9pQfnUKAc0pVGzScwfMjfDJLQHhQw3f-6KNWYCtfJlo62MocE_H3KOvqij7kjrUsJYo9DMMur2bojx8Y9zUc5hMHmqRCPuJt23tyazG2pB2yc0C9LB8KY8EWLh1U7lqFfCQolo_gqfzcWKPo98Rv5OGaRTuuSj849TklYSgMtxKnLmdsFKy7WszCtV7MXXhCD53uNijabU-Tm_gnlUleyJOOSM4OqhjVZ1kRO-wJB0CyGENPXyxvy5L64"
-                    alt="Grupo de voluntarios sonriendo"
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-red-400/80 to-red-400/0">
-                    <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
-                        METODOLOGÍAS
-                      </h2>
-                    </div>
-                    <h3 className="text-white font-condensed text-2xl font-bold uppercase">Metodologías</h3>
-                    <span className="text-white text-sm font-bold tracking-wider mt-2 underline">
-                      VER METODOLOGÍAS
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Misión y Propósito Section */}
-      <section className="py-6 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-                NUESTRO ENFOQUE
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
-                QUÉ NOS HACE DIFERENTES
-              </h1>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <p className="text-text-secondary-light dark:text-text-secondary-dark text-lg">
-                Nuestro enfoque integral combina experiencia local con metodologías globales probadas, creando iniciativas que transforman comunidades de manera sostenible y medible.
-              </p>
-            </motion.div>
-          </div>
-          
-           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-             <motion.div 
-               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-               initial={{ opacity: 0, y: 30 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.6, delay: 0.1 }}
-               viewport={{ once: true }}
-             >
-               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
-                 <Heart className="h-8 w-8 text-orange-500" />
-               </div>
-               <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">IMPACTO MEDIBLE</h3>
-               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                 Cada iniciativa está diseñada con indicadores claros de éxito, permitiéndonos medir y demostrar el impacto real en las vidas de los niños y sus comunidades.
-               </p>
-             </motion.div>
-             
-             <motion.div 
-               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-               initial={{ opacity: 0, y: 30 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.6, delay: 0.2 }}
-               viewport={{ once: true }}
-             >
-               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
-                 <Globe className="h-8 w-8 text-green-500" />
-               </div>
-               <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">METODOLOGÍAS GLOBALES</h3>
-               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                 Aplicamos metodologías probadas internacionalmente por ChildFund Alliance, adaptándolas al contexto local para maximizar la efectividad y sostenibilidad.
-               </p>
-             </motion.div>
-
-             <motion.div 
-               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-               initial={{ opacity: 0, y: 30 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.6, delay: 0.3 }}
-               viewport={{ once: true }}
-             >
-               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
-                 <Users className="h-8 w-8 text-blue-500" />
-               </div>
-               <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">ENFOQUE INTEGRAL</h3>
-               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                 Trabajamos con niños, familias, escuelas y comunidades de manera holística, abordando múltiples dimensiones del desarrollo para crear cambios duraderos.
-               </p>
-             </motion.div>
-
-             <motion.div 
-               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300"
-               initial={{ opacity: 0, y: 30 }}
-               whileInView={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.6, delay: 0.4 }}
-               viewport={{ once: true }}
-             >
-               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
-                 <Shield className="h-8 w-8 text-purple-500" />
-               </div>
-               <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">SOSTENIBILIDAD</h3>
-               <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                 Desarrollamos capacidades locales y fortalecemos sistemas comunitarios para asegurar que los beneficios continúen mucho después de que termine nuestra intervención.
-               </p>
-             </motion.div>
-           </div>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-20 bg-brand text-brand-foreground relative overflow-hidden">
-        {/* Fondo decorativo */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-yellow-200 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-orange-200 rounded-full blur-3xl"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* Ruta de Iniciativas */}
+      <section id="iniciativas" className="py-20 bg-background-light dark:bg-background-dark">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <span className="inline-block bg-brand/20 text-brand text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
-              ÚNETE A NUESTRA MISIÓN
+            <span className="inline-block bg-green-200 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
+              RUTA DE INNOVACIÓN
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white dark:text-white leading-tight font-condensed">
-              ¿QUIERES SER PARTE DEL CAMBIO?
+            <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-3 font-condensed">
+              INICIATIVAS POR GRUPOS ETARIOS
             </h2>
-            <p className="text-xl text-brand-foreground max-w-3xl mx-auto mt-4">
-              Únete a nosotros en nuestra misión de transformar comunidades y crear un futuro mejor 
-              para todos los niños. Juntos podemos hacer la diferencia.
+            <p className="text-xl text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto">
+              Explora nuestras iniciativas innovadoras organizadas por grupos de edad. Pasa el mouse sobre cada iniciativa para conocer más detalles.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-brand hover:bg-brand/10 font-bold font-condensed" asChild>
-              <Link href="/iniciativas">
-                CONOCE NUESTRAS INICIATIVAS
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button size="lg" className="bg-black text-white hover:bg-gray-800 font-bold font-condensed" asChild>
-              <Link href="/participar">
-                PARTICIPAR
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+          {/* Línea de Tiempo Recta */}
+          <div className="relative">
+            {/* Línea vertical central */}
+            <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+            
+            {/* Iniciativas en línea de tiempo */}
+            <div className="space-y-16">
+              {initiativesToShow.length > 0 ? (
+                initiativesToShow.map((initiative, index) => (
+                <article key={initiative.id} className="relative">
+                  {/* Bullet numerado en la línea central */}
+                  <div 
+                    className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-primary ring-8 ring-background-light dark:ring-background-dark flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300 group"
+                    onMouseEnter={() => handleInitiativeHover(initiative)}
+                    onMouseLeave={handleInitiativeLeave}
+                  >
+                    <span className="text-white font-bold text-lg font-condensed">{index + 1}</span>
+                  </div>
+                  
+                  {/* Contenido alternando izquierda/derecha */}
+                  <div className={`flex flex-col md:flex-row items-center w-full ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
+                    {/* Imagen */}
+                    <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'}`}>
+                      <div className="bg-card-light dark:bg-card-dark shadow-lg rounded-lg overflow-hidden">
+                        {initiative.imageUrl ? (
+                          <Image
+                            src={initiative.imageUrl}
+                            alt={initiative.imageAlt || initiative.title}
+                            width={400}
+                            height={300}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-64 bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-800 dark:to-blue-800 flex items-center justify-center">
+                            <div className="text-center">
+                              <span className="material-symbols-outlined text-6xl text-emerald-600 dark:text-emerald-400 mb-4">science</span>
+                              <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300 font-condensed">Iniciativa</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Información */}
+                    <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pl-8' : 'md:pr-8'} mt-6 md:mt-0`}>
+                      <div className="bg-card-light dark:bg-card-dark shadow-lg rounded-lg p-8">
+                        <div className="flex items-center gap-2 mb-4">
+                          {getCategoryIcon(initiative.category)}
+                          <Badge className={`${getCategoryColor(initiative.category)} text-xs`}>
+                            {initiative.category}
+                          </Badge>
+                        </div>
+                        
+                        <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                          {initiative.ageGroup} - {initiative.targetAudience}
+                        </p>
+                        
+                        <h2 className="text-3xl font-bold text-text-light dark:text-text-dark mb-4 font-condensed">
+                          {initiative.title}
+                        </h2>
+                        
+                        <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6">
+                          {initiative.shortDescription}
+                        </p>
+                        
+                        <div className="flex items-center gap-2">
+                          <a 
+                            className="text-sm font-semibold text-text-light dark:text-text-dark hover:text-primary transition-colors"
+                            href={`/iniciativas/${initiative.id}`}
+                          >
+                            VER INICIATIVA COMPLETA
+                          </a>
+                          <ArrowRight className="h-4 w-4 text-primary" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+                ))
+              ) : (
+                <div className="text-center py-16">
+                  <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                    <div className="text-6xl mb-4">📚</div>
+                    <h3 className="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
+                      No hay iniciativas disponibles
+                    </h3>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark mb-6">
+                      Actualmente no tenemos iniciativas publicadas. Vuelve pronto para ver nuestras iniciativas innovadoras.
+                    </p>
+                    <Button 
+                      onClick={() => window.location.reload()}
+                      className="bg-primary hover:bg-primary/90 text-white"
+                    >
+                      Actualizar página
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+
         </div>
       </section>
+
+      {/* Popup de Iniciativa */}
+      {isDialogOpen && selectedInitiative && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setIsDialogOpen(false);
+              setSelectedInitiative(null);
+            }}
+          />
+          
+          {/* Modal Content */}
+          <div 
+            ref={popupRef}
+            className="relative bg-card-light dark:bg-card-dark rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onMouseEnter={handlePopupMouseEnter}
+            onMouseLeave={handlePopupMouseLeave}
+          >
+            <div className="p-6 space-y-6">
+              {/* Header con imagen */}
+              <div className="relative">
+                <div className="relative h-48 rounded-lg overflow-hidden mb-4">
+                  {selectedInitiative.imageUrl ? (
+                    <Image
+                      src={selectedInitiative.imageUrl}
+                      alt={selectedInitiative.imageAlt || selectedInitiative.title}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-800 dark:to-blue-800 flex items-center justify-center">
+                      <div className="text-center">
+                        <span className="material-symbols-outlined text-6xl text-emerald-600 dark:text-emerald-400 mb-4">science</span>
+                        <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300 font-condensed">Iniciativa Innovadora</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute top-4 right-4">
+                    <Badge className={`${getCategoryColor(selectedInitiative.category)} text-sm px-3 py-1`}>
+                      {selectedInitiative.category}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <h2 className="text-2xl font-bold text-text-light dark:text-text-dark font-condensed mb-2">
+                  {selectedInitiative.title}
+                </h2>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  {getCategoryIcon(selectedInitiative.category)}
+                  <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <Users className="h-4 w-4 inline mr-1" />
+                    {selectedInitiative.ageGroup}
+                  </span>
+                  <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                    <Target className="h-4 w-4 inline mr-1" />
+                    {selectedInitiative.targetAudience}
+                  </span>
+                </div>
+              </div>
+              
+              {/* Descripción principal */}
+              <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-lg p-4">
+                <p className="text-text-secondary-light dark:text-text-secondary-dark text-lg leading-relaxed">
+                  {selectedInitiative.description}
+                </p>
+              </div>
+              
+              {/* Información detallada en grid simétrico */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-2 gap-6">
+                {/* Objetivos */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    Objetivos
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedInitiative.objectives}
+                  </p>
+                </div>
+                
+                {/* Público Objetivo */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    Público Objetivo
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedInitiative.targetAudience}
+                  </p>
+                </div>
+                
+                {/* Implementación */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-primary" />
+                    Implementación
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedInitiative.implementation}
+                  </p>
+                </div>
+                
+                {/* Resultados */}
+                <div className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark rounded-lg p-6 flex flex-col h-full">
+                  <h4 className="font-semibold text-text-light dark:text-text-dark mb-4 font-condensed flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    Resultados
+                  </h4>
+                  <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark flex-grow">
+                    {selectedInitiative.results}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Botón de acción */}
+              <div className="flex justify-center pt-4 border-t border-border-light dark:border-border-dark">
+                 <Button 
+                   size="lg"
+                   className="bg-primary hover:bg-primary/90 text-white font-bold font-condensed"
+                   asChild
+                 >
+                   <Link href={`/iniciativas/${selectedInitiative.id}`}>
+                     Ver Iniciativa Completa
+                   </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SiteFooter />
     </div>

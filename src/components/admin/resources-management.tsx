@@ -66,8 +66,7 @@ const categoryInfo = {
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     subcategories: {
       VIDEOS: { title: 'Videos', icon: Video },
-      AUDIOS: { title: 'Audios', icon: Music },
-      REPRODUCTOR_INTEGRADO: { title: 'Reproductor Integrado', icon: Monitor }
+      AUDIOS: { title: 'Audios', icon: Music }
     }
   },
   PUBLICACIONES: {
@@ -897,9 +896,15 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Sin subcategoría</SelectItem>
-              {formData.category && Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
-                <SelectItem key={key} value={key}>{info.title}</SelectItem>
-              ))}
+              {formData.category && categoryInfo[formData.category as keyof typeof categoryInfo]?.subcategories ? (
+                Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
+                  <SelectItem key={key} value={key}>{info.title}</SelectItem>
+                ))
+              ) : !formData.category ? (
+                <SelectItem value="select-category" disabled>
+                  Selecciona una categoría primero
+                </SelectItem>
+              ) : null}
             </SelectContent>
           </Select>
         </div>
@@ -1085,9 +1090,15 @@ const EditResourceForm: React.FC<{
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Sin subcategoría</SelectItem>
-              {formData.category && Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
-                <SelectItem key={key} value={key}>{info.title}</SelectItem>
-              ))}
+              {formData.category && categoryInfo[formData.category as keyof typeof categoryInfo]?.subcategories ? (
+                Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
+                  <SelectItem key={key} value={key}>{info.title}</SelectItem>
+                ))
+              ) : !formData.category ? (
+                <SelectItem value="select-category" disabled>
+                  Selecciona una categoría primero
+                </SelectItem>
+              ) : null}
             </SelectContent>
           </Select>
         </div>

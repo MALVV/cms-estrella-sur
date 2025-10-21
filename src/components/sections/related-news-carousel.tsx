@@ -37,6 +37,8 @@ interface RelatedNewsCarouselProps {
   projectId?: string;
   methodologyId?: string;
   programaId?: string;
+  newsId?: string;
+  eventId?: string;
   title?: string;
   limit?: number;
 }
@@ -44,7 +46,9 @@ interface RelatedNewsCarouselProps {
 export function RelatedNewsCarousel({ 
   projectId, 
   methodologyId, 
-  programaId, 
+  programaId,
+  newsId,
+  eventId,
   title = "Noticias Relacionadas",
   limit = 6 
 }: RelatedNewsCarouselProps) {
@@ -54,17 +58,31 @@ export function RelatedNewsCarousel({
   useEffect(() => {
     const fetchRelatedNews = async () => {
       try {
-        const params = new URLSearchParams();
-        if (projectId) params.append('projectId', projectId);
-        if (methodologyId) params.append('methodologyId', methodologyId);
-        if (programaId) params.append('programaId', programaId);
-        params.append('limit', limit.toString());
+        // Si tenemos newsId o eventId, obtener noticias relacionadas por contenido similar
+        if (newsId || eventId) {
+          const response = await fetch(`/api/news?limit=${limit * 2}`); // Obtener más para filtrar
+          if (!response.ok) throw new Error('Error al cargar noticias');
+          
+          const data = await response.json();
+          // Filtrar la noticia/evento actual
+          const filteredNews = data.filter((item: RelatedNews) => 
+            item.id !== newsId && item.id !== eventId
+          );
+          setNews(filteredNews.slice(0, limit));
+        } else {
+          // Lógica original para projectId, methodologyId, programaId
+          const params = new URLSearchParams();
+          if (projectId) params.append('projectId', projectId);
+          if (methodologyId) params.append('methodologyId', methodologyId);
+          if (programaId) params.append('programaId', programaId);
+          params.append('limit', limit.toString());
 
-        const response = await fetch(`/api/public/news/related?${params}`);
-        if (!response.ok) throw new Error('Error al cargar noticias');
-        
-        const data = await response.json();
-        setNews(data.news);
+          const response = await fetch(`/api/public/news/related?${params}`);
+          if (!response.ok) throw new Error('Error al cargar noticias');
+          
+          const data = await response.json();
+          setNews(data.news);
+        }
       } catch (error) {
         console.error('Error fetching related news:', error);
       } finally {
@@ -73,7 +91,7 @@ export function RelatedNewsCarousel({
     };
 
     fetchRelatedNews();
-  }, [projectId, methodologyId, programaId, limit]);
+  }, [projectId, methodologyId, programaId, newsId, eventId, limit]);
 
   if (loading) {
     return (
@@ -162,7 +180,7 @@ export function RelatedNewsCarousel({
               {/* Botón Ver Más */}
               <div className="pt-2">
                 <Button asChild className="w-full" variant="outline">
-                  <Link href={`/news/${article.id}`} className="flex items-center justify-center gap-2">
+                  <Link href={`/noticias/${article.id}`} className="flex items-center justify-center gap-2">
                     Ver Más
                     <ArrowRight className="h-4 w-4" />
                   </Link>

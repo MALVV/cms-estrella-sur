@@ -6,7 +6,6 @@ import { verifyAuth } from '@/lib/auth-middleware';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
     const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search');
@@ -30,9 +29,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (category && category !== 'ALL') {
-      where.category = category;
-    }
 
     if (featured === 'true') {
       where.isFeatured = true;
@@ -117,7 +113,6 @@ export async function POST(request: NextRequest) {
       excerpt,
       imageUrl,
       imageAlt,
-      category = 'NOTICIAS',
       isFeatured = false,
       programaId,
       projectId,
@@ -138,7 +133,6 @@ export async function POST(request: NextRequest) {
         excerpt,
         imageUrl,
         imageAlt,
-        category,
         isFeatured,
         programaId,
         projectId,

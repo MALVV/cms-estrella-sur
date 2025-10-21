@@ -70,14 +70,14 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
     email: '',
     password: '',
     name: '',
-    role: UserRole.TECNICO,
+    role: UserRole.GESTOR,
     isTemporaryPassword: false
   })
 
   const [editData, setEditData] = useState({
     name: '',
     email: '',
-    role: UserRole.TECNICO,
+    role: UserRole.GESTOR,
     isActive: true
   })
 
@@ -87,7 +87,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
   })
 
   useEffect(() => {
-    if (session?.user?.role === UserRole.ADMINISTRADOR || session?.user?.role === UserRole.SUPERVISOR) {
+    if (session?.user?.role === UserRole.ADMINISTRADOR) {
       fetchUsers()
     }
   }, [session])
@@ -148,7 +148,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
       if (response.ok) {
         await fetchUsers()
         setShowCreateForm(false)
-        setFormData({ email: '', password: '', name: '', role: UserRole.TECNICO, isTemporaryPassword: false })
+        setFormData({ email: '', password: '', name: '', role: UserRole.GESTOR, isTemporaryPassword: false })
       } else {
         const error = await response.json()
         alert(error.message)
@@ -173,7 +173,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
       if (response.ok) {
         await fetchUsers()
         setEditingUser(null)
-        setEditData({ name: '', email: '', role: UserRole.TECNICO, isActive: true })
+        setEditData({ name: '', email: '', role: UserRole.GESTOR, isActive: true })
       } else {
         const error = await response.json()
         alert(error.message)
@@ -254,9 +254,9 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
     switch (role) {
       case UserRole.ADMINISTRADOR:
         return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.SUPERVISOR:
+      case UserRole.GESTOR:
         return <Briefcase className="h-4 w-4 text-blue-500" />
-      case UserRole.TECNICO:
+      case UserRole.GESTOR:
         return <Wrench className="h-4 w-4 text-green-500" />
       default:
         return <Users className="h-4 w-4 text-gray-500" />
@@ -267,16 +267,16 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
     switch (role) {
       case UserRole.ADMINISTRADOR:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.SUPERVISOR:
+      case UserRole.GESTOR:
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case UserRole.TECNICO:
+      case UserRole.GESTOR:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
 
-  if (!session?.user || (session.user.role !== UserRole.ADMINISTRADOR && session.user.role !== UserRole.SUPERVISOR)) {
+  if (!session?.user || session.user.role !== UserRole.ADMINISTRADOR) {
     return (
       <Card className={className}>
         <CardContent className="p-6">
@@ -330,8 +330,8 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
               >
                 <option value="ALL">Todos los roles</option>
                 <option value={UserRole.ADMINISTRADOR}>Administrador</option>
-                <option value={UserRole.SUPERVISOR}>Supervisor</option>
-                <option value={UserRole.TECNICO}>Técnico</option>
+                <option value={UserRole.GESTOR}>Gestor de Contenido</option>
+                <option value={UserRole.GESTOR}>Gestor de Contenido</option>
               </select>
 
               <select
@@ -402,8 +402,8 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value={UserRole.TECNICO}>Técnico</option>
-                    <option value={UserRole.SUPERVISOR}>Supervisor</option>
+                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
+                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
                     <option value={UserRole.ADMINISTRADOR}>Administrador</option>
                   </select>
                 </div>
@@ -598,8 +598,8 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                     onChange={(e) => setEditData({ ...editData, role: e.target.value as UserRole })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value={UserRole.TECNICO}>Técnico</option>
-                    <option value={UserRole.SUPERVISOR}>Supervisor</option>
+                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
+                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
                     <option value={UserRole.ADMINISTRADOR}>Administrador</option>
                   </select>
                 </div>

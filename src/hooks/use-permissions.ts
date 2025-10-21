@@ -91,16 +91,63 @@ export function usePermissions() {
     return hasPermission('content', 'delete')
   }
 
+  // Funciones específicas para gestión de proyectos
+  const canManageProjects = (): boolean => {
+    return hasPermission('projects', 'create') || hasPermission('projects', 'update')
+  }
+
+  const canCreateProjects = (): boolean => {
+    return hasPermission('projects', 'create')
+  }
+
+  const canEditProjects = (): boolean => {
+    return hasPermission('projects', 'update')
+  }
+
+  const canDeleteProjects = (): boolean => {
+    return hasPermission('projects', 'delete')
+  }
+
+  // Funciones específicas para gestión de innovaciones
+  const canManageInnovations = (): boolean => {
+    return hasPermission('innovations', 'create') || hasPermission('innovations', 'update')
+  }
+
+  const canCreateInnovations = (): boolean => {
+    return hasPermission('innovations', 'create')
+  }
+
+  const canEditInnovations = (): boolean => {
+    return hasPermission('innovations', 'update')
+  }
+
+  const canDeleteInnovations = (): boolean => {
+    return hasPermission('innovations', 'delete')
+  }
+
+  // Funciones específicas para gestión de programas
+  const canManagePrograms = (): boolean => {
+    return hasPermission('programs', 'create') || hasPermission('programs', 'update')
+  }
+
+  const canCreatePrograms = (): boolean => {
+    return hasPermission('programs', 'create')
+  }
+
+  const canEditPrograms = (): boolean => {
+    return hasPermission('programs', 'update')
+  }
+
+  const canDeletePrograms = (): boolean => {
+    return hasPermission('programs', 'delete')
+  }
+
   const isAdmin = (): boolean => {
     return userRole === UserRole.ADMINISTRADOR
   }
 
-  const isSupervisor = (): boolean => {
-    return userRole === UserRole.SUPERVISOR
-  }
-
-  const isTechnician = (): boolean => {
-    return userRole === UserRole.TECNICO
+  const isContentManager = (): boolean => {
+    return userRole === UserRole.GESTOR
   }
 
   return {
@@ -121,12 +168,23 @@ export function usePermissions() {
     canCreateVideoTestimonials,
     canEditVideoTestimonials,
     canDeleteVideoTestimonials,
+    canManageProjects,
+    canCreateProjects,
+    canEditProjects,
+    canDeleteProjects,
+    canManageInnovations,
+    canCreateInnovations,
+    canEditInnovations,
+    canDeleteInnovations,
+    canManagePrograms,
+    canCreatePrograms,
+    canEditPrograms,
+    canDeletePrograms,
     canPublishContent,
     canManageFiles,
     canViewReports,
     canManageSystem,
     isAdmin,
-    isSupervisor,
-    isTechnician
+    isContentManager
   }
 }

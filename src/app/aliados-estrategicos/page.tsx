@@ -74,23 +74,21 @@ export default function AliadosEstrategicosPage() {
       <div className="relative min-h-screen flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-          <div className="max-w-2xl text-white text-center">
-            <div className="mb-4">
-              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+          <div className="max-w-4xl text-white text-center">
+            <div className="mb-6">
+              <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
                 Nuestros aliados
               </span>
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-tight text-white">
-              ALIADOS ESTRATÉGICOS
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6">
+              ALIADOS<br/>
+              ESTRATÉGICOS
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200">
+            <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
               Organizaciones, empresas y fundaciones que comparten nuestra visión de transformación social y trabajan junto a nosotros para crear un impacto positivo.
             </p>
-            <p className="mt-4 text-lg md:text-xl text-gray-200">
-              Nuestros aliados estratégicos son fundamentales para amplificar nuestro alcance y maximizar el impacto en las comunidades que servimos.
-            </p>
             <div className="mt-8">
-              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#aliados">
+              <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#aliados">
                 CONOCE NUESTROS ALIADOS
                 <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>

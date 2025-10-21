@@ -38,7 +38,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       excerpt: news.excerpt,
       imageUrl: news.imageUrl,
       imageAlt: news.imageAlt,
-      category: news.category,
       isFeatured: news.isFeatured,
       publishedAt: news.publishedAt.toISOString(),
       createdAt: news.createdAt.toISOString(),

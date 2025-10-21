@@ -94,19 +94,19 @@ export const Navbar: React.FC = () => {
               )}
             </div>
             
-            {/* Menú desplegable de Iniciativas (hover) */}
-            <div className="relative iniciativas-dropdown">
+            {/* Menú desplegable de Impacto (hover) */}
+            <div className="relative impacto-dropdown">
               <button
                 ref={setProgramasButtonRef}
                 onMouseEnter={() => setIsProgramasOpen(true)}
                 onMouseLeave={() => setIsProgramasOpen(false)}
                 onClick={() => {
                   setIsProgramasOpen(false);
-                  window.location.href = '/iniciativas';
+                  window.location.href = '/impacto';
                 }}
                 className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
               >
-                Iniciativas
+                Impacto
                 <span className={`ml-1 transition-transform duration-200 ${isProgramasOpen ? 'rotate-45' : ''}`}>+</span>
               </button>
               
@@ -127,10 +127,10 @@ export const Navbar: React.FC = () => {
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/iniciativas';
+                        window.location.href = '/impacto';
                       }}
                     >
-                      Todas las Iniciativas
+                      Todo el Impacto
                     </button>
                     <button 
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
@@ -154,10 +154,10 @@ export const Navbar: React.FC = () => {
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/metodologias';
+                        window.location.href = '/iniciativas';
                       }}
                     >
-                      Metodologías
+                      Iniciativas
                     </button>
                   </div>
                 </div>,
@@ -375,10 +375,10 @@ export const Navbar: React.FC = () => {
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsHistoriasOpen(false);
-                        window.location.href = '/stories';
+                        window.location.href = '/historias';
                       }}
                     >
-                      Testimonios
+                      Historias
                     </button>
                   </div>
                 </div>,
@@ -394,7 +394,7 @@ export const Navbar: React.FC = () => {
                 onMouseLeave={() => setIsBlogOpen(false)}
                 onClick={() => {
                   setIsBlogOpen(false);
-                  window.location.href = '/news-events';
+                  window.location.href = '/noticias-eventos';
                 }}
                 className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
               >
@@ -419,7 +419,7 @@ export const Navbar: React.FC = () => {
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsBlogOpen(false);
-                        window.location.href = '/news-events';
+                        window.location.href = '/noticias-eventos';
                       }}
                     >
                       Noticias
@@ -428,7 +428,7 @@ export const Navbar: React.FC = () => {
                       className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsBlogOpen(false);
-                        window.location.href = '/news-events';
+                        window.location.href = '/noticias-eventos';
                       }}
                     >
                       Eventos
@@ -468,12 +468,12 @@ export const Navbar: React.FC = () => {
             ) : (
               <Link 
                 href="/sign-in" 
-                className="flex items-center text-text-light dark:text-text-dark px-4 py-2 rounded text-sm hover:text-primary dark:hover:text-primary font-bold font-condensed uppercase"
+                className="flex items-center text-text-light dark:text-text-dark px-4 py-2 rounded text-sm hover:text-primary dark:hover:text-primary font-bold font-condensed uppercase transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                Iniciar Sesión
+                Acceder
               </Link>
             )}
-            <a className="flex items-center bg-primary text-white px-4 py-2 rounded text-sm hover:bg-emerald-700 font-bold" href="/participar">
+            <a className="flex items-center bg-primary text-white px-4 py-2 rounded text-sm hover:bg-emerald-700 font-bold" href="/donar">
               Donar
               <span className="material-symbols-outlined ml-2 text-base">arrow_forward</span>
             </a>
@@ -488,7 +488,7 @@ export const Navbar: React.FC = () => {
               <div className="space-y-3 font-condensed">
                 <Link href="/" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Inicio</Link>
                 <Link href="/nosotros" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Nosotros</Link>
-                <Link href="/iniciativas" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Iniciativas</Link>
+                <Link href="/impacto" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Impacto</Link>
                 <Link href="/participar" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Participar</Link>
                 <Link href="/historias-impacto" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Historias</Link>
                 <Link href="/transparencia" className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-2" onClick={() => setIsMenuOpen(false)}>Transparencia</Link>
@@ -502,14 +502,14 @@ export const Navbar: React.FC = () => {
                   </div>
                   <div className="ml-4 space-y-2">
                     <Link 
-                      href="/news-events" 
+                      href="/noticias-eventos" 
                       className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-1 text-sm transition-colors" 
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Noticias
                     </Link>
                     <Link 
-                      href="/news-events" 
+                      href="/noticias-eventos" 
                       className="block hover:text-primary dark:hover:text-primary font-bold uppercase py-1 text-sm transition-colors" 
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -537,10 +537,10 @@ export const Navbar: React.FC = () => {
                 ) : (
                   <Link 
                     href="/sign-in" 
-                    className="flex items-center text-text-light dark:text-text-dark px-4 py-2 rounded text-sm hover:text-primary dark:hover:text-primary font-bold font-condensed uppercase"
+                    className="flex items-center text-text-light dark:text-text-dark px-4 py-2 rounded text-sm hover:text-primary dark:hover:text-primary font-bold font-condensed uppercase transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Iniciar Sesión
+                    Acceder
                   </Link>
                 )}
                 
@@ -556,7 +556,7 @@ export const Navbar: React.FC = () => {
                   </a>
                   <a 
                     className="flex items-center justify-center bg-primary text-white px-4 py-2 rounded text-sm hover:bg-emerald-700 font-bold" 
-                    href="/participar"
+                    href="/donar"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Donar

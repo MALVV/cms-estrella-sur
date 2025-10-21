@@ -88,25 +88,25 @@ export default function ProjectsPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative h-[calc(100vh-80px)] flex items-center bg-hero">
+      <div className="relative min-h-screen flex items-center bg-hero">
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
-          <div className="max-w-2xl text-white text-center">
-            <div className="mb-4">
-              <span className="inline-block bg-orange-400 text-gray-900 text-xs font-bold uppercase px-3 py-1 tracking-wider">
+          <div className="max-w-4xl text-white text-center">
+            <div className="mb-6">
+              <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
                 Nuestros Proyectos
               </span>
             </div>
-            <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-white">
+            <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6">
               PROYECTOS<br/>
               DE IMPACTO<br/>
               SOCIAL
             </h1>
-            <p className="mt-6 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
               Cada proyecto representa un paso hacia un futuro más justo y sostenible, trabajando directamente con las comunidades para generar un impacto real y duradero.
             </p>
             <div className="mt-8">
-              <a className="inline-flex items-center bg-primary text-white text-sm font-bold py-3 px-6 rounded-sm hover:bg-opacity-90 transition-colors duration-300" href="#proyectos">
+              <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#proyectos">
                 EXPLORA NUESTROS PROYECTOS
                 <svg className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                   <path clipRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" fillRule="evenodd"></path>
@@ -162,9 +162,9 @@ export default function ProjectsPage() {
               const imageAlt = project.imageAlt || project.title;
               
               return (
-                <div key={project.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20">
+                <div key={project.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20 flex flex-col h-full">
                   {/* Imagen del proyecto */}
-                  <div className="relative h-48 sm:h-56">
+                  <div className="relative h-48 sm:h-56 flex-shrink-0">
                     <img
                       src={currentImage}
                       alt={imageAlt}
@@ -175,15 +175,15 @@ export default function ProjectsPage() {
                   </div>
                   
                   {/* Información del proyecto */}
-                  <div className="p-2.5">
-                    <div className="text-left">
+                  <div className="p-2.5 flex flex-col flex-grow">
+                    <div className="text-left flex flex-col flex-grow">
                       {/* Título del proyecto */}
-                      <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5 line-clamp-2 min-h-[2.5rem]">
                         {project.title}
                       </h3>
                       
                       {/* Fechas de ejecución minimalistas */}
-                      <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-1.5">
+                      <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 mb-1.5 min-h-[1rem]">
                         <Calendar className="h-3 w-3" />
                         <span className="font-medium">
                           {new Date(project.executionStart).toLocaleDateString('es-ES', { 
@@ -203,20 +203,18 @@ export default function ProjectsPage() {
                       </div>
                       
                       {/* Contexto del proyecto */}
-                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-1.5 line-clamp-2">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-1.5 line-clamp-2 flex-grow min-h-[2.5rem]">
                         {project.context}
                       </p>
                       
                       {/* Metadatos */}
-                      {project._count?.news && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                          <Target className="h-3 w-3" />
-                          <span>{project._count.news} noticias</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-2 min-h-[1rem]">
+                        <Target className="h-3 w-3" />
+                        <span>{project._count?.news || 0} noticias</span>
+                      </div>
 
                       {/* Botones de acción */}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-auto">
                         <Link 
                           href={`/proyectos/${project.id}`}
                           className="flex-1 bg-primary text-white text-xs font-bold py-2 px-3 rounded hover:bg-opacity-90 transition-colors text-center"
@@ -235,7 +233,7 @@ export default function ProjectsPage() {
                     </div>
                   </div>
                 </div>
-                );
+              );
             })}
           </div>
         )}

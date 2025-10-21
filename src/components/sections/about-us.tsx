@@ -18,31 +18,22 @@ export const AboutUs: React.FC = () => {
       <div className="container mx-auto px-4 pt-16 md:pt-24 pb-16 md:pb-24 w-full max-w-7xl relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <motion.span 
-            className="bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold"
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            QUIÉNES SOMOS
-          </motion.span>
           <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mt-4 md:mt-6 text-text-light dark:text-text-dark leading-tight font-condensed"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-text-light dark:text-text-dark leading-tight font-condensed"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             viewport={{ once: true }}
           >
-            ESTRELLA DEL SUR
+            ¿QUIÉNES SOMOS?
           </motion.h1>
         </div>
         
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-stretch">
           {/* Left Section - Text Content */}
           <motion.div 
-            className="space-y-8"
+            className="space-y-8 flex flex-col justify-center"
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
@@ -50,34 +41,31 @@ export const AboutUs: React.FC = () => {
           >
             {/* Introductory Paragraph */}
             <motion.p 
-              className="text-lg text-text-light dark:text-text-dark leading-relaxed"
+              className="text-base text-text-light dark:text-text-dark leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              Trabajamos con bebés, niños y jóvenes en sus familias, escuelas y comunidades para asegurar que crezcan sanos y felices, con acceso a educación, salud y bienestar.
+              Desde 2004, Estrella del Sur trabaja en Oruro fortaleciendo las capacidades de niñas, niños, adolescentes, jóvenes, mujeres y sus familias, promoviendo su bienestar y protección. Implementamos metodologías lúdicas, participativas e inclusivas, validadas y escaladas en unidades educativas y centros de salud, con la visión de expandir nuestro impacto a otras regiones del país.
             </motion.p>
 
             {/* Key Initiatives */}
             <div className="space-y-6">
-                     <motion.div 
-                       className="group"
-                       initial={{ opacity: 0, y: 20 }}
-                       whileInView={{ opacity: 1, y: 0 }}
-                       transition={{ duration: 0.6, delay: 0.3 }}
-                       viewport={{ once: true }}
-                     >
-                       <div className="flex items-center space-x-3 mb-3">
-                         <Heart className="h-6 w-6 text-red-600" />
-                         <h3 className="text-xl font-bold text-text-light dark:text-text-dark group-hover:text-primary transition-colors">
-                           CUIDADO EXTRAORDINARIO
-                         </h3>
-          </div>
-                       <p className="text-base text-subtext-light dark:text-subtext-dark leading-relaxed">
-                         Brindamos atención especializada a niños con condiciones serias o limitantes, proporcionando apoyo integral para toda la familia, desde el primer diagnóstico y durante todo el tiempo que sea necesario.
-                       </p>
-                     </motion.div>
+              <motion.div 
+                className="group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-start space-x-3">
+                  <Shield className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    <span className="font-semibold text-text-light dark:text-text-dark">Protección infantil con enfoque de derechos:</span> Garantizamos el cumplimiento de los derechos fundamentales de la niñez y adolescencia, creando entornos seguros y protectores.
+                  </p>
+                </div>
+              </motion.div>
 
               <motion.div 
                 className="group"
@@ -86,15 +74,12 @@ export const AboutUs: React.FC = () => {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 viewport={{ once: true }}
               >
-                <div className="flex items-center space-x-3 mb-3">
-                  <GraduationCap className="h-6 w-6 text-green-600" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark group-hover:text-primary transition-colors">
-                    CREAR MÁS OPORTUNIDADES PARA LOS NIÑOS
-                  </h3>
+                <div className="flex items-start space-x-3">
+                  <Heart className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    <span className="font-semibold text-text-light dark:text-text-dark">Prevención de la violencia en todas sus formas:</span> Desarrollamos estrategias integrales para prevenir y erradicar la violencia, promoviendo una cultura de paz y respeto.
+                  </p>
                 </div>
-                <p className="text-base text-subtext-light dark:text-subtext-dark leading-relaxed">
-                  Desarrollamos programas educativos, de salud y desarrollo que abren nuevas posibilidades para el crecimiento integral de cada niño y niña en nuestras comunidades.
-                </p>
               </motion.div>
 
               <motion.div 
@@ -104,17 +89,44 @@ export const AboutUs: React.FC = () => {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 viewport={{ once: true }}
               >
-                <div className="flex items-center space-x-3 mb-3">
-                  <Smile className="h-6 w-6 text-yellow-600" />
-                  <h3 className="text-xl font-bold text-text-light dark:text-text-dark group-hover:text-primary transition-colors">
-                    DAR FELICIDAD A LOS NIÑOS
-                  </h3>
+                <div className="flex items-start space-x-3">
+                  <Stethoscope className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    <span className="font-semibold text-text-light dark:text-text-dark">Salud sexual integral y educación temprana:</span> Brindamos educación integral en salud sexual y reproductiva, adaptada a cada etapa del desarrollo.
+                  </p>
                 </div>
-                <p className="text-base text-subtext-light dark:text-subtext-dark leading-relaxed">
-                  A través de actividades lúdicas, programas recreativos y apoyo emocional, creamos momentos de alegría y esperanza en la vida de cada niño que atendemos.
-                </p>
               </motion.div>
-              </div>
+
+              <motion.div 
+                className="group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-start space-x-3">
+                  <TrendingUp className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    <span className="font-semibold text-text-light dark:text-text-dark">Emprendimiento juvenil y empoderamiento femenino:</span> Fomentamos el desarrollo de habilidades emprendedoras y el empoderamiento económico de jóvenes y mujeres.
+                  </p>
+                </div>
+              </motion.div>
+
+              <motion.div 
+                className="group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex items-start space-x-3">
+                  <Users className="h-5 w-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-subtext-light dark:text-subtext-dark leading-relaxed">
+                    <span className="font-semibold text-text-light dark:text-text-dark">Transformación de roles y estereotipos de género:</span> Promovemos la igualdad de género y la transformación de roles tradicionales para construir una sociedad más justa e inclusiva.
+                  </p>
+                </div>
+              </motion.div>
+            </div>
               
                    {/* Call to Action */}
                    <motion.div 
@@ -140,27 +152,23 @@ export const AboutUs: React.FC = () => {
                        >
                          CONTACTAR
                        </a>
-                </div>
-                     
-                     <p className="text-sm text-subtext-light dark:text-subtext-dark">
-                       ¿Necesitas ayuda? <a href="/contacto" className="underline hover:text-primary transition-colors">Encuentra una Agencia Local de Caridad</a>.
-                     </p>
+                     </div>
                    </motion.div>
           </motion.div>
 
           {/* Right Section - Image with Quote */}
           <motion.div 
-            className="relative"
+            className="relative flex items-center"
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
             {/* Main Image */}
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl w-full h-full min-h-[600px]">
                      <Image 
                        alt="Niña sonriente de Estrella del Sur" 
-                       className="w-full h-[600px] lg:h-[700px] object-cover"
+                       className="w-full h-full object-cover"
                        src="https://images.pexels.com/photos/9037236/pexels-photo-9037236.jpeg"
                        width={600}
                        height={700}

@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { AuthSessionProvider } from "@/lib/providers/session-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-});
 
 export const metadata: Metadata = {
   title: "Charix Charity",
@@ -29,7 +22,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Special+Gothic+Condensed:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body
-        className={`${poppins.variable} font-display antialiased bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark`}
+        className={`font-display antialiased bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark`}
       >
         <AuthSessionProvider>
           <QueryProvider>

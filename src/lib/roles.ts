@@ -1,7 +1,6 @@
 export enum UserRole {
   ADMINISTRADOR = 'ADMINISTRADOR',
-  TECNICO = 'TECNICO',
-  SUPERVISOR = 'SUPERVISOR'
+  GESTOR = 'GESTOR'
 }
 
 export interface Permission {
@@ -24,12 +23,30 @@ export const PERMISSIONS = {
   USER_UPDATE: { resource: 'users', action: 'update', description: 'Editar usuarios' },
   USER_DELETE: { resource: 'users', action: 'delete', description: 'Eliminar usuarios' },
   
-  // Gestión de contenido
+  // Gestión de contenido general
   CONTENT_CREATE: { resource: 'content', action: 'create', description: 'Crear contenido' },
   CONTENT_READ: { resource: 'content', action: 'read', description: 'Ver contenido' },
   CONTENT_UPDATE: { resource: 'content', action: 'update', description: 'Editar contenido' },
   CONTENT_DELETE: { resource: 'content', action: 'delete', description: 'Eliminar contenido' },
   CONTENT_PUBLISH: { resource: 'content', action: 'publish', description: 'Publicar contenido' },
+  
+  // Gestión específica de proyectos
+  PROJECTS_CREATE: { resource: 'projects', action: 'create', description: 'Crear proyectos' },
+  PROJECTS_READ: { resource: 'projects', action: 'read', description: 'Ver proyectos' },
+  PROJECTS_UPDATE: { resource: 'projects', action: 'update', description: 'Editar proyectos' },
+  PROJECTS_DELETE: { resource: 'projects', action: 'delete', description: 'Eliminar proyectos' },
+  
+  // Gestión específica de innovaciones
+  INNOVATIONS_CREATE: { resource: 'innovations', action: 'create', description: 'Crear innovaciones' },
+  INNOVATIONS_READ: { resource: 'innovations', action: 'read', description: 'Ver innovaciones' },
+  INNOVATIONS_UPDATE: { resource: 'innovations', action: 'update', description: 'Editar innovaciones' },
+  INNOVATIONS_DELETE: { resource: 'innovations', action: 'delete', description: 'Eliminar innovaciones' },
+  
+  // Gestión específica de programas
+  PROGRAMS_CREATE: { resource: 'programs', action: 'create', description: 'Crear programas' },
+  PROGRAMS_READ: { resource: 'programs', action: 'read', description: 'Ver programas' },
+  PROGRAMS_UPDATE: { resource: 'programs', action: 'update', description: 'Editar programas' },
+  PROGRAMS_DELETE: { resource: 'programs', action: 'delete', description: 'Eliminar programas' },
   
   // Gestión de archivos
   FILE_UPLOAD: { resource: 'files', action: 'upload', description: 'Subir archivos' },
@@ -53,7 +70,7 @@ export const PERMISSIONS = {
 export const ROLE_PERMISSIONS: RolePermissions[] = [
   {
     role: UserRole.ADMINISTRADOR,
-    description: 'Acceso completo al sistema',
+    description: 'Acceso completo al sistema - Gestión de usuarios, proyectos, innovaciones y programas',
     permissions: [
       // Todos los permisos de usuarios
       PERMISSIONS.USER_CREATE,
@@ -61,12 +78,30 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       PERMISSIONS.USER_UPDATE,
       PERMISSIONS.USER_DELETE,
       
-      // Todos los permisos de contenido
+      // Todos los permisos de contenido general
       PERMISSIONS.CONTENT_CREATE,
       PERMISSIONS.CONTENT_READ,
       PERMISSIONS.CONTENT_UPDATE,
       PERMISSIONS.CONTENT_DELETE,
       PERMISSIONS.CONTENT_PUBLISH,
+      
+      // Todos los permisos de proyectos
+      PERMISSIONS.PROJECTS_CREATE,
+      PERMISSIONS.PROJECTS_READ,
+      PERMISSIONS.PROJECTS_UPDATE,
+      PERMISSIONS.PROJECTS_DELETE,
+      
+      // Todos los permisos de innovaciones
+      PERMISSIONS.INNOVATIONS_CREATE,
+      PERMISSIONS.INNOVATIONS_READ,
+      PERMISSIONS.INNOVATIONS_UPDATE,
+      PERMISSIONS.INNOVATIONS_DELETE,
+      
+      // Todos los permisos de programas
+      PERMISSIONS.PROGRAMS_CREATE,
+      PERMISSIONS.PROGRAMS_READ,
+      PERMISSIONS.PROGRAMS_UPDATE,
+      PERMISSIONS.PROGRAMS_DELETE,
       
       // Todos los permisos de archivos
       PERMISSIONS.FILE_UPLOAD,
@@ -87,43 +122,28 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
     ]
   },
   {
-    role: UserRole.SUPERVISOR,
-    description: 'Supervisión y gestión de contenido',
+    role: UserRole.GESTOR,
+    description: 'Gestión de contenido - Noticias, metodologías, historias, recursos y demás secciones',
     permissions: [
-      // Lectura de usuarios
+      // Solo lectura de usuarios
       PERMISSIONS.USER_READ,
       
-      // Todos los permisos de contenido
+      // Todos los permisos de contenido general
       PERMISSIONS.CONTENT_CREATE,
       PERMISSIONS.CONTENT_READ,
       PERMISSIONS.CONTENT_UPDATE,
       PERMISSIONS.CONTENT_DELETE,
       PERMISSIONS.CONTENT_PUBLISH,
       
+      // Solo lectura de proyectos, innovaciones y programas
+      PERMISSIONS.PROJECTS_READ,
+      PERMISSIONS.INNOVATIONS_READ,
+      PERMISSIONS.PROGRAMS_READ,
+      
       // Gestión de archivos
       PERMISSIONS.FILE_UPLOAD,
       PERMISSIONS.FILE_DELETE,
       PERMISSIONS.FILE_MANAGE,
-      
-      // Reportes
-      PERMISSIONS.REPORTS_VIEW,
-      PERMISSIONS.REPORTS_EXPORT,
-    ]
-  },
-  {
-    role: UserRole.TECNICO,
-    description: 'Operaciones técnicas básicas',
-    permissions: [
-      // Solo lectura de usuarios
-      PERMISSIONS.USER_READ,
-      
-      // Gestión básica de contenido
-      PERMISSIONS.CONTENT_CREATE,
-      PERMISSIONS.CONTENT_READ,
-      PERMISSIONS.CONTENT_UPDATE,
-      
-      // Gestión básica de archivos
-      PERMISSIONS.FILE_UPLOAD,
       
       // Reportes básicos
       PERMISSIONS.REPORTS_VIEW,
@@ -176,8 +196,7 @@ export function canPerformAction(role: UserRole, resource: string, action: strin
 export function getRoleHierarchy(): UserRole[] {
   return [
     UserRole.ADMINISTRADOR,
-    UserRole.SUPERVISOR,
-    UserRole.TECNICO
+    UserRole.GESTOR
   ]
 }
 

@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, X } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,7 +25,7 @@ interface MethodologyFormData {
   imageUrl: string;
   imageAlt: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -41,7 +42,7 @@ const initialFormData: MethodologyFormData = {
   imageUrl: '',
   imageAlt: '',
   ageGroup: '',
-  category: 'EDUCACION',
+  sectors: [],
   targetAudience: '',
   objectives: '',
   implementation: '',
@@ -60,6 +61,15 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
     setFormData(prev => ({
       ...prev,
       [field]: value
+    }));
+  };
+
+  const handleSectorChange = (sector: 'SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS', checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      sectors: checked 
+        ? [...prev.sectors, sector]
+        : prev.sectors.filter(s => s !== sector)
     }));
   };
 
@@ -101,8 +111,8 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
       return;
     }
 
-    if (!formData.results.trim()) {
-      toast.error('Los resultados son requeridos');
+    if (formData.sectors.length === 0) {
+      toast.error('Debe seleccionar al menos un sector programático');
       return;
     }
 
@@ -127,30 +137,36 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al crear metodología');
+        throw new Error(errorData.error || 'Error al crear iniciativa');
       }
 
-      toast.success('Metodología creada exitosamente');
+      toast.success('Iniciativa creada exitosamente');
       setFormData(initialFormData);
       onSuccess?.();
     } catch (error) {
       console.error('Error creating methodology:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al crear metodología');
+      toast.error(error instanceof Error ? error.message : 'Error al crear iniciativa');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'EDUCACION':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+  const getSectorColor = (sector: string) => {
+    switch (sector) {
       case 'SALUD':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'SOCIAL':
+      case 'EDUCACION':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'MEDIOS_DE_VIDA':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'AMBIENTAL':
+      case 'PROTECCION':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'SOSTENIBILIDAD':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+      case 'DESARROLLO_INFANTIL_TEMPRANO':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'NINEZ_EN_CRISIS':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
@@ -161,7 +177,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Plus className="h-5 w-5" />
-          Crear Nueva Metodología
+          Crear Nueva Iniciativa
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -177,28 +193,41 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Título de la metodología"
+                  placeholder="Título de la iniciativa"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Categoría *</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value as 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL')}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EDUCACION">Educación</SelectItem>
-                    <SelectItem value="SALUD">Salud</SelectItem>
-                    <SelectItem value="SOCIAL">Social</SelectItem>
-                    <SelectItem value="AMBIENTAL">Ambiental</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="mt-2">
-                  <Badge className={getCategoryColor(formData.category)}>
-                    {formData.category}
-                  </Badge>
+                <Label htmlFor="sectors">Sector Programático *</Label>
+                <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg">
+                  {[
+                    { value: 'SALUD', label: 'Salud' },
+                    { value: 'EDUCACION', label: 'Educación' },
+                    { value: 'MEDIOS_DE_VIDA', label: 'Medios de Vida' },
+                    { value: 'PROTECCION', label: 'Protección' },
+                    { value: 'SOSTENIBILIDAD', label: 'Sostenibilidad' },
+                    { value: 'DESARROLLO_INFANTIL_TEMPRANO', label: 'Desarrollo Infantil Temprano' },
+                    { value: 'NINEZ_EN_CRISIS', label: 'Niñez en Crisis' }
+                  ].map((sector) => (
+                    <div key={sector.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={sector.value}
+                        checked={formData.sectors.includes(sector.value as any)}
+                        onCheckedChange={(checked) => handleSectorChange(sector.value as any, checked as boolean)}
+                      />
+                      <Label htmlFor={sector.value} className="text-sm font-normal">
+                        {sector.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.sectors.map((sector) => (
+                    <Badge key={sector} className={getSectorColor(sector)}>
+                      {sector.replace(/_/g, ' ')}
+                    </Badge>
+                  ))}
                 </div>
               </div>
             </div>
@@ -209,7 +238,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="shortDescription"
                 value={formData.shortDescription}
                 onChange={(e) => handleInputChange('shortDescription', e.target.value)}
-                placeholder="Descripción breve de la metodología"
+                placeholder="Descripción breve de la iniciativa"
                 rows={2}
                 required
               />
@@ -221,7 +250,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Descripción detallada de la metodología"
+                placeholder="Descripción detallada de la iniciativa"
                 rows={4}
                 required
               />
@@ -257,9 +286,9 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
             </div>
           </div>
 
-          {/* Contenido de la Metodología */}
+          {/* Contenido de la Iniciativa */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contenido de la Metodología</h3>
+            <h3 className="text-lg font-semibold">Contenido de la Iniciativa</h3>
             
             <div className="space-y-2">
               <Label htmlFor="objectives">Objetivos *</Label>
@@ -267,7 +296,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="objectives"
                 value={formData.objectives}
                 onChange={(e) => handleInputChange('objectives', e.target.value)}
-                placeholder="Objetivos específicos de la metodología"
+                placeholder="Objetivos específicos de la iniciativa"
                 rows={3}
                 required
               />
@@ -279,7 +308,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="implementation"
                 value={formData.implementation}
                 onChange={(e) => handleInputChange('implementation', e.target.value)}
-                placeholder="Cómo se implementa la metodología"
+                placeholder="Cómo se implementa la iniciativa"
                 rows={3}
                 required
               />
@@ -291,19 +320,19 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="results"
                 value={formData.results}
                 onChange={(e) => handleInputChange('results', e.target.value)}
-                placeholder="Resultados esperados de la metodología"
+                placeholder="Resultados esperados de la iniciativa"
                 rows={3}
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="methodology">Metodología Detallada</Label>
+              <Label htmlFor="methodology">Iniciativa Detallada</Label>
               <Textarea
                 id="methodology"
                 value={formData.methodology}
                 onChange={(e) => handleInputChange('methodology', e.target.value)}
-                placeholder="Descripción detallada de la metodología (opcional)"
+                placeholder="Descripción detallada de la iniciativa (opcional)"
                 rows={4}
               />
             </div>
@@ -314,7 +343,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="resources"
                 value={formData.resources}
                 onChange={(e) => handleInputChange('resources', e.target.value)}
-                placeholder="Recursos necesarios para implementar la metodología (opcional)"
+                placeholder="Recursos necesarios para implementar la iniciativa (opcional)"
                 rows={3}
               />
             </div>
@@ -325,7 +354,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
                 id="evaluation"
                 value={formData.evaluation}
                 onChange={(e) => handleInputChange('evaluation', e.target.value)}
-                placeholder="Cómo se evalúa la metodología (opcional)"
+                placeholder="Cómo se evalúa la iniciativa (opcional)"
                 rows={3}
               />
             </div>
@@ -378,7 +407,7 @@ export function CreateMethodologyForm({ onSuccess, onCancel }: CreateMethodology
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Crear Metodología
+                  Crear Iniciativa
                 </>
               )}
             </Button>

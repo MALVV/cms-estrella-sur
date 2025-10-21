@@ -7,10 +7,10 @@ export const Hero: React.FC = () => {
       {/* Imagen de fondo en blanco y negro */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         <Image
-          src="https://images.pexels.com/photos/9037596/pexels-photo-9037596.jpeg"
+          src="/static-images/heroes/hero-home.jpg"
           alt="Niños sonriendo de Estrella del Sur"
           fill
-          className="object-cover grayscale"
+          className="object-cover object-center grayscale"
           priority
         />
         {/* Overlay más oscuro para mejor contraste del texto */}
@@ -21,26 +21,28 @@ export const Hero: React.FC = () => {
         <div className="absolute bottom-32 right-16 w-12 h-12 bg-pink-400 rounded-full opacity-40 blur-sm"></div>
       </div>
       
-      <div className="container mx-auto px-4 pt-8 pb-8 relative z-10 w-full max-w-7xl">
-        <div className="flex items-center min-h-[60vh] sm:min-h-[70vh]">
-          <div className="w-full lg:w-2/3 z-10">
-            {/* Banner pequeño */}
-            <div className="inline-block bg-yellow-400 text-black px-3 py-2 text-xs font-semibold mb-4 rounded font-condensed">
-              OFRECEMOS ESPERANZA QUE PUEDES AYUDAR
+      <div className="relative z-10 min-h-screen flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center">
+            <div className="max-w-4xl text-center">
+              {/* Título principal */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-6 font-condensed">
+                <span className="font-black text-blue-400">ESTRELLA DEL SUR</span>,<br/>
+                <span className="font-black">ILUMINANDO</span> vidas,<br/>
+                <span className="font-black">PROTEGIENDO</span> sueños.
+              </h1>
+              
+              {/* Descripción */}
+              <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
+                Transformamos comunidades vulnerables a través de programas integrales que abordan las causas raíz de los problemas sociales.
+              </p>
+              
+              {/* Botón de llamada a la acción */}
+              <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="/nosotros">
+                SABER MÁS
+                <span className="ml-2 text-lg">→</span>
+              </a>
             </div>
-            
-            {/* Título principal */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6 font-condensed">
-              ESTRELLA DEL SUR<br/>
-              ILUMINANDO VIDAS<br/>
-              PROTEGIENDO SUEÑOS
-            </h1>
-            
-            {/* Botón de llamada a la acción */}
-            <a className="mt-4 sm:mt-6 inline-flex items-center bg-gray-800 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-bold hover:bg-gray-700 dark:bg-gray-200 dark:text-black dark:hover:bg-gray-300 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="/nosotros">
-              SABER MÁS
-              <span className="ml-2 text-sm sm:text-base">→</span>
-            </a>
           </div>
         </div>
       </div>

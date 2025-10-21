@@ -151,168 +151,102 @@ export default function DonationDetailPage({ params }: DonationDetailPageProps) 
           </Button>
         </div>
 
+        {/* Título */}
+        <h1 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-8">
+          {project.title}
+        </h1>
+
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Contenido Principal */}
+          {/* Grid del Contenido Principal */}
           <div className="lg:col-span-2">
-            {/* Título */}
-            <h1 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-6">
-              {project.title}
-            </h1>
+            <div className="space-y-8">
+              {/* Imagen Principal */}
+              {project.imageUrl && (
+                <div className="relative h-80 rounded-lg overflow-hidden">
+                  <Image
+                    src={project.imageUrl}
+                    alt={project.imageAlt || project.title}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                </div>
+              )}
 
-            {/* Imagen Principal */}
-            {project.imageUrl && (
-              <div className="relative h-64 md:h-80 rounded-lg overflow-hidden mb-6">
-                <Image
-                  src={project.imageUrl}
-                  alt={project.imageAlt || project.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+              {/* Descripción del Proyecto */}
+              <div>
+                <h2 className="text-xl font-semibold text-text-light dark:text-text-dark mb-4">
+                  Sobre este Proyecto
+                </h2>
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed mb-4">
+                    {project.context}
+                  </p>
+                  <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    {project.objectives}
+                  </p>
+                </div>
               </div>
-            )}
 
-            {/* Información del Organizador */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <Users className="h-4 w-4 text-white" />
+              {/* Información de Fechas */}
+              <div>
+                <div className="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
+                  <span className="font-medium">Período de ejecución:</span>
+                  <span>{formatDate(project.executionStart)} - {formatDate(project.executionEnd)}</span>
+                </div>
               </div>
-              <span className="text-text-secondary-light dark:text-text-secondary-dark">
-                Estrella del Sur está organizando esta recaudación
-              </span>
-            </div>
 
-            {/* Badge de Protección */}
-            <div className="flex items-center gap-2 mb-6">
-              <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                <Shield className="mr-1 h-3 w-3" />
-                Donación Protegida
-              </Badge>
-            </div>
-
-            {/* Descripción del Proyecto */}
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-text-light dark:text-text-dark mb-3">
-                Sobre este Proyecto
-              </h2>
-              <div className="prose prose-lg max-w-none">
-                <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed mb-4">
-                  {project.context}
-                </p>
-                <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                  {project.objectives}
-                </p>
+              {/* Barra de Progreso */}
+              <div className="bg-card-light dark:bg-card-dark p-6 rounded-lg shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xl font-bold text-text-light dark:text-text-dark">
+                    ${raisedAmount.toLocaleString()}
+                  </span>
+                  <span className="text-xl font-bold text-text-light dark:text-text-dark">
+                    de ${goalAmount.toLocaleString()} meta
+                  </span>
+                </div>
+                
+                {/* Barra de progreso */}
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-3">
+                  <div 
+                    className="bg-gradient-to-r from-primary to-primary/80 h-4 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-3"
+                    style={{ width: `${percentage}%` }}
+                  >
+                    <span className="text-sm font-bold text-white">
+                      {percentage}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="text-center text-text-secondary-light dark:text-text-secondary-dark">
+                  {donationCount.toLocaleString()} donaciones
+                </div>
               </div>
-            </div>
-
-            {/* Información de Fechas */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 text-text-secondary-light dark:text-text-secondary-dark">
-                <span className="font-medium">Período de ejecución:</span>
-                <span>{formatDate(project.executionStart)} - {formatDate(project.executionEnd)}</span>
-              </div>
-            </div>
-
-            {/* Reacciones */}
-            <div className="flex items-center gap-4 mb-8">
-              <Button variant="outline" size="sm">
-                <Heart className="mr-2 h-4 w-4" />
-                Reaccionar
-              </Button>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                  {Math.floor(Math.random() * 50) + 20} personas han reaccionado
-                </span>
-              </div>
-            </div>
-
-            {/* Botones de Acción */}
-            <div className="flex gap-4">
-              <Button size="lg" className="flex-1" onClick={handleDonation}>
-                <Heart className="mr-2 h-5 w-5" />
-                Donar Ahora
-              </Button>
-              <Button variant="outline" size="lg">
-                <Share2 className="mr-2 h-5 w-5" />
-                Compartir
-              </Button>
             </div>
           </div>
 
-          {/* Sidebar de Donación */}
+          {/* Grid de la Tarjeta de Donación */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardContent className="p-6">
-                {/* Resumen de Recaudación */}
-                <div className="text-center mb-6">
-                  <div className="text-3xl font-bold text-text-light dark:text-text-dark mb-2">
-                    ${raisedAmount.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
-                    de ${goalAmount.toLocaleString()} meta · {donationCount.toLocaleString()} donaciones
-                  </div>
-                  
-                  {/* Barra de Progreso Circular */}
-                  <div className="relative w-24 h-24 mx-auto mb-4">
-                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="none"
-                        className="text-gray-200 dark:text-gray-700"
-                      />
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="40"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        fill="none"
-                        strokeDasharray={`${2 * Math.PI * 40}`}
-                        strokeDashoffset={`${2 * Math.PI * 40 * (1 - percentage / 100)}`}
-                        className="text-primary transition-all duration-1000 ease-out"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-lg font-bold text-text-light dark:text-text-dark">
-                        {percentage}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Botones de Acción */}
-                <div className="space-y-3 mb-6">
-                  <Button className="w-full" size="lg" onClick={handleDonation}>
-                    <Heart className="mr-2 h-4 w-4" />
-                    Donar Ahora
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    <Share2 className="mr-2 h-4 w-4" />
-                    Compartir
-                  </Button>
-                </div>
-
+            <Card className="h-fit lg:sticky lg:top-8">
+              <CardContent className="p-4 h-full flex flex-col">
                 {/* Formulario de Donación */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-text-light dark:text-text-dark">
+                <div className="space-y-6 flex-1">
+                  <h3 className="text-xl font-semibold text-text-light dark:text-text-dark">
                     Selecciona el Monto
                   </h3>
                   
                   {/* Montos Sugeridos */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     {donationAmounts.map((amount) => (
                       <Button
                         key={amount}
                         variant={selectedAmount === amount ? "default" : "outline"}
                         size="sm"
                         onClick={() => handleAmountSelect(amount)}
-                        className="h-10"
+                        className="h-12"
                       >
-                        <DollarSign className="mr-1 h-3 w-3" />
+                        <DollarSign className="mr-2 h-4 w-4" />
                         {amount}
                       </Button>
                     ))}
@@ -330,7 +264,7 @@ export default function DonationDetailPage({ params }: DonationDetailPageProps) 
                         placeholder="Ingresa el monto"
                         value={customAmount}
                         onChange={(e) => handleCustomAmountChange(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
                       />
                     </div>
                   </div>
@@ -345,7 +279,7 @@ export default function DonationDetailPage({ params }: DonationDetailPageProps) 
                       placeholder="Nombre del donante"
                       value={donorName}
                       onChange={(e) => setDonorName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
 
@@ -357,67 +291,22 @@ export default function DonationDetailPage({ params }: DonationDetailPageProps) 
                       placeholder="Deja un mensaje de apoyo..."
                       value={donorMessage}
                       onChange={(e) => setDonorMessage(e.target.value)}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-secondary-dark focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                      rows={4}
+                      className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-secondary-dark focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     />
                   </div>
                 </div>
 
-                {/* Donaciones Recientes */}
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-semibold text-text-light dark:text-text-dark">
-                      {Math.floor(Math.random() * 50) + 20} personas acaban de donar
-                    </h3>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Heart className="h-4 w-4 text-red-500" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-text-light dark:text-text-dark">
-                          Anónimo
-                        </div>
-                        <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                          ${Math.floor(Math.random() * 5000) + 1000} - Donación destacada
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <Heart className="h-4 w-4 text-red-500" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-text-light dark:text-text-dark">
-                          María González
-                        </div>
-                        <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                          $50 - Primera donación
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <Heart className="h-4 w-4 text-red-500" />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-text-light dark:text-text-dark">
-                          Carlos Rodríguez
-                        </div>
-                        <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                          $100 - Hace 5 min
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1">
-                      Ver todas
-                    </Button>
-                    <Button variant="outline" size="sm" className="flex-1">
-                      <Star className="mr-1 h-3 w-3" />
-                      Ver destacadas
-                    </Button>
-                  </div>
+                {/* Botones de Acción */}
+                <div className="space-y-3 mt-4">
+                  <Button className="w-full" size="lg" onClick={handleDonation}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    Donar Ahora
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Compartir
+                  </Button>
                 </div>
               </CardContent>
             </Card>

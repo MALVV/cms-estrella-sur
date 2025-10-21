@@ -18,11 +18,13 @@ export async function middleware(request: NextRequest) {
       pathname.startsWith('/favicon.ico') ||
       pathname.startsWith('/api/public') ||
       pathname.startsWith('/debug') ||
-      pathname.startsWith('/news-events') ||
+      pathname.startsWith('/noticias-eventos') ||
+      pathname.startsWith('/historias') ||
+      pathname.startsWith('/eventos') ||
+      pathname.startsWith('/noticias') ||
       pathname.startsWith('/programas') ||
       pathname.startsWith('/proyectos') ||
       pathname.startsWith('/metodologias') ||
-      pathname.startsWith('/news') ||
       pathname.startsWith('/historias-impacto') ||
       pathname.startsWith('/transparencia') ||
       pathname.startsWith('/recursos') ||

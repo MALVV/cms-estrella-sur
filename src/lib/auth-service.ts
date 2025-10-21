@@ -45,7 +45,7 @@ export async function registerUser(data: RegisterData): Promise<AuthResult> {
     const email = sanitizeInput(data.email.toLowerCase())
     const password = data.password
     const name = data.name ? sanitizeInput(data.name) : undefined
-    const role = data.role || UserRole.TECNICO // Por defecto TÉCNICO
+    const role = data.role // role es requerido según RegisterData
     const createdBy = data.createdBy
     const isTemporaryPassword = data.isTemporaryPassword || false
 
@@ -59,7 +59,7 @@ export async function registerUser(data: RegisterData): Promise<AuthResult> {
     }
 
     // Validar rol
-    if (!isValidRole(role)) {
+    if (!isValidRole(role as string)) {
       return {
         success: false,
         message: 'Rol inválido',
@@ -101,7 +101,7 @@ export async function registerUser(data: RegisterData): Promise<AuthResult> {
         email,
         password: hashedPassword,
         name,
-        role,
+        role: role,
         emailVerified: null, // Requiere verificación
         loginAttempts: 0,
         lockedUntil: null,

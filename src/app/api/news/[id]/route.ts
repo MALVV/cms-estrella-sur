@@ -81,7 +81,6 @@ export async function PUT(
       excerpt,
       imageUrl,
       imageAlt,
-      category,
       isFeatured,
       isActive,
       programaId,
@@ -108,7 +107,6 @@ export async function PUT(
         ...(excerpt !== undefined && { excerpt }),
         ...(imageUrl !== undefined && { imageUrl }),
         ...(imageAlt !== undefined && { imageAlt }),
-        ...(category && { category }),
         ...(isFeatured !== undefined && { isFeatured }),
         ...(isActive !== undefined && { isActive }),
         // Actualizar relaciones

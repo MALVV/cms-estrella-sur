@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Users, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Download, Upload, Settings } from 'lucide-react'
+import { Users, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Settings } from 'lucide-react'
 import { CreateUserForm } from '@/components/admin/create-user-form'
 import { ToggleUserStatusDialog } from '@/components/admin/toggle-user-status-dialog'
+import { EditUserModal } from '@/components/admin/edit-user-modal'
 
 interface User {
   id: string
@@ -38,6 +39,7 @@ export default function UsersPage() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'status' | 'lastLogin'>('name')
+  const [editingUser, setEditingUser] = useState<User | null>(null)
 
   // Cargar usuarios desde la API
   const fetchUsers = useCallback(async () => {
@@ -84,8 +86,7 @@ export default function UsersPage() {
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
       case 'ADMINISTRADOR': return 'destructive'
-      case 'SUPERVISOR': return 'default'
-      case 'TECNICO': return 'secondary'
+      case 'GESTOR': return 'secondary'
       default: return 'outline'
     }
   }
@@ -118,11 +119,6 @@ export default function UsersPage() {
       case 'deactivate':
         handleBulkToggleStatus(false)
         break
-      case 'export':
-        console.log('Exportando usuarios:', selectedUsers)
-        // Implementar exportación
-        setSelectedUsers([])
-        break
       default:
         console.log(`Acción no reconocida: ${action}`)
     }
@@ -134,6 +130,66 @@ export default function UsersPage() {
         ? { ...u, status: newStatus }
         : u
     ))
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setUsers(prev => prev.filter(user => user.id !== userId))
+        setSelectedUsers(prev => prev.filter(id => id !== userId))
+      } else {
+        const errorData = await response.json()
+        alert(errorData.message || 'Error al eliminar usuario')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      alert('Error al eliminar usuario')
+    }
+  }
+
+  const handleEditUser = async (userId: string, userData: { name: string, email: string, role: string, isActive: boolean }) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      if (response.ok) {
+        const updatedUser = await response.json()
+        setUsers(prev => prev.map(user => 
+          user.id === userId 
+            ? { 
+                ...user, 
+                name: updatedUser.user.name,
+                email: updatedUser.user.email,
+                role: updatedUser.user.role,
+                status: updatedUser.user.isActive ? 'ACTIVE' : 'INACTIVE'
+              }
+            : user
+        ))
+      } else {
+        const errorData = await response.json()
+        alert(errorData.message || 'Error al actualizar usuario')
+      }
+    } catch (error) {
+      console.error('Error updating user:', error)
+      alert('Error al actualizar usuario')
+    }
+  }
+
+  const handleOpenEditModal = (user: User) => {
+    setEditingUser(user)
   }
 
   const handleBulkToggleStatus = async (isActive: boolean) => {
@@ -195,17 +251,15 @@ export default function UsersPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
-          <Button variant="outline" size="sm">
-            <Upload className="mr-2 h-4 w-4" />
-            Importar
-          </Button>
           {canCreateUsers() && (
             <CreateUserForm onUserCreated={(newUser) => {
+              // Agregar el usuario a la lista
               setUsers(prev => [newUser, ...prev])
+              
+              // Limpiar filtros para mostrar el usuario recién creado
+              setSearchTerm('')
+              setRoleFilter('ALL')
+              setStatusFilter('ALL')
             }} />
           )}
         </div>
@@ -308,8 +362,7 @@ export default function UsersPage() {
                 <SelectContent>
                   <SelectItem value="ALL">Todos los roles</SelectItem>
                   <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
-                  <SelectItem value="SUPERVISOR">Supervisor</SelectItem>
-                  <SelectItem value="TECNICO">Técnico</SelectItem>
+                  <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -358,10 +411,6 @@ export default function UsersPage() {
                     <UserX className="mr-1 h-3 w-3" />
                     Desactivar
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleBulkAction('export')}>
-                    <Download className="mr-1 h-3 w-3" />
-                    Exportar
-                  </Button>
                   <Button size="sm" variant="outline" onClick={() => setSelectedUsers([])}>
                     Cancelar
                   </Button>
@@ -388,6 +437,9 @@ export default function UsersPage() {
             onSelectUser={handleSelectUser}
             onSelectAll={handleSelectAll}
             onToggleStatus={handleUserStatusChanged}
+            onDeleteUser={handleDeleteUser}
+            onEditUser={handleEditUser}
+            onOpenEditModal={handleOpenEditModal}
             canEditUsers={canEditUsers}
             canDeleteUsers={canDeleteUsers}
             getRoleBadgeVariant={getRoleBadgeVariant}
@@ -404,6 +456,9 @@ export default function UsersPage() {
             onSelectUser={handleSelectUser}
             onSelectAll={handleSelectAll}
             onToggleStatus={handleUserStatusChanged}
+            onDeleteUser={handleDeleteUser}
+            onEditUser={handleEditUser}
+            onOpenEditModal={handleOpenEditModal}
             canEditUsers={canEditUsers}
             canDeleteUsers={canDeleteUsers}
             getRoleBadgeVariant={getRoleBadgeVariant}
@@ -420,6 +475,9 @@ export default function UsersPage() {
             onSelectUser={handleSelectUser}
             onSelectAll={handleSelectAll}
             onToggleStatus={handleUserStatusChanged}
+            onDeleteUser={handleDeleteUser}
+            onEditUser={handleEditUser}
+            onOpenEditModal={handleOpenEditModal}
             canEditUsers={canEditUsers}
             canDeleteUsers={canDeleteUsers}
             getRoleBadgeVariant={getRoleBadgeVariant}
@@ -428,6 +486,13 @@ export default function UsersPage() {
           />
         </TabsContent>
       </Tabs>
+
+      <EditUserModal
+        user={editingUser}
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        onSave={handleEditUser}
+      />
     </div>
   )
 }
@@ -440,6 +505,9 @@ interface UserListProps {
   onSelectUser: (userId: string) => void
   onSelectAll: () => void
   onToggleStatus: (userId: string, newStatus: 'ACTIVE' | 'INACTIVE') => void
+  onDeleteUser: (userId: string) => void
+  onEditUser: (userId: string, userData: { name: string, email: string, role: string, isActive: boolean }) => void
+  onOpenEditModal: (user: User) => void
   canEditUsers: () => boolean
   canDeleteUsers: () => boolean
   getRoleBadgeVariant: (role: string) => "destructive" | "default" | "secondary" | "outline"
@@ -454,6 +522,9 @@ function UserList({
   onSelectUser,
   onSelectAll,
   onToggleStatus,
+  onDeleteUser,
+  onEditUser,
+  onOpenEditModal,
   canEditUsers,
   canDeleteUsers,
   getRoleBadgeVariant,
@@ -519,7 +590,7 @@ function UserList({
                       Ver detalles
                     </DropdownMenuItem>
                     {canEditUsers() && (
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onOpenEditModal(user)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
@@ -543,7 +614,10 @@ function UserList({
                       </DropdownMenuItem>
                     </ToggleUserStatusDialog>
                     {canDeleteUsers() && (
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => onDeleteUser(user.id)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </DropdownMenuItem>
@@ -632,7 +706,11 @@ function UserList({
                   <Eye className="h-4 w-4" />
                 </Button>
                 {canEditUsers() && (
-                  <Button variant="ghost" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => onOpenEditModal(user)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                 )}
@@ -653,7 +731,12 @@ function UserList({
                   </Button>
                 </ToggleUserStatusDialog>
                 {canDeleteUsers() && (
-                  <Button variant="ghost" size="sm" className="text-destructive">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-destructive"
+                    onClick={() => onDeleteUser(user.id)}
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 )}
@@ -669,7 +752,7 @@ function UserList({
                       Ver detalles
                     </DropdownMenuItem>
                     {canEditUsers() && (
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onOpenEditModal(user)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Editar
                       </DropdownMenuItem>
@@ -693,7 +776,10 @@ function UserList({
                       </DropdownMenuItem>
                     </ToggleUserStatusDialog>
                     {canDeleteUsers() && (
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => onDeleteUser(user.id)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Eliminar
                       </DropdownMenuItem>

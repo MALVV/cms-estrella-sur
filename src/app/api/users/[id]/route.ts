@@ -11,7 +11,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withSimpleRole([UserRole.SUPERVISOR], async (authenticatedRequest) => {
+  return withSimpleRole([UserRole.ADMINISTRADOR], async (authenticatedRequest) => {
     try {
       const resolvedParams = await params;
       const userId = resolvedParams.id

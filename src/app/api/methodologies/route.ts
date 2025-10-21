@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
     const status = searchParams.get('status');
-    const category = searchParams.get('category');
+    const sector = searchParams.get('sector');
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '10', 10);
     const skip = (page - 1) * limit;
@@ -30,8 +30,10 @@ export async function GET(request: NextRequest) {
       where.isActive = false;
     }
 
-    if (category && category !== 'all') {
-      where.category = category;
+    if (sector && sector !== 'all') {
+      where.sectors = {
+        has: sector
+      };
     }
 
     const [methodologies, total] = await Promise.all([
@@ -85,7 +87,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       imageAlt,
       ageGroup,
-      category,
+      sectors,
       targetAudience,
       objectives,
       implementation,
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
         imageUrl,
         imageAlt,
         ageGroup,
-        category,
+        sectors,
         targetAudience,
         objectives,
         implementation,

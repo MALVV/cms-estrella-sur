@@ -62,19 +62,8 @@ export default function SuccessStoriesSection() {
             </h1>
           </div>
 
-          {/* Descripción arriba de la tarjeta */}
-          <div className="text-center mb-8">
-            <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-5xl mx-auto leading-relaxed">
-              Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-            </p>
-          </div>
 
           <div className="relative">
-            <div className="absolute top-8 left-8 z-10">
-              <span className="bg-yellow-500 text-white text-xs font-bold px-3 py-1.5 rounded-sm tracking-wider">
-                HISTORIAS DESTACADAS
-              </span>
-            </div>
             <div className="w-full h-[300px] overflow-hidden">
               <div className="w-full h-full bg-gray-300 dark:bg-gray-600 animate-pulse"></div>
             </div>
@@ -92,12 +81,6 @@ export default function SuccessStoriesSection() {
           </div>
         </div>
 
-        {/* Descripción debajo de la tarjeta */}
-        <div className="text-center mt-8">
-          <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-3xl mx-auto leading-relaxed">
-            Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-          </p>
-        </div>
       </section>
     );
   }
@@ -116,12 +99,6 @@ export default function SuccessStoriesSection() {
             </h1>
           </div>
 
-          {/* Descripción arriba de la tarjeta */}
-          <div className="text-center mb-8">
-            <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-5xl mx-auto leading-relaxed">
-              Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-            </p>
-          </div>
 
           <div className="relative">
             <div className="absolute top-8 left-8 z-10">
@@ -156,12 +133,6 @@ export default function SuccessStoriesSection() {
           </div>
         </div>
 
-        {/* Descripción debajo de la tarjeta */}
-        <div className="text-center mt-8">
-          <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-3xl mx-auto leading-relaxed">
-            Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-          </p>
-        </div>
       </section>
     );
   }
@@ -180,12 +151,6 @@ export default function SuccessStoriesSection() {
             </h1>
           </div>
 
-          {/* Descripción arriba de la tarjeta */}
-          <div className="text-center mb-8">
-            <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-5xl mx-auto leading-relaxed">
-              Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-            </p>
-          </div>
 
           <div className="relative">
             <div className="absolute top-8 left-8 z-10">
@@ -222,12 +187,6 @@ export default function SuccessStoriesSection() {
           </div>
         </div>
 
-        {/* Descripción debajo de la tarjeta */}
-        <div className="text-center mt-8">
-          <p className="text-lg text-subtext-light dark:text-subtext-dark max-w-3xl mx-auto leading-relaxed">
-            Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
-          </p>
-        </div>
       </section>
     );
   }
@@ -240,24 +199,14 @@ export default function SuccessStoriesSection() {
       <div className="max-w-7xl mx-auto">
         {/* Título de la sección */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
-            HISTORIAS DESTACADAS
-          </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
             CADA HISTORIA ES UNA VICTORIA
           </h1>
           <p className="text-lg text-text-light dark:text-text-dark max-w-4xl mx-auto">
-            Cada historia representa una vida transformada, una familia fortalecida y una comunidad que crece. Descubre cómo nuestro trabajo conjunto está creando un futuro mejor para los niños y sus familias en Oruro.
           </p>
         </div>
 
         <div className="relative">
-          <div className="absolute top-8 left-8 z-10">
-            <span className="bg-yellow-500 text-white text-xs font-bold px-3 py-1.5 rounded-sm tracking-wider">
-              HISTORIAS DESTACADAS
-            </span>
-          </div>
-          
           <div className="w-full h-[300px] overflow-hidden">
             <Image
               alt={currentStory.imageAlt || currentStory.title}

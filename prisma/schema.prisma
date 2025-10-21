@@ -23,7 +23,7 @@ model User {
   mustChangePassword Boolean                @default(false)
   refreshToken       String?                @unique
   refreshTokenExp    DateTime?
-  role               UserRole               @default(TECNICO)
+  role               UserRole               @default(GESTOR)
   allies             allies[]               @relation("AllyCreator")
   events             Event[]                @relation("EventOrganizer")
   imageLibrary       ImageLibrary[]         @relation("ImageLibraryCreator")
@@ -88,7 +88,6 @@ model News {
   excerpt       String?
   imageUrl      String?
   imageAlt      String?
-  category      NewsCategory @default(NOTICIAS)
   isActive      Boolean      @default(true)
   isFeatured    Boolean      @default(false)
   publishedAt   DateTime     @default(now())
@@ -156,7 +155,7 @@ model Methodology {
   imageUrl         String?
   imageAlt         String?
   ageGroup         String
-  category         MethodologyCategory
+  sectors          SectorProgramatico[]
   targetAudience   String
   objectives       String
   implementation   String
@@ -283,22 +282,18 @@ model ImageLibrary {
 
 enum UserRole {
   ADMINISTRADOR
-  TECNICO
-  SUPERVISOR
+  GESTOR
 }
 
-enum NewsCategory {
-  NOTICIAS
-  FUNDRAISING
-  COMPANIA
-  SIN_CATEGORIA
-}
 
-enum MethodologyCategory {
-  EDUCACION
+enum SectorProgramatico {
   SALUD
-  SOCIAL
-  AMBIENTAL
+  EDUCACION
+  MEDIOS_DE_VIDA
+  PROTECCION
+  SOSTENIBILIDAD
+  DESARROLLO_INFANTIL_TEMPRANO
+  NINEZ_EN_CRISIS
 }
 
 enum TransparencyCategory {
@@ -316,7 +311,6 @@ enum ResourceCategory {
 enum ResourceSubcategory {
   VIDEOS
   AUDIOS
-  REPRODUCTOR_INTEGRADO
   BIBLIOTECA_DIGITAL
   GUIAS_DESCARGABLES
   MANUALES

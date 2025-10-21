@@ -45,21 +45,21 @@ export function ToggleMethodologyStatusDialog({
       });
 
       if (!response.ok) {
-        throw new Error('Error al cambiar estado de la metodología');
+        throw new Error('Error al cambiar estado de la iniciativa');
       }
 
       toast({
         title: 'Éxito',
-        description: `Metodología ${!methodology.isActive ? 'activada' : 'desactivada'} exitosamente`,
+        description: `Iniciativa ${!methodology.isActive ? 'activada' : 'desactivada'} exitosamente`,
       });
 
       setIsOpen(false);
       onSuccess?.();
     } catch (error) {
-      console.error('Error al cambiar estado de la metodología:', error);
+      console.error('Error al cambiar estado de la iniciativa:', error);
       toast({
         title: 'Error',
-        description: 'Error al cambiar el estado de la metodología',
+        description: 'Error al cambiar el estado de la iniciativa',
         variant: 'destructive',
       });
     } finally {
@@ -75,23 +75,23 @@ export function ToggleMethodologyStatusDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {methodology.isActive ? 'Desactivar Metodología' : 'Activar Metodología'}
+            {methodology.isActive ? 'Desactivar Iniciativa' : 'Activar Iniciativa'}
           </DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <p className="text-sm text-gray-600">
-            ¿Estás seguro de que quieres {methodology.isActive ? 'desactivar' : 'activar'} la metodología 
+            ¿Estás seguro de que quieres {methodology.isActive ? 'desactivar' : 'activar'} la iniciativa 
             <strong> "{methodology.title}"</strong>?
           </p>
           {methodology.isActive && (
             <p className="text-sm text-gray-500 mt-2">
-              La metodología no será visible para los usuarios públicos.
+              La iniciativa no será visible para los usuarios públicos.
             </p>
           )}
           {!methodology.isActive && (
             <p className="text-sm text-gray-500 mt-2">
-              La metodología será visible para los usuarios públicos.
+              La iniciativa será visible para los usuarios públicos.
             </p>
           )}
         </div>

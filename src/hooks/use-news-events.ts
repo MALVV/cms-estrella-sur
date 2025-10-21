@@ -9,7 +9,6 @@ interface NewsItem {
   excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
-  category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
   isActive: boolean;
   isFeatured: boolean;
   publishedAt: string;
@@ -49,12 +48,9 @@ export const useNewsAndEvents = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNews = async (category?: string) => {
+  const fetchNews = async () => {
     try {
       const params = new URLSearchParams();
-      if (category && category !== 'ALL') {
-        params.append('category', category);
-      }
       params.append('limit', '10');
 
       const response = await fetch(`/api/news?${params.toString()}`);
@@ -127,9 +123,9 @@ export const useNewsAndEvents = () => {
     }
   };
 
-  const refreshNews = async (category?: string) => {
+  const refreshNews = async () => {
     try {
-      const newsData = await fetchNews(category);
+      const newsData = await fetchNews();
       setNews(newsData);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al actualizar noticias');

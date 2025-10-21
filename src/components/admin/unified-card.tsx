@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2, Eye, EyeOff, Calendar, User } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff, Calendar, User, Star, StarOff } from 'lucide-react';
 import Image from 'next/image';
 import { isValidImageUrl, getImagePlaceholderData, handleImageError } from '@/lib/image-utils';
 
@@ -172,6 +172,22 @@ export const UnifiedCard: React.FC<UnifiedCardProps> = ({
         )}
         
         <div className="flex items-center justify-end gap-1 mt-auto">
+          {onToggleFeatured && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title={isFeatured ? 'Remover de destacados' : 'Destacar'}
+              onClick={onToggleFeatured}
+            >
+              {isFeatured ? (
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              ) : (
+                <StarOff className="h-4 w-4 text-gray-400 hover:text-yellow-400" />
+              )}
+            </Button>
+          )}
+          
           {onEdit && (
             <Button
               variant="ghost"

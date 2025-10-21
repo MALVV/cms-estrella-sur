@@ -53,7 +53,7 @@ export function AdvancedUserManagementSystem() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
   const isAdmin = session?.user?.role === UserRole.ADMINISTRADOR
-  const isSupervisor = session?.user?.role === UserRole.SUPERVISOR
+  const isContentManager = session?.user?.role === UserRole.GESTOR
 
   const fetchUsers = useCallback(async (page = 1) => {
     setIsLoading(true)
@@ -239,8 +239,7 @@ export function AdvancedUserManagementSystem() {
   const getRoleColor = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.SUPERVISOR: return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case UserRole.TECNICO: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case UserRole.GESTOR: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
@@ -248,13 +247,12 @@ export function AdvancedUserManagementSystem() {
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.SUPERVISOR: return <Briefcase className="h-4 w-4 text-blue-500" />
-      case UserRole.TECNICO: return <Wrench className="h-4 w-4 text-green-500" />
+      case UserRole.GESTOR: return <Briefcase className="h-4 w-4 text-green-500" />
       default: return <Users className="h-4 w-4 text-gray-500" />
     }
   }
 
-  if (!session?.user || (!isAdmin && !isSupervisor)) {
+  if (!session?.user || !isAdmin) {
     return (
       <div className="flex items-center justify-center h-64">
         <Card>

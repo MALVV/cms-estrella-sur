@@ -38,9 +38,6 @@ export default function OurHistorySection() {
       <div className="container mx-auto px-4 py-16 md:py-24">
         {/* Título de la sección */}
         <div className="text-center mb-16">
-          <span className="inline-block bg-primary text-white px-3 py-1 rounded text-xs md:text-sm font-bold mb-4">
-            NUESTRA HISTORIA
-          </span>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-text-light dark:text-text-dark mb-8">
             DOS DÉCADAS TRANSFORMANDO VIDAS
           </h1>

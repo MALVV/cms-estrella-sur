@@ -14,7 +14,7 @@ interface Methodology {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -78,7 +78,7 @@ export const MethodologyCardWrapper: React.FC<MethodologyCardWrapperProps> = ({
         shortDescription={methodology.shortDescription || methodology.description}
         imageUrl={methodology.imageUrl}
         imageAlt={methodology.imageAlt}
-        category={methodology.category}
+        sectors={methodology.sectors}
         isActive={methodology.isActive}
         createdAt={methodology.createdAt}
         creator={methodology.creator}

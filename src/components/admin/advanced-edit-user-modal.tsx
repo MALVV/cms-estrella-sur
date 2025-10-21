@@ -65,7 +65,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
     defaultValues: {
       name: user?.name || '',
       email: user?.email || '',
-      role: user?.role || UserRole.TECNICO,
+      role: user?.role || UserRole.GESTOR,
       isActive: user?.isActive || true,
       mustChangePassword: user?.mustChangePassword || false
     }
@@ -87,8 +87,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.SUPERVISOR: return <Briefcase className="h-4 w-4 text-blue-500" />
-      case UserRole.TECNICO: return <Wrench className="h-4 w-4 text-green-500" />
+      case UserRole.GESTOR: return <Briefcase className="h-4 w-4 text-green-500" />
       default: return <User className="h-4 w-4 text-gray-500" />
     }
   }
@@ -96,8 +95,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
   const getRoleDescription = (role: UserRole) => {
     switch (role) {
       case UserRole.ADMINISTRADOR: return 'Acceso completo al sistema'
-      case UserRole.SUPERVISOR: return 'Puede supervisar contenido y usuarios'
-      case UserRole.TECNICO: return 'Acceso básico para tareas técnicas'
+      case UserRole.GESTOR: return 'Gestión de contenido - Noticias, iniciativas, historias, recursos y demás secciones'
       default: return ''
     }
   }

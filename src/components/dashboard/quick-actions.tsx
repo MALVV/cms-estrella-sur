@@ -27,21 +27,21 @@ export function QuickActions() {
         {canManageContent() && (
           <>
             <Button asChild variant="default" className="w-full justify-start">
-              <Link href="/dashboard/stories/new">
+              <Link href="/dashboard/historias/create">
                 <FileText className="mr-2 h-4 w-4" />
                 Nueva Historia
               </Link>
             </Button>
 
             <Button asChild variant="default" className="w-full justify-start">
-              <Link href="/dashboard/news/new">
+              <Link href="/dashboard/noticias/create">
                 <Newspaper className="mr-2 h-4 w-4" />
                 Nueva Noticia
               </Link>
             </Button>
 
             <Button asChild variant="default" className="w-full justify-start">
-              <Link href="/dashboard/projects/new">
+              <Link href="/dashboard/proyectos/create">
                 <Target className="mr-2 h-4 w-4" />
                 Nuevo Proyecto
               </Link>

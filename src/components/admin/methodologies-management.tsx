@@ -28,7 +28,7 @@ interface Methodology {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -66,7 +66,7 @@ export function MethodologiesManagement() {
       setLoading(true);
       const response = await fetch('/api/methodologies');
       if (!response.ok) {
-        throw new Error('Error al cargar metodologías');
+        throw new Error('Error al cargar iniciativas');
       }
       const data = await response.json();
       // Manejar la estructura de respuesta del API
@@ -79,7 +79,7 @@ export function MethodologiesManagement() {
       }
     } catch (error) {
       console.error('Error fetching methodologies:', error);
-      toast.error('Error al cargar metodologías');
+      toast.error('Error al cargar iniciativas');
       setMethodologies([]); // Asegurar array vacío en caso de error
     } finally {
       setLoading(false);
@@ -108,7 +108,7 @@ export function MethodologiesManagement() {
 
   const handleBulkStatusToggle = async (isActive: boolean) => {
     if (selectedMethodologies.length === 0) {
-      toast.error('Selecciona al menos una metodología');
+      toast.error('Selecciona al menos una iniciativa');
       return;
     }
 
@@ -126,17 +126,17 @@ export function MethodologiesManagement() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Error al cambiar estado de las metodologías');
+        throw new Error(errorData.error || 'Error al cambiar estado de las iniciativas');
       }
 
       toast.success(
-        `${selectedMethodologies.length} metodología(s) ${isActive ? 'activada(s)' : 'desactivada(s)'} exitosamente`
+        `${selectedMethodologies.length} iniciativa(s) ${isActive ? 'activada(s)' : 'desactivada(s)'} exitosamente`
       );
       setSelectedMethodologies([]);
       fetchMethodologies();
     } catch (error) {
       console.error('Error bulk toggling methodologies:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al cambiar estado de las metodologías');
+      toast.error(error instanceof Error ? error.message : 'Error al cambiar estado de las iniciativas');
     }
   };
 
@@ -238,7 +238,7 @@ export function MethodologiesManagement() {
                          (statusFilter === 'active' && methodology.isActive) ||
                          (statusFilter === 'inactive' && !methodology.isActive);
     
-    const matchesCategory = categoryFilter === 'all' || methodology.category === categoryFilter;
+    const matchesCategory = categoryFilter === 'all' || methodology.sectors.includes(categoryFilter as any);
     
     return matchesSearch && matchesStatus && matchesCategory;
   });
@@ -256,14 +256,14 @@ export function MethodologiesManagement() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Gestión de Metodologías</h1>
+          <h1 className="text-3xl font-bold">Gestión de Iniciativas</h1>
           <p className="text-muted-foreground">
-            Administra las metodologías innovadoras del sistema
+            Administra las iniciativas innovadoras del sistema
           </p>
         </div>
         <Button onClick={() => setViewMode('create')}>
           <Plus className="h-4 w-4 mr-2" />
-          Nueva Metodología
+          Nueva Iniciativa
         </Button>
       </div>
 
@@ -315,13 +315,13 @@ export function MethodologiesManagement() {
         </CardContent>
       </Card>
 
-        {/* Lista de Metodologías */}
+        {/* Lista de Iniciativas */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
                 <Filter className="mr-2 h-4 w-4" />
-                Metodologías ({filteredMethodologies.length})
+                Iniciativas ({filteredMethodologies.length})
               </CardTitle>
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -348,7 +348,7 @@ export function MethodologiesManagement() {
             ) : filteredMethodologies.length === 0 ? (
               <div className="text-center py-8">
                 <Search className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-2 text-sm font-medium">No se encontraron metodologías</h3>
+                <h3 className="mt-2 text-sm font-medium">No se encontraron iniciativas</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Intenta ajustar los filtros de búsqueda.
                 </p>

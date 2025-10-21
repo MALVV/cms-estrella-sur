@@ -106,7 +106,19 @@
 
 /* Hero Background */
 .bg-hero {
-  background-image: url('https://images.pexels.com/photos/2219024/pexels-photo-2219024.jpeg');
+  background-image: url('/static-images/heroes/hero-nosotros.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: top center;
+}
+
+.bg-hero-iniciativas {
+  background-image: url('/static-images/heroes/hero-metodologias.jpg');
+  background-size: cover;
+  background-position: top center;
+}
+
+.bg-hero-impacto {
+  background-image: url('/static-images/sections/seccion-impato-generado.jpg');
+  background-size: cover;
+  background-position: center center;
 }

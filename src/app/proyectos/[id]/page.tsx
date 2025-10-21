@@ -12,9 +12,11 @@ import {
   DollarSign, 
   Share2, 
   ExternalLink,
-  Clock
+  Clock,
+  FolderOpen
 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { RelatedNewsCarousel } from '@/components/sections/related-news-carousel';
 import { SiteFooter } from '@/components/layout/site-footer';
@@ -115,6 +117,10 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     }
   };
 
+  const getProjectIcon = () => {
+    return <FolderOpen className="h-6 w-6 text-blue-500" />;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -178,11 +184,9 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               <Badge className="bg-primary text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
                 PROYECTO
               </Badge>
-              {project.isFeatured && (
-                <Badge variant="outline" className="border-yellow-500 text-yellow-600">
-                  Destacado
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {getProjectIcon()}
+              </div>
             </div>
             
             <h1 className="text-4xl md:text-5xl font-black text-text-light dark:text-text-dark leading-tight mb-6">
@@ -205,13 +209,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
                 <Clock className="h-4 w-4" />
                 <span>Período: {formatPeriod(project.executionStart, project.executionEnd)}</span>
               </div>
-              
-              {project.creator && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Por {project.creator.name}</span>
-                </div>
-              )}
             </div>
 
             {/* Botones de acción */}
@@ -341,15 +338,33 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
             />
           </div>
 
-          {/* Footer de navegación */}
+          {/* CTA Section */}
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex justify-start">
-              <Button 
-                onClick={() => router.push('/proyectos')}
-              >
-                Ver más proyectos
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Button>
+            <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-lg p-8 text-center">
+              <h3 className="text-2xl font-bold text-text-light dark:text-text-dark mb-4">
+                ¿Te interesa conocer más sobre nuestros proyectos?
+              </h3>
+              <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark mb-6 max-w-2xl mx-auto">
+                Descubre cómo desarrollamos proyectos transformadores que generan impacto social positivo en las comunidades más vulnerables.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  asChild
+                  className="bg-black hover:bg-gray-800 text-white px-8 py-3 text-lg font-semibold"
+                >
+                  <Link href="/proyectos">
+                    Ver más proyectos
+                    <ExternalLink className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => window.history.back()}
+                  className="px-6 py-3"
+                >
+                  Explorar metodologías
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -22,8 +22,7 @@ export async function GET(
             excerpt: true,
             imageUrl: true,
             imageAlt: true,
-            publishedAt: true,
-            category: true
+            publishedAt: true
           }
         },
         imageLibrary: {

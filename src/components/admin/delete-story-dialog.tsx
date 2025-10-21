@@ -36,22 +36,22 @@ export function DeleteStoryDialog({ story, onStoryDeleted, children }: DeleteSto
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al eliminar la story')
+        throw new Error(errorData.error || 'Error al eliminar la historia')
       }
 
       // Llamar callback para actualizar el estado local
       onStoryDeleted(story.id)
 
       toast({
-        title: "Story eliminada exitosamente",
+        title: "Historia eliminada exitosamente",
         description: `"${story.title}" ha sido eliminada permanentemente.`,
       })
 
       setOpen(false)
     } catch (error) {
       toast({
-        title: "Error al eliminar story",
-        description: error instanceof Error ? error.message : "Hubo un problema al eliminar la story.",
+        title: "Error al eliminar historia",
+        description: error instanceof Error ? error.message : "Hubo un problema al eliminar la historia.",
         variant: "destructive",
       })
     } finally {
@@ -66,12 +66,12 @@ export function DeleteStoryDialog({ story, onStoryDeleted, children }: DeleteSto
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar Story</DialogTitle>
+          <DialogTitle>Eliminar Historia</DialogTitle>
         </DialogHeader>
         
         <div className="py-4">
           <p className="text-sm text-gray-600">
-            ¿Estás seguro de que quieres eliminar la story 
+            ¿Estás seguro de que quieres eliminar la historia 
             <strong> "{story.title}"</strong>?
           </p>
           <p className="text-sm text-red-600 mt-2 font-medium">
