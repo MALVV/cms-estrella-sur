@@ -23,9 +23,9 @@ interface NewsItem {
   publishedAt: string;
   createdAt: string;
   updatedAt: string;
-  programa?: {
+  program?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
   };
   project?: {
     id: string;
@@ -57,7 +57,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
     imageAlt: '',
     isActive: true,
     isFeatured: false,
-    programaId: 'none',
+    programId: 'none',
     projectId: 'none',
     methodologyId: 'none',
   });
@@ -74,7 +74,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         imageAlt: news.imageAlt || '',
         isActive: news.isActive,
         isFeatured: news.isFeatured,
-        programaId: news.programa?.id || 'none',
+        programId: news.program?.id || 'none',
         projectId: news.project?.id || 'none',
         methodologyId: news.methodology?.id || 'none',
       });
@@ -147,7 +147,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         },
         body: JSON.stringify({
           ...formData,
-          programaId: formData.programaId === 'none' ? null : formData.programaId,
+          programId: formData.programId === 'none' ? null : formData.programId,
           projectId: formData.projectId === 'none' ? null : formData.projectId,
           methodologyId: formData.methodologyId === 'none' ? null : formData.methodologyId,
         }),
@@ -253,7 +253,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
             
             <div>
               <label className="text-sm font-medium">Programa</label>
-              <Select value={formData.programaId} onValueChange={(value) => handleChange('programaId', value)}>
+              <Select value={formData.programId} onValueChange={(value) => handleChange('programId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar programa" />
                 </SelectTrigger>
@@ -261,7 +261,7 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
                   <SelectItem value="none">Sin programa</SelectItem>
                   {programas.map((programa) => (
                     <SelectItem key={programa.id} value={programa.id}>
-                      {programa.nombreSector}
+                      {programa.sectorName}
                     </SelectItem>
                   ))}
                 </SelectContent>

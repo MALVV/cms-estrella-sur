@@ -19,10 +19,22 @@ export async function GET(
     const image = await prisma.imageLibrary.findUnique({
       where: { id },
       include: {
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true
+            sectorName: true
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            title: true
+          }
+        },
+        methodology: {
+          select: {
+            id: true,
+            title: true
           }
         }
       }
@@ -59,7 +71,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
-    const { imageUrl, imageAlt, title, programaId } = body;
+    const { imageUrl, imageAlt, title, programId, projectId, methodologyId } = body;
 
     // Verificar que la imagen existe
     const existingImage = await prisma.imageLibrary.findUnique({
@@ -74,23 +86,56 @@ export async function PUT(
     }
 
     // Validaciones
-    if (!imageUrl || !programaId) {
+    if (!imageUrl) {
       return NextResponse.json(
-        { error: 'URL de imagen y programa son requeridos' },
+        { error: 'URL de imagen es requerida' },
         { status: 400 }
       );
     }
 
-    // Verificar que el programa existe
-    const programa = await prisma.programas.findUnique({
-      where: { id: programaId }
-    });
-
-    if (!programa) {
+    // Verificar que al menos una relación está presente
+    if (!programId && !projectId && !methodologyId) {
       return NextResponse.json(
-        { error: 'Programa no encontrado' },
-        { status: 404 }
+        { error: 'Debe especificar al menos un programa, proyecto o iniciativa' },
+        { status: 400 }
       );
+    }
+
+    // Verificar que las entidades existen
+    if (programId) {
+      const programa = await prisma.program.findUnique({
+        where: { id: programId }
+      });
+      if (!programa) {
+        return NextResponse.json(
+          { error: 'Programa no encontrado' },
+          { status: 404 }
+        );
+      }
+    }
+
+    if (projectId) {
+      const project = await prisma.project.findUnique({
+        where: { id: projectId }
+      });
+      if (!project) {
+        return NextResponse.json(
+          { error: 'Proyecto no encontrado' },
+          { status: 404 }
+        );
+      }
+    }
+
+    if (methodologyId) {
+      const methodology = await prisma.methodology.findUnique({
+        where: { id: methodologyId }
+      });
+      if (!methodology) {
+        return NextResponse.json(
+          { error: 'Iniciativa no encontrada' },
+          { status: 404 }
+        );
+      }
     }
 
     const image = await prisma.imageLibrary.update({
@@ -99,13 +144,27 @@ export async function PUT(
         imageUrl,
         imageAlt: imageAlt || null,
         title: title || 'Sin título',
-        programaId
+        programId: programId || null,
+        projectId: projectId || null,
+        methodologyId: methodologyId || null
       },
       include: {
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true
+            sectorName: true
+          }
+        },
+        project: {
+          select: {
+            id: true,
+            title: true
+          }
+        },
+        methodology: {
+          select: {
+            id: true,
+            title: true
           }
         }
       }

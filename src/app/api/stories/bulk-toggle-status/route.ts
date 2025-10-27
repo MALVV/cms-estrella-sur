@@ -22,7 +22,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Actualizar múltiples stories
-    const updatedStories = await prisma.stories.updateMany({
+    const updatedStories = await prisma.story.updateMany({
       where: {
         id: {
           in: storyIds

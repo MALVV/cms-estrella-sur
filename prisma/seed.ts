@@ -1,535 +1,843 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
-});
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando proceso de seed para Estrella Sur...');
+  console.log('🌱 Iniciando seed completo para Estrella Sur...');
 
   try {
     // Limpiar datos existentes
     console.log('🧹 Limpiando datos existentes...');
+    await prisma.donation.deleteMany();
+    await prisma.donationProject.deleteMany();
+    await prisma.annualGoal.deleteMany();
     await prisma.imageLibrary.deleteMany();
-    await prisma.transparencyDocument.deleteMany();
+    await prisma.news.deleteMany();
+    await prisma.event.deleteMany();
     await prisma.videoTestimonial.deleteMany();
     await prisma.resource.deleteMany();
-    await prisma.event.deleteMany();
-    await prisma.news.deleteMany();
+    await prisma.transparencyDocument.deleteMany();
     await prisma.project.deleteMany();
     await prisma.methodology.deleteMany();
-    await prisma.programas.deleteMany();
-    await prisma.allies.deleteMany();
-    await prisma.stories.deleteMany();
+    await prisma.story.deleteMany();
+    await prisma.ally.deleteMany();
+    await prisma.program.deleteMany();
+    await prisma.post.deleteMany();
     await prisma.user.deleteMany();
 
     console.log('✅ Datos existentes eliminados');
 
-    // Crear usuarios
+    // ==========================================
+    // USUARIOS
+    // ==========================================
     console.log('👥 Creando usuarios...');
     const adminPassword = await bcrypt.hash('Admin123!', 12);
     const gestorPassword = await bcrypt.hash('Gestor123!', 12);
+    const asesorPassword = await bcrypt.hash('Asesor123!', 12);
 
     const admin = await prisma.user.create({
       data: {
-      email: 'admin@estrellasur.com',
-      name: 'Administrador Principal',
+        email: 'admin@estrellasur.org',
+        name: 'María Elena Fernández',
         password: adminPassword,
-        role: 'ADMINISTRADOR',
+        role: 'ADMINISTRATOR',
       isActive: true,
-      mustChangePassword: true,
+        mustChangePassword: false,
         emailVerified: new Date(),
     },
     });
 
     const gestor = await prisma.user.create({
       data: {
-      email: 'gestor@estrellasur.com',
-      name: 'Gestor de Contenido',
+        email: 'gestor@estrellasur.org',
+        name: 'Carlos Mendoza',
         password: gestorPassword,
-        role: 'GESTOR',
+        role: 'MANAGER',
       isActive: true,
-      mustChangePassword: true,
+        mustChangePassword: false,
+        emailVerified: new Date(),
+      },
+    });
+
+    const asesor = await prisma.user.create({
+      data: {
+        email: 'asesor@estrellasur.org',
+        name: 'Ana Patricia Quispe',
+        password: asesorPassword,
+        role: 'CONSULTANT',
+        isActive: true,
+        mustChangePassword: false,
       emailVerified: new Date(),
     },
     });
 
     console.log('✅ Usuarios creados');
 
-    // Crear programas
+    // ==========================================
+    // PROGRAMAS
+    // ==========================================
     console.log('📚 Creando programas...');
-    const programa1 = await prisma.programas.create({
-      data: {
-        nombreSector: 'Educación Infantil',
-        descripcion: 'Programa integral de desarrollo infantil que promueve el aprendizaje temprano y el desarrollo cognitivo en niños de 0 a 6 años.',
-        videoPresentacion: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        alineacionODS: 'ODS 4: Educación de Calidad - Garantizar una educación inclusiva, equitativa y de calidad.',
-        subareasResultados: 'Desarrollo cognitivo temprano, Alfabetización emergente, Habilidades socioemocionales',
-        resultados: '95% de los niños muestran mejoras en habilidades cognitivas, 80% de las familias reportan mejoras en prácticas de crianza',
-        gruposAtencion: 'Niños de 0 a 6 años, Madres embarazadas, Familias en situación de vulnerabilidad',
-        contenidosTemas: 'Estimulación temprana, Lectura en voz alta, Juegos educativos, Nutrición balanceada',
-        enlaceMasInformacion: 'https://estrellasur.org/programas/educacion-infantil',
-      isActive: true,
-      isFeatured: true,
-        createdBy: admin.id,
-        imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop',
-        imageAlt: 'Niños en programa de educación infantil',
-      },
-    });
-
-    const programa2 = await prisma.programas.create({
-      data: {
-        nombreSector: 'Salud Comunitaria',
-        descripcion: 'Programa de salud preventiva que fortalece los sistemas de salud comunitarios y promueve prácticas saludables.',
-        videoPresentacion: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        alineacionODS: 'ODS 3: Salud y Bienestar - Asegurar vidas saludables y promover el bienestar para todos.',
-        subareasResultados: 'Prevención de enfermedades, Promoción de la salud, Capacitación comunitaria',
-        resultados: '70% de reducción en enfermedades prevenibles, 85% de cobertura de vacunación',
-        gruposAtencion: 'Comunidades rurales, Mujeres en edad reproductiva, Niños menores de 5 años',
-        contenidosTemas: 'Prevención de enfermedades, Nutrición adecuada, Higiene personal, Salud reproductiva',
-        enlaceMasInformacion: 'https://estrellasur.org/programas/salud-comunitaria',
-      isActive: true,
-      isFeatured: true,
-        createdBy: admin.id,
-        imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop',
-        imageAlt: 'Promotora de salud comunitaria',
-      },
-    });
-
-    const programa3 = await prisma.programas.create({
-      data: {
-        nombreSector: 'Desarrollo Económico Juvenil',
-        descripcion: 'Programa que empodera a jóvenes de 15 a 24 años con habilidades técnicas y empresariales para generar ingresos sostenibles.',
-        videoPresentacion: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        alineacionODS: 'ODS 8: Trabajo Decente y Crecimiento Económico - Promover el crecimiento económico sostenido.',
-        subareasResultados: 'Capacitación técnica, Desarrollo empresarial, Acceso a financiamiento',
-        resultados: '75% de jóvenes completan capacitación técnica, 60% inician emprendimientos exitosos',
-        gruposAtencion: 'Jóvenes de 15 a 24 años, Mujeres jóvenes, Población rural',
-        contenidosTemas: 'Habilidades técnicas, Planificación empresarial, Gestión financiera, Marketing',
-        enlaceMasInformacion: 'https://estrellasur.org/programas/desarrollo-economico-juvenil',
-      isActive: true,
-      isFeatured: false,
-        createdBy: gestor.id,
-        imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop',
-        imageAlt: 'Jóvenes en capacitación técnica',
-      },
-    });
-
-    console.log('✅ Programas creados');
-
-    // Crear metodologías
-    console.log('🔬 Creando metodologías...');
-    const metodologia1 = await prisma.methodology.create({
-      data: {
-      title: 'Aprendizaje Basado en Proyectos',
-        description: 'Metodología educativa que involucra a los estudiantes en proyectos del mundo real para desarrollar habilidades del siglo XXI.',
-      shortDescription: 'Desarrollo de habilidades a través de proyectos reales',
-      ageGroup: '6-12 años',
-        sectors: ['EDUCACION'],
-      targetAudience: 'Estudiantes de primaria',
-        objectives: 'Fomentar el pensamiento crítico, la colaboración y la resolución de problemas a través de proyectos interdisciplinarios.',
-      implementation: 'Proyectos interdisciplinarios de 8 semanas con seguimiento semanal, presentaciones finales y evaluación por pares.',
-        results: 'Mejora del 40% en habilidades de resolución de problemas, aumento del 60% en participación estudiantil.',
-        methodology: 'Los estudiantes identifican problemas reales en su comunidad, investigan soluciones, diseñan prototipos y presentan sus hallazgos.',
-      resources: 'Materiales de investigación, herramientas tecnológicas, espacios de trabajo colaborativo y mentores de la comunidad.',
-        evaluation: 'Evaluación continua basada en rúbricas, autoevaluación, evaluación por pares y presentaciones finales.',
-      isActive: true,
-      isFeatured: true,
-        createdBy: admin.id,
-        imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop',
-        imageAlt: 'Estudiantes trabajando en proyecto',
-    },
-    });
-
-    const metodologia2 = await prisma.methodology.create({
-      data: {
-      title: 'Salud Comunitaria Preventiva',
-        description: 'Programa integral de salud que empodera a las comunidades para prevenir enfermedades y promover estilos de vida saludables.',
-      shortDescription: 'Prevención y promoción de salud comunitaria',
-      ageGroup: 'Todas las edades',
-        sectors: ['SALUD'],
-      targetAudience: 'Comunidades rurales',
-        objectives: 'Reducir enfermedades prevenibles en un 60%, mejorar el acceso a servicios de salud básicos.',
-        implementation: 'Talleres mensuales, seguimiento personalizado, campañas de vacunación, educación nutricional.',
-        results: 'Reducción del 45% en consultas por enfermedades prevenibles, formación de 25 promotores de salud.',
-        methodology: 'Identificación participativa de problemas de salud, formación de promotores comunitarios, implementación de estrategias preventivas.',
-      resources: 'Materiales educativos, equipos básicos de salud, medicamentos preventivos y transporte para campañas móviles.',
-        evaluation: 'Indicadores de salud comunitaria, encuestas de satisfacción, seguimiento de casos.',
-      isActive: true,
-      isFeatured: false,
-        createdBy: gestor.id,
-        imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop',
-        imageAlt: 'Promotora de salud comunitaria',
-      },
-    });
-
-    console.log('✅ Metodologías creadas');
-
-    // Crear proyectos
-    console.log('🚀 Creando proyectos...');
-    const proyecto1 = await prisma.project.create({
-      data: {
-      title: 'SEMBRANDO UNA IDEA, COSECHANDO UN FUTURO',
-      executionStart: new Date('2016-04-01'),
-      executionEnd: new Date('2016-09-30'),
-        context: 'La falta de oportunidades laborales para jóvenes, la carencia de orientación vocacional, genera procesos de incertidumbre en jóvenes y señoritas.',
-        objectives: 'El proyecto busca el desarrollo de habilidades blandas en jóvenes y señoritas, acompañado de un proceso de fortalecimiento en la identificación de ideas de negocio.',
-        content: 'El proyecto desarrolla habilidades en liderazgo en jóvenes a través de la escuela de emprendedores. Los 98 jóvenes y señoritas desarrollan competencias en la elaboración de un plan de negocio.',
-      strategicAllies: 'Confederación de Microempresarios',
-      financing: 'Barnfondem\nChildFund Bolivia',
-      isActive: true,
-      isFeatured: true,
-        createdBy: admin.id,
-        imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=600&fit=crop',
-        imageAlt: 'Jóvenes emprendedores',
-    },
-    });
-
-    const proyecto2 = await prisma.project.create({
-      data: {
-      title: 'EDUCACIÓN DIGITAL PARA TODOS',
-      executionStart: new Date('2023-01-15'),
-      executionEnd: new Date('2023-12-15'),
-        context: 'La pandemia aceleró la necesidad de digitalización en la educación, pero muchas comunidades rurales quedaron rezagadas.',
-        objectives: 'Capacitar a 200 docentes rurales en herramientas digitales educativas y dotar de equipamiento tecnológico básico a 50 escuelas rurales.',
-        content: 'El proyecto incluye capacitación intensiva en herramientas digitales, entrega de tablets y laptops a escuelas, instalación de internet satelital.',
-      strategicAllies: 'Ministerio de Educación\nFundación Telefónica\nCisco Systems',
-      financing: 'Banco Mundial\nFondo de Desarrollo Digital\nEmpresas privadas',
-      isActive: true,
-      isFeatured: true,
-        createdBy: gestor.id,
-        imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop',
-        imageAlt: 'Educación digital rural',
-      },
-    });
-
-    console.log('✅ Proyectos creados');
-
-    // Crear noticias con relaciones
-    console.log('📰 Creando noticias...');
-    const noticia1 = await prisma.news.create({
-      data: {
-        title: 'Nueva Iniciativa de Apoyo Educativo',
-        content: 'Estamos emocionados de anunciar el lanzamiento de nuestra nueva iniciativa de apoyo educativo que beneficiará a más de 500 niños en comunidades rurales. Este programa incluye materiales escolares, capacitación docente y apoyo nutricional.',
-        excerpt: 'Nueva iniciativa que beneficiará a más de 500 niños en comunidades rurales con apoyo educativo integral.',
-      isActive: true,
-      isFeatured: true,
-        imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=600&h=400&fit=crop',
-        imageAlt: 'Niños estudiando en aula rural',
-        createdBy: gestor.id,
-        programaId: programa1.id,
-      },
-    });
-
-    const noticia2 = await prisma.news.create({
-      data: {
-        title: 'Campaña de Recaudación de Fondos Exitosos',
-        content: 'Gracias al apoyo de nuestra comunidad, hemos logrado recaudar $50,000 para nuestro programa de alimentación escolar. Estos fondos nos permitirán proporcionar comidas nutritivas a 200 niños durante todo el año escolar.',
-        excerpt: 'Campaña exitosa que recaudó $50,000 para el programa de alimentación escolar.',
-      isActive: true,
-      isFeatured: false,
-        imageUrl: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=600&h=400&fit=crop',
-        imageAlt: 'Niños recibiendo comida en la escuela',
-        createdBy: gestor.id,
-        programaId: programa2.id,
-      },
-    });
-
-    const noticia3 = await prisma.news.create({
-      data: {
-        title: 'Expansión de Nuestras Operaciones',
-        content: 'Estrella Sur está expandiendo sus operaciones a tres nuevas regiones del país. Esta expansión nos permitirá llegar a más comunidades necesitadas y duplicar nuestro impacto en los próximos dos años.',
-        excerpt: 'Expansión a tres nuevas regiones para duplicar nuestro impacto social.',
-      isActive: true,
-      isFeatured: false,
-        imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&h=400&fit=crop',
-        imageAlt: 'Mapa de expansión de operaciones',
-        createdBy: gestor.id,
-        methodologyId: metodologia1.id,
-      },
-    });
-
-    const noticia4 = await prisma.news.create({
-      data: {
-        title: 'Voluntarios Destacados del Mes',
-        content: 'Reconocemos a nuestros voluntarios destacados del mes: María González, Juan Pérez y Ana Rodríguez. Su dedicación y compromiso han sido fundamentales para el éxito de nuestros programas comunitarios.',
-        excerpt: 'Reconocimiento a voluntarios destacados por su compromiso con la comunidad.',
-      isActive: true,
-      isFeatured: false,
-        imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&h=400&fit=crop',
-        imageAlt: 'Grupo de voluntarios trabajando',
-        createdBy: gestor.id,
-        projectId: proyecto1.id,
-      },
-    });
-
-    console.log('✅ Noticias creadas');
-
-    // Crear eventos
-    console.log('📅 Creando eventos...');
-    const evento1 = await prisma.event.create({
-      data: {
-      title: 'Jornada de salud comunitaria en San José',
-      description: 'Jornada médica gratuita que incluye consultas generales, vacunación y exámenes preventivos para toda la comunidad.',
-        content: 'La jornada de salud comunitaria se realizará en el Centro Comunitario de San José el próximo sábado. Contaremos con médicos especialistas, enfermeras y voluntarios capacitados para atender a toda la comunidad.',
-      imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop',
-      imageAlt: 'Jornada médica comunitaria',
-      eventDate: new Date('2024-12-15T08:00:00Z'),
-      location: 'Centro Comunitario San José, Calle Principal #123',
-      isActive: true,
-      isFeatured: true,
-        createdBy: gestor.id,
-    },
-    });
-
-    const evento2 = await prisma.event.create({
-      data: {
-      title: 'Taller de emprendimiento para mujeres',
-      description: 'Capacitación especializada en creación y gestión de microempresas dirigida exclusivamente a mujeres de la comunidad.',
-        content: 'Este taller de 3 días está diseñado para empoderar a las mujeres de la comunidad con herramientas prácticas para iniciar y gestionar sus propios negocios.',
-      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&h=600&fit=crop',
-      imageAlt: 'Mujeres en taller de emprendimiento',
-      eventDate: new Date('2024-12-20T09:00:00Z'),
-      location: 'Salón Comunitario Las Flores',
-      isActive: true,
-      isFeatured: true,
-        createdBy: gestor.id,
-      },
-    });
-
-    console.log('✅ Eventos creados');
-
-    // Crear historias
-    console.log('📖 Creando historias...');
-    const historia1 = await prisma.stories.create({
-      data: {
-        id: 'story-001',
-        title: 'Transformando vidas en la comunidad de San José',
-        imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=600&fit=crop',
-        imageAlt: 'Mujer emprendedora en su tienda local',
-        content: 'Conoce la historia de María, una madre soltera que logró emprender su propio negocio gracias al programa de microcréditos de Estrella Sur.',
-        summary: 'Conoce la historia de María, una madre soltera que logró emprender su propio negocio gracias al programa de microcréditos de Estrella Sur.',
-        isActive: true,
-        createdBy: gestor.id,
-      },
-    });
-
-    const historia2 = await prisma.stories.create({
-      data: {
-        id: 'story-002',
-        title: 'Educación que cambia el futuro',
-        imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800&h=600&fit=crop',
-        imageAlt: 'Jóvenes aprendiendo computación',
-        content: 'El programa de alfabetización digital ha beneficiado a más de 500 jóvenes en zonas rurales, abriendo nuevas oportunidades de empleo.',
-        summary: 'El programa de alfabetización digital ha beneficiado a más de 500 jóvenes en zonas rurales, abriendo nuevas oportunidades de empleo.',
-      isActive: true,
-        createdBy: gestor.id,
-      },
-    });
-
-    console.log('✅ Historias creadas');
-
-    // Crear aliados
-    console.log('🤝 Creando aliados...');
-    const aliado1 = await prisma.allies.create({
-      data: {
-        id: 'ally-001',
-        name: 'Fundación Esperanza',
-        role: 'Socio Estratégico',
-        description: 'Organización sin fines de lucro con más de 20 años de experiencia en desarrollo comunitario y programas de educación.',
-        imageUrl: 'https://images.unsplash.com/photo-1593113598332-cd288d649433?w=400&h=300&fit=crop',
-        imageAlt: 'Logo de Fundación Esperanza',
+    
+    const programas = await prisma.program.createMany({
+      data: [
+        {
+          sectorName: 'Salud Infantil Integral',
+          description: 'Programa dirigido a la prevención de enfermedades infantiles y promoción de hábitos saludables en niños y niñas de comunidades rurales.',
+          presentationVideo: 'https://www.youtube.com/watch?v=ejemplo',
+          odsAlignment: 'ODS 3: Salud y Bienestar',
+          resultsAreas: 'Control y seguimiento de salud infantil, Talleres de nutrición infantil',
+          results: 'Más de 1,200 niños con esquemas de vacunación completos',
+          targetGroups: 'Niños y niñas de 0 a 12 años, Madres gestantes',
+          contentTopics: 'Programas de vacunación, Talleres de alimentación complementaria',
+          moreInfoLink: 'https://estrellasur.org/salud-infantil',
+          imageUrl: 'https://images.unsplash.com/photo-1538300342682-cf57afb97285',
+          imageAlt: 'Niños en actividad de promoción de salud',
       isActive: true,
         isFeatured: true,
         createdBy: admin.id,
       },
-    });
-
-    const aliado2 = await prisma.allies.create({
-      data: {
-        id: 'ally-002',
-        name: 'Corporación Desarrollo Rural',
-        role: 'Aliado Técnico',
-        description: 'Especialistas en proyectos de desarrollo rural sostenible y capacitación agrícola para comunidades campesinas.',
-        imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop',
-        imageAlt: 'Logo de Corporación Desarrollo Rural',
+        {
+          sectorName: 'Educación Rural de Calidad',
+          description: 'Programa que fortalece la educación en zonas rurales mediante capacitación docente y provisión de materiales educativos.',
+          presentationVideo: 'https://www.youtube.com/watch?v=ejemplo',
+          odsAlignment: 'ODS 4: Educación de Calidad',
+          resultsAreas: 'Formación docente continua, Materiales educativos innovadores',
+          results: '150 docentes capacitados. 2,500 estudiantes con acceso a materiales',
+          targetGroups: 'Docentes de escuelas rurales, Estudiantes',
+          contentTopics: 'Capacitación docente, Talleres de lectura y escritura',
+          moreInfoLink: 'https://estrellasur.org/educacion-rural',
+          imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7',
+          imageAlt: 'Docente trabajando con estudiantes rurales',
       isActive: true,
         isFeatured: true,
         createdBy: admin.id,
       },
-    });
-
-    console.log('✅ Aliados creados');
-
-    // Crear recursos
-    console.log('📁 Creando recursos...');
-    const recurso1 = await prisma.resource.create({
-      data: {
-      title: 'Guía de Metodologías Participativas',
-      description: 'Manual completo sobre metodologías participativas para el desarrollo comunitario',
-      fileName: 'guia-metodologias-participativas.pdf',
-      fileUrl: 'https://estrellasur.org/resources/guia-metodologias.pdf',
-      fileSize: 2048000,
-      fileType: 'application/pdf',
-        category: 'PUBLICACIONES',
-        subcategory: 'MANUALES',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300',
-      duration: null,
-      isActive: true,
-      isFeatured: true,
-      downloadCount: 150,
-        createdBy: gestor.id,
-    },
-    });
-
-    const recurso2 = await prisma.resource.create({
-      data: {
-      title: 'Video: Introducción al Desarrollo Comunitario',
-      description: 'Video educativo sobre conceptos básicos del desarrollo comunitario',
-      fileName: 'introduccion-desarrollo-comunitario.mp4',
-      fileUrl: 'https://estrellasur.org/resources/video-desarrollo.mp4',
-      fileSize: 52428800,
-      fileType: 'video/mp4',
-        category: 'CENTRO_MULTIMEDIA',
-        subcategory: 'VIDEOS',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=300',
-      duration: 1800,
-      isActive: true,
-      isFeatured: false,
-      downloadCount: 75,
-        createdBy: gestor.id,
-      },
-    });
-
-    console.log('✅ Recursos creados');
-
-    // Crear testimonios en video
-    console.log('🎥 Creando testimonios en video...');
-    const testimonio1 = await prisma.videoTestimonial.create({
-      data: {
-      title: 'Testimonio de María - Beneficiaria del Programa Educativo',
-      description: 'María comparte su experiencia como beneficiaria del programa educativo de Estrella Sur',
-      youtubeUrl: 'https://www.youtube.com/watch?v=example-testimonial-1',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400',
-      duration: 300,
+        {
+          sectorName: 'Fortalecimiento Económico de Mujeres',
+          description: 'Programa que empodera económicamente a mujeres mediante capacitación técnica y acceso a microcréditos.',
+          presentationVideo: 'https://www.youtube.com/watch?v=ejemplo',
+          odsAlignment: 'ODS 5: Igualdad de Género y ODS 8: Trabajo Decente',
+          resultsAreas: 'Capacitación técnica en oficios, Acceso a microcréditos',
+          results: 'Más de 300 mujeres capacitadas. 180 microempresas iniciadas',
+          targetGroups: 'Mujeres de 18 a 50 años, Madres solteras',
+          contentTopics: 'Capacitación en oficios técnicos, Gestión de microcréditos',
+          moreInfoLink: 'https://estrellasur.org/mujeres-emprendedoras',
+          imageUrl: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5',
+          imageAlt: 'Mujeres en taller de emprendimiento',
       isActive: true,
       isFeatured: true,
         createdBy: gestor.id,
     },
-    });
-
-    const testimonio2 = await prisma.videoTestimonial.create({
-      data: {
-      title: 'Testimonio de Carlos - Facilitador Comunitario',
-      description: 'Carlos habla sobre su trabajo como facilitador comunitario',
-      youtubeUrl: 'https://www.youtube.com/watch?v=example-testimonial-2',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-      duration: 240,
+        {
+          sectorName: 'Seguridad Alimentaria y Nutrición',
+          description: 'Programa integral que combate la desnutrición mediante huertos familiares y capacitación en alimentación saludable.',
+          presentationVideo: 'https://www.youtube.com/watch?v=ejemplo',
+          odsAlignment: 'ODS 2: Hambre Cero',
+          resultsAreas: 'Huertos familiares y comunitarios, Capacitación nutricional',
+          results: '300 familias con huertos productivos. 60% de reducción en desnutrición',
+          targetGroups: 'Familias con niños menores de 5 años, Comunidades rurales',
+          contentTopics: 'Talleres de huertos familiares, Educación nutricional',
+          moreInfoLink: 'https://estrellasur.org/seguridad-alimentaria',
+          imageUrl: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8',
+          imageAlt: 'Huerto familiar comunitario',
       isActive: true,
       isFeatured: false,
         createdBy: gestor.id,
       },
-    });
-
-    console.log('✅ Testimonios creados');
-
-    // Crear documentos de transparencia
-    console.log('📄 Creando documentos de transparencia...');
-    const documento1 = await prisma.transparencyDocument.create({
-      data: {
-      title: 'Informe Anual 2023',
-      description: 'Informe anual de actividades y resultados de Estrella Sur',
-      fileName: 'informe-anual-2023.pdf',
-      fileUrl: 'https://estrellasur.org/transparency/informe-2023.pdf',
-      fileSize: 5120000,
-      fileType: 'application/pdf',
-        category: 'INFORMES_ANUALES',
-      year: 2023,
+        {
+          sectorName: 'Protección de la Niñez',
+          description: 'Programa que previene violencia infantil y promueve derechos de la niñez en entornos protectores.',
+          presentationVideo: 'https://www.youtube.com/watch?v=ejemplo',
+          odsAlignment: 'ODS 16: Paz, Justicia e Instituciones Sólidas',
+          resultsAreas: 'Prevención de violencia infantil, Atención psicosocial',
+          results: 'Más de 500 niños identificados en riesgo. 8 espacios seguros',
+          targetGroups: 'Niños y niñas en situación de vulnerabilidad',
+          contentTopics: 'Derechos de la niñez, Prevención de violencia',
+          moreInfoLink: 'https://estrellasur.org/proteccion-ninez',
+          imageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9',
+          imageAlt: 'Niños en espacio recreativo seguro',
       isActive: true,
       isFeatured: true,
         createdBy: admin.id,
     },
+      ],
     });
 
-    const documento2 = await prisma.transparencyDocument.create({
-      data: {
-      title: 'Rendición de Cuentas Q1 2024',
-      description: 'Rendición de cuentas del primer trimestre de 2024',
-      fileName: 'rendicion-cuentas-q1-2024.pdf',
-      fileUrl: 'https://estrellasur.org/transparency/rendicion-q1-2024.pdf',
-      fileSize: 2560000,
-      fileType: 'application/pdf',
-        category: 'RENDICION_CUENTAS',
-      year: 2024,
-      isActive: true,
-      isFeatured: false,
-        createdBy: admin.id,
-      },
-    });
+    const programasCreated = await prisma.program.findMany();
+    console.log('✅ Programas creados:', programasCreated.length);
 
-    console.log('✅ Documentos de transparencia creados');
-
-    // Crear biblioteca de imágenes
-    console.log('🖼️ Creando biblioteca de imágenes...');
-    const imagen1 = await prisma.imageLibrary.create({
-      data: {
-      title: 'Niños en aula de clase',
-      description: 'Niños participando en actividades educativas en el programa de Educación Infantil',
-      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
-      imageAlt: 'Niños aprendiendo en el aula',
-      fileName: 'ninos-aula-clase.jpg',
-      fileSize: 1024000,
-      fileType: 'image/jpeg',
-      isActive: true,
-      isFeatured: true,
-        createdBy: gestor.id,
-        programaId: programa1.id,
-    },
-    });
-
-    const imagen2 = await prisma.imageLibrary.create({
-      data: {
-      title: 'Promotora de salud comunitaria',
-      description: 'Promotora de salud capacitando a la comunidad sobre prácticas saludables',
-      imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
-      imageAlt: 'Promotora de salud en la comunidad',
-      fileName: 'promotora-salud.jpg',
-      fileSize: 1200000,
-      fileType: 'image/jpeg',
-      isActive: true,
-      isFeatured: true,
-        createdBy: gestor.id,
-        programaId: programa2.id,
+    // ==========================================
+    // IMAGENES DE LA GALERÍA (ImageLibrary)
+    // ==========================================
+    console.log('🖼️ Creando galería de imágenes...');
+    const imageLibrary = await prisma.imageLibrary.createMany({
+      data: [
+        {
+          title: 'Taller de nutrición infantil',
+          description: 'Niños participando en taller de educación nutricional',
+          imageUrl: 'https://images.unsplash.com/photo-1565501631754-4c066ae82486',
+          imageAlt: 'Taller de nutrición',
+          isActive: true,
+          isFeatured: true,
+          programId: programasCreated[0].id,
+          createdBy: admin.id,
         },
-      });
+        {
+          title: 'Aula rural - Escuela multigrado',
+          description: 'Docente trabajando con estudiantes en aula rural',
+          imageUrl: 'https://images.unsplash.com/photo-1580584126903-c17d41801450',
+          imageAlt: 'Aula rural',
+          isActive: true,
+          isFeatured: true,
+          programId: programasCreated[1].id,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Taller de emprendimiento',
+          description: 'Mujeres en taller de elaboración de productos',
+          imageUrl: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68',
+          imageAlt: 'Taller emprendimiento',
+          isActive: true,
+          isFeatured: false,
+          programId: programasCreated[2].id,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Galería de imágenes creada:', imageLibrary.count);
 
-    console.log('✅ Biblioteca de imágenes creada');
+    // ==========================================
+    // METODOLOGÍAS
+    // ==========================================
+    console.log('📖 Creando metodologías...');
+    const metodologias = await prisma.methodology.createMany({
+      data: [
+        {
+          title: 'Metodología de Aprendizaje Activo',
+          description: 'Enfoque pedagógico que promueve la participación activa de los estudiantes mediante dinámicas grupales y proyectos colaborativos.',
+          shortDescription: 'Metodología participativa para educación rural',
+          ageGroup: '5 a 18 años',
+          sectors: ['EDUCATION', 'PROTECTION'],
+          targetAudience: 'Docentes y estudiantes de escuelas rurales',
+          objectives: 'Mejorar el aprendizaje significativo y desarrollar competencias básicas',
+          implementation: 'Talleres de capacitación docente, acompañamiento pedagógico',
+          results: 'Mejora del 40% en comprensión lectora y habilidades matemáticas',
+          methodology: 'Aprendizaje basado en proyectos, trabajo colaborativo',
+          resources: 'Materiales educativos contextualizados, kits pedagógicos',
+          evaluation: 'Evaluación continua mediante portafolios y proyectos',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Modelo de Intervención en Salud Comunitaria',
+          description: 'Estrategia integral para mejorar la salud infantil mediante actividades preventivas y educativas.',
+          shortDescription: 'Intervención en salud comunitaria',
+          ageGroup: '0 a 12 años',
+          sectors: ['HEALTH', 'SUSTAINABILITY'],
+          targetAudience: 'Niños, madres y familias en comunidades rurales',
+          objectives: 'Reducir enfermedades prevenibles y mejorar hábitos saludables',
+          implementation: 'Campañas de vacunación, talleres de salud familiar',
+          results: '85% de menores con controles de salud regulares',
+          methodology: 'Participación comunitaria, promotores de salud',
+          resources: 'Materiales educativos, equipos médicos básicos',
+          evaluation: 'Indicadores de salud, reportes mensuales',
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Programa de Empoderamiento Económico',
+          description: 'Modelo para fortalecer capacidades empresariales de mujeres mediante formación técnica y financiera.',
+          shortDescription: 'Empoderamiento económico de mujeres',
+          ageGroup: 'Adultas',
+          sectors: ['LIVELIHOODS', 'SUSTAINABILITY'],
+          targetAudience: 'Mujeres emprendedoras y en situación de vulnerabilidad',
+          objectives: 'Mejorar ingresos familiares y promover emprendimientos sostenibles',
+          implementation: 'Capacitación técnica, apoyo a microempresas, redes de comercio',
+          results: '70% de mujeres con ingresos propios, 180 microempresas',
+          methodology: 'Capacitación por competencias, acompañamiento técnico',
+          resources: 'Microcréditos, herramientas de trabajo, espacios productivos',
+          evaluation: 'Seguimiento mensual, indicadores de ingresos',
+          isActive: true,
+          isFeatured: false,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Metodologías creadas:', metodologias.count);
 
-    console.log('🎉 ¡Seed completado exitosamente!');
-    console.log('\n📊 Resumen de datos creados:');
-    console.log(`👥 Usuarios: 2`);
-    console.log(`📚 Programas: 3`);
-    console.log(`🔬 Metodologías: 2`);
-    console.log(`🚀 Proyectos: 2`);
-    console.log(`📰 Noticias: 4 (con relaciones a programas, metodologías y proyectos)`);
-    console.log(`📅 Eventos: 2`);
-    console.log(`📖 Historias: 2`);
-    console.log(`🤝 Aliados: 2`);
-    console.log(`📁 Recursos: 2`);
-    console.log(`🎥 Testimonios: 2`);
-    console.log(`📄 Documentos: 2`);
-    console.log(`🖼️ Imágenes: 2`);
+    const metodologiasCreated = await prisma.methodology.findMany();
 
-    console.log('\n🔑 Credenciales de acceso:');
-    console.log('Administrador: admin@estrellasur.com / Admin123!');
-    console.log('Gestor: gestor@estrellasur.com / Gestor123!');
+    // ==========================================
+    // PROYECTOS
+    // ==========================================
+    console.log('🏗️ Creando proyectos...');
+    const proyectos = await prisma.project.createMany({
+      data: [
+        {
+          title: 'Proyecto de Modernización de Escuelas Rurales',
+          executionStart: new Date('2024-01-15'),
+          executionEnd: new Date('2024-12-31'),
+          context: 'Zonas rurales con infraestructura escolar deficiente',
+          objectives: 'Mejorar infraestructura y dotar de recursos educativos',
+          content: 'Renovación de aulas, instalación de bibliotecas, equipamiento tecnológico',
+          strategicAllies: 'Ministerio de Educación, Gobierno Regional',
+          financing: 'Fundación internacional, Cooperación internacional',
+          imageUrl: 'https://images.unsplash.com/photo-1497486751825-1233686d5d80',
+          imageAlt: 'Escuela rural modernizada',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Campaña Nacional de Vacunación 2024',
+          executionStart: new Date('2024-03-01'),
+          executionEnd: new Date('2024-11-30'),
+          context: 'Comunidades rurales con baja cobertura de vacunación',
+          objectives: 'Inmunizar a más de 5,000 niños contra enfermedades prevenibles',
+          content: 'Brigadas móviles, jornadas de vacunación, registro actualizado',
+          strategicAllies: 'Ministerio de Salud, Centros de salud comunales',
+          financing: 'Organismos internacionales, contribuciones locales',
+          imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5',
+          imageAlt: 'Campaña de vacunación',
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Red de Huertos Comunitarios',
+          executionStart: new Date('2024-02-01'),
+          executionEnd: new Date('2024-12-15'),
+          context: 'Comunidades con alta inseguridad alimentaria',
+          objectives: 'Crear 300 huertos familiares productivos',
+          content: 'Capacitación técnica, provisión de semillas, seguimiento constante',
+          strategicAllies: 'AGRICOL, Cooperativas locales',
+          financing: 'Fondo de desarrollo local, aportes de socios',
+          imageUrl: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b',
+          imageAlt: 'Huerto comunitario',
+          isActive: true,
+          isFeatured: false,
+          createdBy: gestor.id,
+        },
+      ],
+    });
+    console.log('✅ Proyectos creados:', proyectos.count);
 
-    console.log('\n🔗 Relaciones creadas:');
-    console.log(`- Noticia 1 vinculada al Programa: ${programa1.nombreSector}`);
-    console.log(`- Noticia 2 vinculada al Programa: ${programa2.nombreSector}`);
-    console.log(`- Noticia 3 vinculada a la Metodología: ${metodologia1.title}`);
-    console.log(`- Noticia 4 vinculada al Proyecto: ${proyecto1.title}`);
+    const proyectosCreated = await prisma.project.findMany();
+
+    // ==========================================
+    // NOTICIAS
+    // ==========================================
+    console.log('📰 Creando noticias...');
+    const noticias = await prisma.news.createMany({
+      data: [
+        {
+          title: 'Más de 1,200 niños vacunados en campaña de salud',
+          content: 'La campaña nacional de vacunación de Estrella Sur ha logrado inmunizar a más de 1,200 niños en zonas rurales durante el primer trimestre del año.',
+          excerpt: 'Campaña de vacunación logra impacto positivo en comunidades rurales',
+          imageUrl: 'https://images.unsplash.com/photo-1530018607912-eff2daa1adb4',
+          imageAlt: 'Niños recibiendo vacunación',
+          isActive: true,
+          isFeatured: true,
+          publishedAt: new Date('2024-06-15'),
+          programId: programasCreated[0].id,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Taller de emprendimiento beneficia a 45 mujeres',
+          content: 'El taller de emprendimiento y capacitación técnica benefició a 45 mujeres de comunidades rurales, quienes desarrollaron habilidades para iniciar sus propios negocios.',
+          excerpt: 'Mujeres rurales se capacitan en emprendimiento e iniciación de negocios',
+          imageUrl: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5',
+          imageAlt: 'Taller de emprendimiento',
+          isActive: true,
+          isFeatured: true,
+          methodologyId: metodologiasCreated[2].id,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Escuela rural estrena nueva infraestructura educativa',
+          content: 'La escuela de la comunidad de San José ha estrenado modernas instalaciones educativas, mejorando significativamente el ambiente de aprendizaje para 180 estudiantes.',
+          excerpt: 'Nueva infraestructura escolar beneficia a estudiantes rurales',
+          imageUrl: 'https://images.unsplash.com/photo-1571260899304-425eee4c7efc',
+          imageAlt: 'Nueva escuela rural',
+          isActive: true,
+          isFeatured: false,
+          projectId: proyectosCreated[0].id,
+          createdBy: asesor.id,
+        },
+        {
+          title: 'Capacitación docente impacta a 150 profesionales',
+          content: 'Programa de capacitación docente ha formado a 150 profesores en metodologías activas de enseñanza, mejorando la calidad educativa en zonas rurales.',
+          excerpt: 'Docentes rurales se capacitan en metodologías innovadoras',
+          imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
+          imageAlt: 'Capacitación docente',
+          isActive: true,
+          isFeatured: false,
+          programId: programasCreated[1].id,
+          methodologyId: metodologiasCreated[0].id,
+          createdBy: admin.id,
+        },
+      ],
+    });
+    console.log('✅ Noticias creadas:', noticias.count);
+
+    // ==========================================
+    // EVENTOS
+    // ==========================================
+    console.log('📅 Creando eventos...');
+    const eventos = await prisma.event.createMany({
+      data: [
+        {
+          title: 'Jornada de Salud Infantil 2024',
+          description: 'Gran jornada de atención pediátrica, vacunación y talleres de nutrición infantil para familias de comunidades rurales.',
+          imageUrl: 'https://images.unsplash.com/photo-1551818255-c9b361f6c9c2',
+          imageAlt: 'Jornada de salud infantil',
+          eventDate: new Date('2024-09-15T09:00:00'),
+          location: 'Plaza Principal - Centro de la ciudad',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Feria de Emprendedoras',
+          description: 'Exposición y venta de productos elaborados por mujeres participantes del programa de emprendimiento.',
+          imageUrl: 'https://images.unsplash.com/photo-1524820197278-540916411e20',
+          imageAlt: 'Feria de emprendedoras',
+          eventDate: new Date('2024-10-20T14:00:00'),
+          location: 'Centro Comunitario Los Olivos',
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Congreso de Educación Rural',
+          description: 'Encuentro académico sobre innovación educativa en zonas rurales con expertos nacionales e internacionales.',
+          imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
+          imageAlt: 'Congreso educación rural',
+          eventDate: new Date('2024-11-08T08:00:00'),
+          location: 'Centro de Convenciones',
+          isActive: true,
+          isFeatured: false,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Eventos creados:', eventos.count);
+
+    // ==========================================
+    // ALIADOS ESTRATÉGICOS
+    // ==========================================
+    console.log('🤝 Creando aliados estratégicos...');
+    const aliados = await prisma.ally.createMany({
+      data: [
+        {
+          id: 'ally-1',
+          name: 'Ministerio de Educación',
+          role: 'Aliado Gubernamental',
+          description: 'Apoyo en programas de educación rural y capacitación docente',
+          imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d',
+          imageAlt: 'Logo Ministerio de Educación',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          id: 'ally-2',
+          name: 'Fundación Internacional para el Desarrollo',
+          role: 'Organización Cooperante',
+          description: 'Financiamiento y acompañamiento técnico en proyectos de desarrollo',
+          imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3',
+          imageAlt: 'Logo FID',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          id: 'ally-3',
+          name: 'Cooperativa AGRICOL',
+          role: 'Aliado Comunitario',
+          description: 'Apoyo en programas de seguridad alimentaria y huertos comunitarios',
+          imageUrl: 'https://images.unsplash.com/photo-1500835556837-99ac94a94552',
+          imageAlt: 'Logo AGRICOL',
+          isActive: true,
+          isFeatured: false,
+          createdBy: gestor.id,
+        },
+        {
+          id: 'ally-4',
+          name: 'Gobierno Regional',
+          role: 'Aliado Gubernamental',
+          description: 'Coordinación en programas de desarrollo social',
+          imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab',
+          imageAlt: 'Logo Gobierno Regional',
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+      ],
+    });
+    console.log('✅ Aliados creados:', aliados.count);
+
+    // ==========================================
+    // HISTORIAS
+    // ==========================================
+    console.log('📖 Creando historias...');
+    const historias = await prisma.story.createMany({
+      data: [
+        {
+          id: 'story-1',
+          title: 'Ana y su camino hacia la independencia económica',
+          content: 'Ana, una madre soltera de 28 años, participó en nuestro programa de emprendimiento y hoy dirige su propio negocio de artesanías, generando ingresos suficientes para mantener a su familia.',
+          summary: 'Historia de empoderamiento económico de una madre soltera',
+          imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
+          imageAlt: 'Ana en su taller',
+          isActive: true,
+          createdBy: gestor.id,
+        },
+        {
+          id: 'story-2',
+          title: 'José, de la desnutrición a una vida saludable',
+          content: 'José, un niño de 6 años, superó la desnutrición gracias al programa de seguridad alimentaria que instaló un huerto familiar en su hogar.',
+          summary: 'Historia de superación de desnutrición infantil',
+          imageUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9',
+          imageAlt: 'José en su huerto',
+          isActive: true,
+          createdBy: admin.id,
+        },
+        {
+          id: 'story-3',
+          title: 'María Elena: Maestra transformadora',
+          content: 'María Elena, docente rural por 15 años, transformó su metodología de enseñanza gracias a nuestra capacitación, mejorando el aprendizaje de 120 estudiantes.',
+          summary: 'Historia de transformación educativa',
+          imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+          imageAlt: 'María Elena enseñando',
+          isActive: true,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Historias creadas:', historias.count);
+
+    // ==========================================
+    // VIDEOS TESTIMONIALES
+    // ==========================================
+    console.log('🎥 Creando videos testimoniales...');
+    const videos = await prisma.videoTestimonial.createMany({
+      data: [
+        {
+          title: 'Testimonio: Rosa y su emprendimiento',
+          description: 'Rosa comparte cómo el programa de emprendimiento cambió su vida y la de su familia',
+          youtubeUrl: 'https://www.youtube.com/watch?v=test1',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1521521875411-21ea7c42a9fe',
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Testimonio: Comunidad beneficiada con salud',
+          description: 'Comunidad rural comparte su experiencia con el programa de salud infantil',
+          youtubeUrl: 'https://www.youtube.com/watch?v=test2',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Testimonio: Docente transformada',
+          description: 'Profesora María comparte cómo las capacitaciones mejoraron su práctica docente',
+          youtubeUrl: 'https://www.youtube.com/watch?v=test3',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
+          isActive: true,
+          isFeatured: false,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Videos testimoniales creados:', videos.count);
+
+    // ==========================================
+    // RECURSOS
+    // ==========================================
+    console.log('📁 Creando recursos...');
+    const recursos = await prisma.resource.createMany({
+      data: [
+        {
+          title: 'Guía de Nutrición Infantil',
+          description: 'Manual completo sobre alimentación complementaria para menores de 2 años',
+          fileName: 'guia-nutricion-infantil.pdf',
+          fileUrl: 'https://www.example.com/resources/guia-nutricion.pdf',
+          fileSize: 2048000,
+          fileType: 'application/pdf',
+          category: 'PUBLICATIONS',
+          subcategory: 'MANUALS',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1488196749152-4c3e5e09e2ec',
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Serie: Aprendiendo en Casa',
+          description: 'Videos educativos para padres sobre desarrollo infantil temprano',
+          fileName: 'serie-aprendiendo-en-casa.mp4',
+          fileUrl: 'https://www.example.com/resources/serie-videos.mp4',
+          fileSize: 52428800,
+          fileType: 'video/mp4',
+          category: 'MULTIMEDIA_CENTER',
+          subcategory: 'VIDEOS',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b',
+          duration: 1800,
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Podcast: Historias de Éxito',
+          description: 'Serie de podcasts con testimonios de beneficiarios',
+          fileName: 'podcast-historias-exito.mp3',
+          fileUrl: 'https://www.example.com/resources/podcasts.mp3',
+          fileSize: 10485760,
+          fileType: 'audio/mpeg',
+          category: 'MULTIMEDIA_CENTER',
+          subcategory: 'AUDIOS',
+          thumbnailUrl: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618',
+          duration: 1200,
+          isActive: true,
+          isFeatured: false,
+          createdBy: asesor.id,
+        },
+      ],
+    });
+    console.log('✅ Recursos creados:', recursos.count);
+
+    // ==========================================
+    // DOCUMENTOS DE TRANSPARENCIA
+    // ==========================================
+    console.log('📄 Creando documentos de transparencia...');
+    const transparencia = await prisma.transparencyDocument.createMany({
+      data: [
+        {
+          title: 'Memoria Anual 2023',
+          description: 'Reporte completo de actividades y resultados del año 2023',
+          fileName: 'memoria-anual-2023.pdf',
+          fileUrl: 'https://www.example.com/transparency/memoria-2023.pdf',
+          fileSize: 5120000,
+          fileType: 'application/pdf',
+          category: 'ANNUAL_REPORTS',
+          year: 2023,
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Estados Financieros 2024',
+          description: 'Balance general y estado de resultados del primer semestre 2024',
+          fileName: 'estados-financieros-2024.pdf',
+          fileUrl: 'https://www.example.com/transparency/estados-2024.pdf',
+          fileSize: 1024000,
+          fileType: 'application/pdf',
+          category: 'ACCOUNTABILITY',
+          year: 2024,
+          isActive: true,
+          isFeatured: true,
+          createdBy: admin.id,
+        },
+        {
+          title: 'Proyecto Inversión Pública',
+          description: 'Documentación del proyecto de inversión aprobado por el Estado',
+          fileName: 'proyecto-inversion-publica.pdf',
+          fileUrl: 'https://www.example.com/transparency/inversion-publica.pdf',
+          fileSize: 2048000,
+          fileType: 'application/pdf',
+          category: 'DOCUMENT_CENTER',
+          year: 2024,
+          isActive: true,
+          isFeatured: false,
+          createdBy: gestor.id,
+        },
+        {
+          title: 'Convenios de Cooperación',
+          description: 'Convenios firmados con organizaciones internacionales y aliados',
+          fileName: 'convenios-cooperacion.pdf',
+          fileUrl: 'https://www.example.com/transparency/convenios.pdf',
+          fileSize: 3072000,
+          fileType: 'application/pdf',
+          category: 'FINANCIERS_AND_ALLIES',
+          year: 2024,
+          isActive: true,
+          isFeatured: true,
+          createdBy: gestor.id,
+        },
+      ],
+    });
+    console.log('✅ Documentos de transparencia creados:', transparencia.count);
+
+    // ==========================================
+    // PROYECTOS DE DONACIÓN
+    // ==========================================
+    console.log('💰 Creando proyectos de donación...');
+    const donationProjects = await prisma.donationProject.createMany({
+      data: [
+        {
+          title: 'Alimentación Escolar 2024',
+          description: 'Proyecto para proporcionar desayunos y almuerzos nutritivos a 500 estudiantes de escuelas rurales',
+          context: 'Estudiantes de zonas rurales enfrentan inseguridad alimentaria que afecta su aprendizaje',
+          objectives: 'Garantizar al menos una comida nutritiva diaria para estudiantes vulnerables',
+          executionStart: new Date('2024-08-01'),
+          executionEnd: new Date('2024-12-31'),
+          accountNumber: '1234567890',
+          recipientName: 'Estrella Sur - Alimentación Escolar',
+          qrImageUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e',
+          targetAmount: 25000.00,
+          currentAmount: 15200.50,
+          isActive: true,
+          isCompleted: false,
+          isFeatured: true,
+        },
+        {
+          title: 'Construcción de Aulas',
+          description: 'Construcción de 3 nuevas aulas para ampliar capacidad de escuela rural',
+          context: 'Escuela rural necesita ampliar infraestructura para más estudiantes',
+          objectives: 'Construir 3 aulas funcionales con mobiliario y equipamiento básico',
+          executionStart: new Date('2024-07-01'),
+          executionEnd: new Date('2025-06-30'),
+          accountNumber: '0987654321',
+          recipientName: 'Estrella Sur - Infraestructura Escolar',
+          targetAmount: 45000.00,
+          currentAmount: 28000.00,
+          isActive: true,
+          isCompleted: false,
+          isFeatured: true,
+        },
+        {
+          title: 'Emergencia: Inundaciones',
+          description: 'Ayuda urgente para familias afectadas por inundaciones',
+          context: 'Inundaciones han dejado a 200 familias sin hogar ni alimentos',
+          objectives: 'Brindar alimentos, vivienda temporal y kits de limpieza',
+          executionStart: new Date('2024-06-15'),
+          executionEnd: new Date('2024-09-30'),
+          accountNumber: '5555555555',
+          recipientName: 'Estrella Sur - Emergencias',
+          qrImageUrl: 'https://images.unsplash.com/photo-1582435512280-8d5e23785f9b',
+          targetAmount: 15000.00,
+          currentAmount: 8750.00,
+          isActive: true,
+          isCompleted: false,
+          isFeatured: false,
+        },
+      ],
+    });
+    console.log('✅ Proyectos de donación creados:', donationProjects.count);
+
+    const donationProjectsCreated = await prisma.donationProject.findMany();
+
+    // ==========================================
+    // DONACIONES
+    // ==========================================
+    console.log('💝 Creando donaciones...');
+    await prisma.donation.createMany({
+      data: [
+        {
+          donorName: 'Juan Pérez',
+          donorEmail: 'juan@example.com',
+          donorAddress: 'Av. Principal 123',
+          donorPhone: '999888777',
+          amount: 500.00,
+          donationType: 'SPECIFIC_PROJECT',
+          message: 'Espero que ayude a los niños',
+          status: 'APPROVED',
+          donationProjectId: donationProjectsCreated[0].id,
+          bankTransferImage: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3',
+          approvedBy: admin.id,
+          approvedAt: new Date('2024-06-20'),
+        },
+        {
+          donorName: 'María González',
+          donorEmail: 'maria@example.com',
+          donorAddress: 'Jr. Los Olivos 456',
+          donorPhone: '999777666',
+          amount: 250.00,
+          donationType: 'EMERGENCY',
+          message: 'Para ayudar en las emergencias',
+          status: 'APPROVED',
+          donationProjectId: donationProjectsCreated[2].id,
+          approvedBy: admin.id,
+          approvedAt: new Date('2024-06-18'),
+        },
+        {
+          donorName: 'Carlos Ramírez',
+          donorEmail: 'carlos@example.com',
+          donorAddress: 'Calle Libertad 789',
+          donorPhone: '999666555',
+          amount: 1000.00,
+          donationType: 'SPECIFIC_PROJECT',
+          donationProjectId: donationProjectsCreated[1].id,
+          status: 'PENDING',
+        },
+      ],
+    });
+    console.log('✅ Donaciones creadas: 3');
+
+    // ==========================================
+    // METAS ANUALES
+    // ==========================================
+    console.log('🎯 Creando metas anuales...');
+    await prisma.annualGoal.createMany({
+      data: [
+        {
+          year: 2024,
+          targetAmount: 100000.00,
+          currentAmount: 62500.00,
+          description: 'Meta anual para programas de desarrollo social',
+          isActive: true,
+          isFeatured: true,
+        },
+        {
+          year: 2023,
+          targetAmount: 85000.00,
+          currentAmount: 87500.00,
+          description: 'Meta anual 2023 cumplida exitosamente',
+          isActive: false,
+          isFeatured: true,
+        },
+        {
+          year: 2025,
+          targetAmount: 120000.00,
+          currentAmount: 0.00,
+          description: 'Meta anual proyectada para 2025',
+          isActive: true,
+          isFeatured: false,
+        },
+      ],
+    });
+    console.log('✅ Metas anuales creadas: 3');
+
+    // ==========================================
+    // RESUMEN FINAL
+    // ==========================================
+    console.log('\n🎉 ¡Seed completado exitosamente!');
+    console.log('\n📊 Resumen:');
+    console.log('👥 Usuarios: 3');
+    console.log('📚 Programas: 5');
+    console.log('📖 Metodologías: 3');
+    console.log('🏗️ Proyectos: 3');
+    console.log('📰 Noticias: 4');
+    console.log('📅 Eventos: 3');
+    console.log('🤝 Aliados: 4');
+    console.log('📖 Historias: 3');
+    console.log('🎥 Videos testimoniales: 3');
+    console.log('📁 Recursos: 3');
+    console.log('📄 Documentos de transparencia: 4');
+    console.log('💰 Proyectos de donación: 3');
+    console.log('💝 Donaciones: 3');
+    console.log('🎯 Metas anuales: 3');
+    console.log('🖼️ Imágenes en galería: 3');
+    console.log('\n🔑 Credenciales:');
+    console.log('Admin: admin@estrellasur.org / Admin123!');
+    console.log('Gestor: gestor@estrellasur.org / Gestor123!');
+    console.log('Asesor: asesor@estrellasur.org / Asesor123!');
+    console.log('\n✨ Base de datos completamente poblada con datos realistas para Estrella Sur');
 
   } catch (error) {
     console.error('❌ Error durante el seed:', error);
@@ -539,7 +847,6 @@ async function main() {
   }
 }
 
-// Ejecutar el seed
 main()
   .catch((e) => {
     console.error('❌ Error fatal:', e);

@@ -26,10 +26,20 @@ interface ImageGalleryItem {
   imageUrl: string;
   imageAlt?: string;
   title?: string;
-  programaId: string;
-  programa?: {
+  programId?: string;
+  projectId?: string;
+  methodologyId?: string;
+  program?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
+  };
+  project?: {
+    id: string;
+    title: string;
+  };
+  methodology?: {
+    id: string;
+    title: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -37,16 +47,28 @@ interface ImageGalleryItem {
 
 interface Programa {
   id: string;
-  nombreSector: string;
+  sectorName: string;
+}
+
+interface Proyecto {
+  id: string;
+  title: string;
+}
+
+interface Iniciativa {
+  id: string;
+  title: string;
 }
 
 export function ImageGalleryManagement() {
   const { toast } = useToast();
   const [images, setImages] = useState<ImageGalleryItem[]>([]);
   const [programas, setProgramas] = useState<Programa[]>([]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [iniciativas, setIniciativas] = useState<Iniciativa[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPrograma, setSelectedPrograma] = useState<string>('all');
+  const [filterType, setFilterType] = useState<'all' | 'program' | 'project' | 'methodology'>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingImage, setEditingImage] = useState<ImageGalleryItem | null>(null);
@@ -54,12 +76,17 @@ export function ImageGalleryManagement() {
     imageUrl: '',
     imageAlt: '',
     title: '',
-    programaId: ''
+    programId: '',
+    projectId: '',
+    methodologyId: '',
+    relationType: 'program' as 'program' | 'project' | 'methodology'
   });
 
   useEffect(() => {
     fetchImages();
     fetchProgramas();
+    fetchProyectos();
+    fetchIniciativas();
   }, []);
 
   const fetchImages = async () => {
@@ -105,15 +132,66 @@ export function ImageGalleryManagement() {
     }
   };
 
+  const fetchProyectos = async () => {
+    try {
+      const response = await fetch('/api/admin/projects?limit=1000', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const proyectosArray = data.projects || [];
+        console.log('Proyectos cargados:', proyectosArray.length);
+        setProyectos(proyectosArray);
+      }
+    } catch (error) {
+      console.error('Error fetching proyectos:', error);
+      setProyectos([]);
+    }
+  };
+
+  const fetchIniciativas = async () => {
+    try {
+      const response = await fetch('/api/admin/methodologies?limit=1000', {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const iniciativasArray = data.methodologies || [];
+        console.log('Iniciativas cargadas:', iniciativasArray.length);
+        setIniciativas(iniciativasArray);
+      }
+    } catch (error) {
+      console.error('Error fetching iniciativas:', error);
+      setIniciativas([]);
+    }
+  };
+
   const handleAddImage = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
+      // Preparar payload según el tipo de relación
+      const payload: any = {
+        imageUrl: formData.imageUrl,
+        imageAlt: formData.imageAlt,
+        title: formData.title
+      };
+
+      if (formData.relationType === 'program') {
+        payload.programId = formData.programId;
+      } else if (formData.relationType === 'project') {
+        payload.projectId = formData.projectId;
+      } else if (formData.relationType === 'methodology') {
+        payload.methodologyId = formData.methodologyId;
+      }
+
       const response = await fetch('/api/admin/image-gallery', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -127,7 +205,15 @@ export function ImageGalleryManagement() {
       });
       
       setShowAddDialog(false);
-      setFormData({ imageUrl: '', imageAlt: '', title: '', programaId: '' });
+      setFormData({ 
+        imageUrl: '', 
+        imageAlt: '', 
+        title: '', 
+        programId: '', 
+        projectId: '', 
+        methodologyId: '', 
+        relationType: 'program' 
+      });
       fetchImages();
     } catch (error) {
       console.error('Error adding image:', error);
@@ -145,11 +231,26 @@ export function ImageGalleryManagement() {
     if (!editingImage) return;
 
     try {
+      // Preparar payload según el tipo de relación
+      const payload: any = {
+        imageUrl: formData.imageUrl,
+        imageAlt: formData.imageAlt,
+        title: formData.title
+      };
+
+      if (formData.relationType === 'program') {
+        payload.programId = formData.programId;
+      } else if (formData.relationType === 'project') {
+        payload.projectId = formData.projectId;
+      } else if (formData.relationType === 'methodology') {
+        payload.methodologyId = formData.methodologyId;
+      }
+
       const response = await fetch(`/api/admin/image-gallery/${editingImage.id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -164,7 +265,15 @@ export function ImageGalleryManagement() {
       
       setShowEditDialog(false);
       setEditingImage(null);
-      setFormData({ imageUrl: '', imageAlt: '', title: '', programaId: '' });
+      setFormData({ 
+        imageUrl: '', 
+        imageAlt: '', 
+        title: '', 
+        programId: '', 
+        projectId: '', 
+        methodologyId: '', 
+        relationType: 'program' 
+      });
       fetchImages();
     } catch (error) {
       console.error('Error updating image:', error);
@@ -208,11 +317,32 @@ export function ImageGalleryManagement() {
 
   const openEditDialog = (image: ImageGalleryItem) => {
     setEditingImage(image);
+    
+    // Determinar el tipo de relación
+    let relationType: 'program' | 'project' | 'methodology' = 'program';
+    let programId = '';
+    let projectId = '';
+    let methodologyId = '';
+
+    if (image.programId) {
+      relationType = 'program';
+      programId = image.programId;
+    } else if (image.projectId) {
+      relationType = 'project';
+      projectId = image.projectId;
+    } else if (image.methodologyId) {
+      relationType = 'methodology';
+      methodologyId = image.methodologyId;
+    }
+
     setFormData({
       imageUrl: image.imageUrl,
       imageAlt: image.imageAlt || '',
       title: image.title || '',
-      programaId: image.programaId
+      programId,
+      projectId,
+      methodologyId,
+      relationType
     });
     setShowEditDialog(true);
   };
@@ -220,11 +350,20 @@ export function ImageGalleryManagement() {
   const filteredImages = images.filter(image => {
     const matchesSearch = image.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          image.imageAlt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         image.programa?.nombreSector.toLowerCase().includes(searchTerm.toLowerCase());
+                         image.program?.sectorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         image.project?.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         image.methodology?.title.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesPrograma = selectedPrograma === 'all' || image.programaId === selectedPrograma;
+    let matchesFilter = true;
+    if (filterType === 'program') {
+      matchesFilter = !!image.programId;
+    } else if (filterType === 'project') {
+      matchesFilter = !!image.projectId;
+    } else if (filterType === 'methodology') {
+      matchesFilter = !!image.methodologyId;
+    }
     
-    return matchesSearch && matchesPrograma;
+    return matchesSearch && matchesFilter;
   });
 
   if (loading) {
@@ -245,7 +384,7 @@ export function ImageGalleryManagement() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Galería de Imágenes</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Gestiona las imágenes de los programas
+            Gestiona las imágenes de programas, proyectos e iniciativas
           </p>
         </div>
         <Button onClick={() => setShowAddDialog(true)} className="flex items-center gap-2">
@@ -257,33 +396,33 @@ export function ImageGalleryManagement() {
       {/* Filtros y búsqueda */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Buscar por título, descripción o programa..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Buscar por título, descripción, programa, proyecto o iniciativa..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="sm:w-64">
-              <Select value={selectedPrograma} onValueChange={setSelectedPrograma}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filtrar por programa" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los programas</SelectItem>
-                  {Array.isArray(programas) && programas.map((programa) => (
-                    <SelectItem key={programa.id} value={programa.id}>
-                      {programa.nombreSector}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="sm:w-64">
+                <Select value={filterType} onValueChange={(value) => setFilterType(value as any)}>
+                  <SelectTrigger>
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Filtrar por tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas las imágenes</SelectItem>
+                    <SelectItem value="program">Solo Programas</SelectItem>
+                    <SelectItem value="project">Solo Proyectos</SelectItem>
+                    <SelectItem value="methodology">Solo Iniciativas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -319,10 +458,22 @@ export function ImageGalleryManagement() {
                   </p>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {image.programa?.nombreSector || 'Programa no encontrado'}
-                  </Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  {image.program && (
+                    <Badge variant="secondary" className="text-xs">
+                      📋 {image.program.sectorName}
+                    </Badge>
+                  )}
+                  {image.project && (
+                    <Badge variant="secondary" className="text-xs">
+                      📁 {image.project.title}
+                    </Badge>
+                  )}
+                  {image.methodology && (
+                    <Badge variant="secondary" className="text-xs">
+                      💡 {image.methodology.title}
+                    </Badge>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-between text-xs text-gray-500">
@@ -365,7 +516,7 @@ export function ImageGalleryManagement() {
               No hay imágenes
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {searchTerm || selectedPrograma !== 'all' 
+              {searchTerm || filterType !== 'all' 
                 ? 'No se encontraron imágenes con los filtros aplicados.'
                 : 'Comienza agregando imágenes a la galería.'
               }
@@ -384,7 +535,7 @@ export function ImageGalleryManagement() {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Agregar Imagen a la Galería</DialogTitle>
             <DialogDescription>
-              Completa los campos para agregar una nueva imagen a la galería de programas
+              Completa los campos para agregar una nueva imagen a la galería
             </DialogDescription>
           </DialogHeader>
           
@@ -393,45 +544,106 @@ export function ImageGalleryManagement() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Básica</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="programaId" className="text-sm font-medium">Programa *</Label>
-                  <Select value={formData.programaId} onValueChange={(value) => setFormData({...formData, programaId: value})}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecciona un programa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(programas) && programas.length > 0 ? (
-                        programas.map((programa) => (
-                          <SelectItem key={programa.id} value={programa.id}>
-                            {programa.nombreSector}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="" disabled>
-                          No hay programas disponibles
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {programas.length === 0 && (
-                    <p className="text-sm text-red-600">
-                      ⚠️ No se pudieron cargar los programas. Verifica tu conexión.
-                    </p>
-                  )}
-                </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Tipo de Relación *</Label>
+                <Select value={formData.relationType} onValueChange={(value) => setFormData({...formData, relationType: value as any})}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecciona el tipo de relación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="program">📋 Programa</SelectItem>
+                    <SelectItem value="project">📁 Proyecto</SelectItem>
+                    <SelectItem value="methodology">💡 Iniciativa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl" className="text-sm font-medium">URL de la Imagen *</Label>
-                  <Input
-                    id="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                    className="h-10"
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.relationType === 'program' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="programId" className="text-sm font-medium">Programa *</Label>
+                    <Select value={formData.programId} onValueChange={(value) => setFormData({...formData, programId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona un programa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(programas) && programas.length > 0 ? (
+                          programas.map((programa) => (
+                            <SelectItem key={programa.id} value={programa.id}>
+                              {programa.sectorName}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay programas disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {formData.relationType === 'project' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="projectId" className="text-sm font-medium">Proyecto *</Label>
+                    <Select value={formData.projectId} onValueChange={(value) => setFormData({...formData, projectId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona un proyecto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(proyectos) && proyectos.length > 0 ? (
+                          proyectos.map((proyecto) => (
+                            <SelectItem key={proyecto.id} value={proyecto.id}>
+                              {proyecto.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay proyectos disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {formData.relationType === 'methodology' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="methodologyId" className="text-sm font-medium">Iniciativa *</Label>
+                    <Select value={formData.methodologyId} onValueChange={(value) => setFormData({...formData, methodologyId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona una iniciativa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(iniciativas) && iniciativas.length > 0 ? (
+                          iniciativas.map((iniciativa) => (
+                            <SelectItem key={iniciativa.id} value={iniciativa.id}>
+                              {iniciativa.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay iniciativas disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                {formData.relationType && (
+                  <div className="space-y-2">
+                    <Label htmlFor="imageUrl" className="text-sm font-medium">URL de la Imagen *</Label>
+                    <Input
+                      id="imageUrl"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                      placeholder="https://ejemplo.com/imagen.jpg"
+                      className="h-10"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -519,34 +731,93 @@ export function ImageGalleryManagement() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Información Básica</h3>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-programaId" className="text-sm font-medium">Programa *</Label>
-                  <Select value={formData.programaId} onValueChange={(value) => setFormData({...formData, programaId: value})}>
-                    <SelectTrigger className="h-10">
-                      <SelectValue placeholder="Selecciona un programa" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.isArray(programas) && programas.length > 0 ? (
-                        programas.map((programa) => (
-                          <SelectItem key={programa.id} value={programa.id}>
-                            {programa.nombreSector}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="" disabled>
-                          No hay programas disponibles
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {programas.length === 0 && (
-                    <p className="text-sm text-red-600">
-                      ⚠️ No se pudieron cargar los programas. Verifica tu conexión.
-                    </p>
-                  )}
-                </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Tipo de Relación *</Label>
+                <Select value={formData.relationType} onValueChange={(value) => setFormData({...formData, relationType: value as any})}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Selecciona el tipo de relación" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="program">📋 Programa</SelectItem>
+                    <SelectItem value="project">📁 Proyecto</SelectItem>
+                    <SelectItem value="methodology">💡 Iniciativa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formData.relationType === 'program' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-programId" className="text-sm font-medium">Programa *</Label>
+                    <Select value={formData.programId} onValueChange={(value) => setFormData({...formData, programId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona un programa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(programas) && programas.length > 0 ? (
+                          programas.map((programa) => (
+                            <SelectItem key={programa.id} value={programa.id}>
+                              {programa.sectorName}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay programas disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {formData.relationType === 'project' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-projectId" className="text-sm font-medium">Proyecto *</Label>
+                    <Select value={formData.projectId} onValueChange={(value) => setFormData({...formData, projectId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona un proyecto" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(proyectos) && proyectos.length > 0 ? (
+                          proyectos.map((proyecto) => (
+                            <SelectItem key={proyecto.id} value={proyecto.id}>
+                              {proyecto.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay proyectos disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {formData.relationType === 'methodology' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-methodologyId" className="text-sm font-medium">Iniciativa *</Label>
+                    <Select value={formData.methodologyId} onValueChange={(value) => setFormData({...formData, methodologyId: value})}>
+                      <SelectTrigger className="h-10">
+                        <SelectValue placeholder="Selecciona una iniciativa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.isArray(iniciativas) && iniciativas.length > 0 ? (
+                          iniciativas.map((iniciativa) => (
+                            <SelectItem key={iniciativa.id} value={iniciativa.id}>
+                              {iniciativa.title}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="" disabled>
+                            No hay iniciativas disponibles
+                          </SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
                 <div className="space-y-2">
                   <Label htmlFor="edit-imageUrl" className="text-sm font-medium">URL de la Imagen *</Label>
                   <Input

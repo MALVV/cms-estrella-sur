@@ -34,8 +34,8 @@ interface Resource {
   fileUrl: string;
   fileSize?: number;
   fileType?: string;
-  category: 'CENTRO_MULTIMEDIA' | 'PUBLICACIONES';
-  subcategory?: 'VIDEOS' | 'AUDIOS' | 'REPRODUCTOR_INTEGRADO' | 'BIBLIOTECA_DIGITAL' | 'GUIAS_DESCARGABLES' | 'MANUALES';
+  category: 'MULTIMEDIA_CENTER' | 'PUBLICATIONS';
+  subcategory?: 'VIDEOS' | 'AUDIOS' | 'DIGITAL_LIBRARY' | 'DOWNLOADABLE_GUIDES' | 'MANUALS';
   thumbnailUrl?: string;
   duration?: number;
   isActive: boolean;
@@ -51,7 +51,7 @@ interface Resource {
 }
 
 const categoryInfo = {
-  CENTRO_MULTIMEDIA: {
+  MULTIMEDIA_CENTER: {
     title: 'Centro Multimedia',
     description: 'Videos, audios y contenido multimedia interactivo',
     icon: PlayCircle,
@@ -62,32 +62,69 @@ const categoryInfo = {
       AUDIOS: { title: 'Audios', icon: Music, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
     }
   },
-  PUBLICACIONES: {
+  PUBLICATIONS: {
     title: 'Publicaciones',
     description: 'Biblioteca digital, guías y manuales descargables',
     icon: BookOpen,
     color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
     bgColor: 'bg-orange-50 dark:bg-orange-950',
     subcategories: {
-      BIBLIOTECA_DIGITAL: { title: 'Biblioteca Digital', icon: Library, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200' },
-      GUIAS_DESCARGABLES: { title: 'Guías Descargables', icon: FileDown, color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200' },
-      MANUALES: { title: 'Manuales', icon: Book, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' }
+      DIGITAL_LIBRARY: { title: 'Biblioteca Digital', icon: Library, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200' },
+      DOWNLOADABLE_GUIDES: { title: 'Guías Descargables', icon: FileDown, color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200' },
+      MANUALS: { title: 'Manuales', icon: Book, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' }
     }
   }
 };
 
+interface ImageGallery {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  imageAlt?: string;
+  createdAt: string;
+  program?: {
+    id: string;
+    sectorName: string;
+  };
+  project?: {
+    id: string;
+    title: string;
+  };
+  methodology?: {
+    id: string;
+    title: string;
+  };
+}
+
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
+  const [galleryImages, setGalleryImages] = useState<ImageGallery[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [galleryLoading, setGalleryLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'multimedia' | 'publications' | 'gallery'>('multimedia');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchResources = async () => {
     try {
       setLoading(true);
+      
+      // No cargar recursos si estamos en el tab de galería
+      if (activeTab === 'gallery') {
+        setLoading(false);
+        return;
+      }
+      
       const params = new URLSearchParams();
-      if (selectedCategory) params.append('category', selectedCategory);
+      
+      // Aplicar filtro por categoría según el tab activo
+      if (activeTab === 'multimedia') {
+        params.append('category', 'MULTIMEDIA_CENTER');
+      } else if (activeTab === 'publications') {
+        params.append('category', 'PUBLICATIONS');
+      }
+      
       if (selectedSubcategory) params.append('subcategory', selectedSubcategory);
       if (searchTerm) params.append('search', searchTerm);
       
@@ -104,9 +141,36 @@ export default function ResourcesPage() {
     }
   };
 
+  const fetchGalleryImages = async () => {
+    try {
+      setGalleryLoading(true);
+      const response = await fetch('/api/public/image-library?limit=12');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar imágenes');
+      }
+      
+      const data = await response.json();
+      setGalleryImages(data.images || []);
+    } catch (error) {
+      console.error('Error al cargar imágenes de galería:', error);
+    } finally {
+      setGalleryLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchResources();
-  }, [selectedCategory, selectedSubcategory, searchTerm]);
+  }, [activeTab, selectedSubcategory, searchTerm]);
+
+  useEffect(() => {
+    fetchGalleryImages();
+  }, []);
+
+  // Reset subcategory when tab changes
+  useEffect(() => {
+    setSelectedSubcategory('');
+  }, [activeTab]);
 
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return '';
@@ -174,64 +238,185 @@ export default function ResourcesPage() {
         </main>
       </div>
 
-      {/* Filtros y Búsqueda */}
+      {/* Búsqueda y Tabs */}
       <section className="py-8 bg-background-light dark:bg-background-dark">
         <div className="container mx-auto px-4">
-          <div className="bg-card-light dark:bg-card-dark rounded-lg p-6 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-text-light dark:text-text-dark mb-6 md:mb-0">
+              RECURSOS
+            </h2>
+            {/* Tabs */}
+            <div className="flex space-x-2 md:space-x-4">
+              <button 
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  activeTab === 'multimedia' 
+                    ? 'bg-blue-600 text-white shadow-lg' 
+                    : 'text-text-light dark:text-text-dark hover:bg-card-light dark:hover:bg-card-dark'
+                }`}
+                onClick={() => setActiveTab('multimedia')}
+              >
+                CENTRO MULTIMEDIA
+              </button>
+              <button 
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  activeTab === 'publications' 
+                    ? 'bg-orange-600 text-white shadow-lg' 
+                    : 'text-text-light dark:text-text-dark hover:bg-card-light dark:hover:bg-card-dark'
+                }`}
+                onClick={() => setActiveTab('publications')}
+              >
+                PUBLICACIONES
+              </button>
+              <button 
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  activeTab === 'gallery' 
+                    ? 'bg-purple-600 text-white shadow-lg' 
+                    : 'text-text-light dark:text-text-dark hover:bg-card-light dark:hover:bg-card-dark'
+                }`}
+                onClick={() => setActiveTab('gallery')}
+              >
+                GALERÍA
+              </button>
+            </div>
+          </div>
+
+          {/* Filtros */}
+          <div className="bg-card-light dark:bg-card-dark rounded-lg p-6 shadow-sm mb-2">
+            <div className={`grid grid-cols-1 ${activeTab === 'gallery' ? 'md:grid-cols-1' : 'md:grid-cols-2'} gap-4`}>
               {/* Búsqueda */}
-              <div className="md:col-span-2">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Buscar recursos..."
+                    placeholder={
+                      activeTab === 'gallery' 
+                        ? 'Buscar imágenes...' 
+                        : activeTab === 'multimedia'
+                        ? 'Buscar videos y audios...'
+                        : 'Buscar publicaciones...'
+                    }
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-                </div>
-              </div>
-
-              {/* Filtro por categoría */}
-              <div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => {
-                    setSelectedCategory(e.target.value);
-                    setSelectedSubcategory(''); // Reset subcategory when category changes
-                  }}
-                  className="w-full px-3 py-2 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Todas las categorías</option>
-                  {Object.entries(categoryInfo).map(([key, info]) => (
-                    <option key={key} value={key}>{info.title}</option>
-                  ))}
-                </select>
               </div>
 
               {/* Filtro por subcategoría */}
+              {activeTab !== 'gallery' && (
               <div>
                 <select
                   value={selectedSubcategory}
                   onChange={(e) => setSelectedSubcategory(e.target.value)}
                   className="w-full px-3 py-2 border border-border-light dark:border-border-dark rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-primary"
-                  disabled={!selectedCategory}
-                >
-                  <option value="">Todas las subcategorías</option>
-                  {selectedCategory && Object.entries(categoryInfo[selectedCategory as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
+                  >
+                    <option value="">
+                      {activeTab === 'multimedia' ? 'Todos los videos y audios' : 'Todas las publicaciones'}
+                    </option>
+                    {Object.entries(categoryInfo[activeTab === 'multimedia' ? 'MULTIMEDIA_CENTER' : 'PUBLICATIONS' as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
                     <option key={key} value={key}>{info.title}</option>
                   ))}
                 </select>
               </div>
+              )}
             </div>
           </div>
+
+          {/* Contador de resultados */}
+          {(!loading && !galleryLoading) && (
+            <div className="mt-4 mb-4">
+              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                {activeTab === 'gallery' ? (
+                  <>Mostrando {galleryImages.length} {galleryImages.length === 1 ? 'imagen' : 'imágenes'}</>
+                ) : (
+                  <>Mostrando {resources.length} {resources.length === 1 ? 'recurso' : 'recursos'}</>
+                )}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Recursos por Categoría */}
-      <section className="py-8 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4">
+      {/* Secciones por Categoría */}
+      <section className="pb-16 bg-background-light dark:bg-background-dark">
+        <div className="container mx-auto px-4 pt-0">
+          
+          {/* Tab: Galería */}
+          {activeTab === 'gallery' && (
+            <>
+
+              {galleryLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {[...Array(8)].map((_, i) => (
+                    <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                  ))}
+                </div>
+              ) : galleryImages.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {galleryImages.map((image) => (
+                    <div 
+                      key={image.id} 
+                      className="relative overflow-hidden rounded-lg aspect-square cursor-pointer group"
+                    >
+                      <img
+                        src={image.imageUrl}
+                        alt={image.imageAlt || image.title}
+                        className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
+                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                          <h3 className="font-bold text-sm mb-1 line-clamp-1">
+                            {image.title}
+                          </h3>
+                          {image.description && (
+                            <p className="text-xs text-gray-200 line-clamp-2">
+                              {image.description}
+                            </p>
+                          )}
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {image.methodology && (
+                              <span className="text-xs bg-purple-500/80 px-2 py-1 rounded">
+                                Iniciativa: {image.methodology.title}
+                              </span>
+                            )}
+                            {image.program && (
+                              <span className="text-xs bg-blue-500/80 px-2 py-1 rounded">
+                                Programa: {image.program.sectorName}
+                              </span>
+                            )}
+                            {image.project && (
+                              <span className="text-xs bg-green-500/80 px-2 py-1 rounded">
+                                Proyecto: {image.project.title}
+                              </span>
+                            )}
+                            {!image.program && !image.project && !image.methodology && (
+                              <span className="text-xs bg-gray-500/80 px-2 py-1 rounded">
+                                Galería General
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <PlayCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
+                    No hay imágenes disponibles
+                  </h3>
+                  <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                    Las imágenes de iniciativas, programas y proyectos aparecerán aquí cuando estén disponibles.
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Tab: Centro Multimedia */}
+          {activeTab === 'multimedia' && (
+            <>
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
@@ -246,75 +431,63 @@ export default function ResourcesPage() {
                 </Card>
               ))}
             </div>
-          ) : selectedCategory ? (
-            // Mostrar recursos de una categoría específica
-            <div>
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-3 rounded-lg ${categoryInfo[selectedCategory as keyof typeof categoryInfo].bgColor}`}>
-                    {React.createElement(categoryInfo[selectedCategory as keyof typeof categoryInfo].icon, { className: "h-6 w-6 text-primary" })}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
-                      {categoryInfo[selectedCategory as keyof typeof categoryInfo].title}
-                    </h2>
-                    <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                      {categoryInfo[selectedCategory as keyof typeof categoryInfo].description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
+          ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groupedResources[selectedCategory]?.map((resource) => {
+                  {resources.map((resource) => {
                   const FileIcon = getFileIcon(resource.fileType, resource.subcategory);
                   return (
-                    <Card key={resource.id} className="bg-card-light dark:bg-card-dark hover:shadow-lg transition-shadow">
+                    <Card key={resource.id} className="bg-card-light dark:bg-card-dark hover:shadow-lg transition-shadow overflow-hidden">
+                      {resource.thumbnailUrl ? (
+                        <div className="relative w-full h-48 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
+                          <img
+                            src={resource.thumbnailUrl}
+                            alt={resource.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute top-2 right-2">
+                            {resource.isFeatured && (
+                              <Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-md" />
+                            )}
+                          </div>
+                          <div className="absolute top-2 left-2">
+                            <div className="bg-card-light dark:bg-card-dark rounded-full p-2 shadow-md">
+                              <FileIcon className="h-5 w-5 text-primary" />
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="relative w-full h-48 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <FileIcon className="h-16 w-16 text-primary opacity-50" />
+                          </div>
+                          <div className="absolute top-2 right-2">
+                            {resource.isFeatured && (
+                              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                            )}
+                          </div>
+                        </div>
+                      )}
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
+                          {!resource.thumbnailUrl && (
                           <div className="flex items-center gap-2">
                             <FileIcon className="h-5 w-5 text-primary" />
-                            {resource.subcategory && (() => {
-                              const category = categoryInfo[resource.category as keyof typeof categoryInfo];
-                              if (category?.subcategories) {
-                                const subcategory = (category.subcategories as any)[resource.subcategory];
-                                if (subcategory) {
-                                  return (
-                                    <Badge className={subcategory.color || 'bg-gray-100 text-gray-800'}>
-                                      {subcategory.title}
-                                    </Badge>
-                                  );
-                                }
-                              }
-                              return null;
-                            })()}
                           </div>
-                          {resource.isFeatured && (
+                          )}
+                          {!resource.thumbnailUrl && resource.isFeatured && (
                             <Star className="h-4 w-4 text-yellow-500 fill-current" />
                           )}
                         </div>
-
                         <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-2 line-clamp-2">
                           {resource.title}
                         </h3>
-
                         {resource.description && (
                           <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm mb-4 line-clamp-3">
                             {resource.description}
                           </p>
                         )}
-
                         <div className="space-y-2 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
-                          <div className="flex items-center gap-2">
-                            <FileText className="h-4 w-4" />
-                            <span>{resource.fileName}</span>
-                          </div>
-                          {resource.fileSize && (
-                            <div className="flex items-center gap-2">
-                              <Download className="h-4 w-4" />
-                              <span>{formatFileSize(resource.fileSize)}</span>
-                            </div>
-                          )}
                           {resource.duration && (
                             <div className="flex items-center gap-2">
                               <Clock className="h-4 w-4" />
@@ -326,11 +499,7 @@ export default function ResourcesPage() {
                             <span>{resource.downloadCount} descargas</span>
                           </div>
                         </div>
-
-                        <Button 
-                          className="w-full" 
-                          asChild
-                        >
+                          <Button className="w-full" asChild>
                           <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
                             {resource.subcategory === 'VIDEOS' ? (
                               <>
@@ -355,55 +524,83 @@ export default function ResourcesPage() {
                   );
                 })}
               </div>
-            </div>
-          ) : (
-            // Mostrar todas las categorías
-            <div className="space-y-12">
-              {Object.entries(categoryInfo).map(([categoryKey, categoryData]) => {
-                const categoryResources = groupedResources[categoryKey] || [];
-                if (categoryResources.length === 0) return null;
+              )}
+            </>
+          )}
 
-                return (
-                  <div key={categoryKey}>
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className={`p-3 rounded-lg ${categoryData.bgColor}`}>
-                        {React.createElement(categoryData.icon, { className: "h-6 w-6 text-primary" })}
+          {/* Tab: Publicaciones */}
+          {activeTab === 'publications' && (
+            <>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="bg-card-light dark:bg-card-dark">
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3" />
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                       </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-text-light dark:text-text-dark">
-                          {categoryData.title}
-                        </h2>
-                        <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                          {categoryData.description}
-                        </p>
-                      </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                     </div>
-
+              ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {categoryResources.slice(0, 3).map((resource) => {
+                  {resources.map((resource) => {
                         const FileIcon = getFileIcon(resource.fileType, resource.subcategory);
                         return (
-                          <Card key={resource.id} className="bg-card-light dark:bg-card-dark hover:shadow-lg transition-shadow">
+                          <Card key={resource.id} className="bg-card-light dark:bg-card-dark hover:shadow-lg transition-shadow overflow-hidden">
+                            {resource.thumbnailUrl ? (
+                              <div className="relative w-full h-48 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950">
+                                <img
+                                  src={resource.thumbnailUrl}
+                                  alt={resource.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                                <div className="absolute top-2 right-2">
+                                  {resource.isFeatured && (
+                                    <Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-md" />
+                                  )}
+                                </div>
+                                <div className="absolute top-2 left-2">
+                                  <div className="bg-card-light dark:bg-card-dark rounded-full p-2 shadow-md">
+                                    <FileIcon className="h-5 w-5 text-primary" />
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="relative w-full h-48 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950 dark:to-amber-950 flex items-center justify-center">
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <FileIcon className="h-16 w-16 text-primary opacity-50" />
+                                </div>
+                                <div className="absolute top-2 right-2">
+                                  {resource.isFeatured && (
+                                    <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                                  )}
+                                </div>
+                              </div>
+                            )}
                             <CardContent className="p-6">
                               <div className="flex items-start justify-between mb-4">
+                                {!resource.thumbnailUrl && (
                                 <div className="flex items-center gap-2">
                                   <FileIcon className="h-5 w-5 text-primary" />
                                 </div>
-                                {resource.isFeatured && (
+                                )}
+                                {!resource.thumbnailUrl && resource.isFeatured && (
                                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
                                 )}
                               </div>
-
                               <h3 className="text-lg font-semibold text-text-light dark:text-text-dark mb-2 line-clamp-2">
                                 {resource.title}
                               </h3>
-
                               {resource.description && (
                                 <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm mb-4 line-clamp-3">
                                   {resource.description}
                                 </p>
                               )}
-
                               <div className="space-y-2 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                                 {resource.duration && (
                                   <div className="flex items-center gap-2">
@@ -416,11 +613,7 @@ export default function ResourcesPage() {
                                   <span>{resource.downloadCount} descargas</span>
                                 </div>
                               </div>
-
-                              <Button 
-                                className="w-full" 
-                                asChild
-                              >
+                          <Button className="w-full" asChild>
                                 <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
                                   {resource.subcategory === 'VIDEOS' ? (
                                     <>
@@ -444,35 +637,9 @@ export default function ResourcesPage() {
                           </Card>
                         );
                       })}
-                    </div>
-
-                    {categoryResources.length > 3 && (
-                      <div className="text-center mt-6">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setSelectedCategory(categoryKey)}
-                        >
-                          Ver todos los recursos ({categoryResources.length})
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
                       </div>
                     )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {!loading && resources.length === 0 && (
-            <div className="text-center py-12">
-              <PlayCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
-                No se encontraron recursos
-              </h3>
-              <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                Intenta ajustar los filtros de búsqueda o vuelve más tarde.
-              </p>
-            </div>
+            </>
           )}
         </div>
       </section>

@@ -150,6 +150,52 @@ export function usePermissions() {
     return userRole === UserRole.GESTOR
   }
 
+  const isDonationAdvisor = (): boolean => {
+    return userRole === UserRole.ASESOR
+  }
+
+  // Funciones específicas para gestión de donaciones
+  const canManageDonations = (): boolean => {
+    return hasPermission('donations', 'create') || hasPermission('donations', 'update')
+  }
+
+  const canCreateDonations = (): boolean => {
+    return hasPermission('donations', 'create')
+  }
+
+  const canEditDonations = (): boolean => {
+    return hasPermission('donations', 'update')
+  }
+
+  const canDeleteDonations = (): boolean => {
+    return hasPermission('donations', 'delete')
+  }
+
+  const canApproveDonations = (): boolean => {
+    return hasPermission('donations', 'approve')
+  }
+
+  const canRejectDonations = (): boolean => {
+    return hasPermission('donations', 'reject')
+  }
+
+  // Funciones específicas para gestión de metas anuales
+  const canManageAnnualGoals = (): boolean => {
+    return hasPermission('annual_goals', 'create') || hasPermission('annual_goals', 'update')
+  }
+
+  const canCreateAnnualGoals = (): boolean => {
+    return hasPermission('annual_goals', 'create')
+  }
+
+  const canEditAnnualGoals = (): boolean => {
+    return hasPermission('annual_goals', 'update')
+  }
+
+  const canDeleteAnnualGoals = (): boolean => {
+    return hasPermission('annual_goals', 'delete')
+  }
+
   return {
     userRole,
     hasPermission,
@@ -185,6 +231,17 @@ export function usePermissions() {
     canViewReports,
     canManageSystem,
     isAdmin,
-    isContentManager
+    isContentManager,
+    isDonationAdvisor,
+    canManageDonations,
+    canCreateDonations,
+    canEditDonations,
+    canDeleteDonations,
+    canApproveDonations,
+    canRejectDonations,
+    canManageAnnualGoals,
+    canCreateAnnualGoals,
+    canEditAnnualGoals,
+    canDeleteAnnualGoals
   }
 }

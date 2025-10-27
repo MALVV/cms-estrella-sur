@@ -91,17 +91,28 @@ const interventionAreas = [
     image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
   },
   {
-    name: 'Tecnologías y Comunicaciones',
-    description: 'Fortalecer la presencia digital y comunicación efectiva de la organización.',
-    careers: ['Ingeniería de Sistemas', 'Comunicación Social', 'Diseño Gráfico', 'Marketing Digital'],
+    name: 'Área de Tecnologías',
+    description: 'Desarrollar soluciones tecnológicas que mejoren el impacto social de la organización.',
+    careers: ['Ingeniería de Sistemas', 'Técnicos en Sistemas', 'Computacionales y ramas afines'],
     activities: [
-      'Desarrollo y mantenimiento de plataformas web',
-      'Gestión de redes sociales y contenido digital',
-      'Diseño de material gráfico y audiovisual',
-      'Implementación de sistemas de información',
-      'Estrategias de comunicación y divulgación'
+      'Apoyar en el desarrollo de aplicaciones web y móviles propias de la Organización',
+      'Colaborar en la actualización de sistemas de gestión de datos y reportes',
+      'Brindar soporte técnico a equipos operativos',
+      'Crear o sugerir nuevas herramientas digitales para optimizar procesos'
     ],
     image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    name: 'Área de Comunicaciones',
+    description: 'Visibilizar el impacto social y fortalecer la imagen institucional de la organización.',
+    careers: ['Comunicación Social', 'Marketing', 'Periodismo', 'Diseño Gráfico'],
+    activities: [
+      'Crear contenido para redes sociales y sitio web',
+      'Elaborar materiales gráficos y audiovisuales',
+      'Gestionar campañas de comunicación interna y externa',
+      'Redactar notas de prensa y reportes de impacto'
+    ],
+    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
   }
 ];
 

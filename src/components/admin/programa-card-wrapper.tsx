@@ -8,8 +8,8 @@ import { DeleteProgramaDialog } from '@/components/admin/delete-programa-dialog'
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
   videoPresentacion?: string;
@@ -68,8 +68,8 @@ export const ProgramaCardWrapper: React.FC<ProgramaCardWrapperProps> = ({
     <>
       <UnifiedCard
         id={programa.id}
-        title={programa.nombreSector}
-        description={programa.descripcion}
+        title={programa.sectorName}
+        description={programa.description}
         imageUrl={programa.imageUrl}
         imageAlt={programa.imageAlt}
         isActive={programa.isActive}

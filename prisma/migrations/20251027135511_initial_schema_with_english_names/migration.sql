@@ -1,17 +1,23 @@
 -- CreateEnum
-CREATE TYPE "public"."UserRole" AS ENUM ('ADMINISTRADOR', 'GESTOR');
+CREATE TYPE "public"."UserRole" AS ENUM ('ADMINISTRATOR', 'MANAGER', 'CONSULTANT');
 
 -- CreateEnum
-CREATE TYPE "public"."SectorProgramatico" AS ENUM ('SALUD', 'EDUCACION', 'MEDIOS_DE_VIDA', 'PROTECCION', 'SOSTENIBILIDAD', 'DESARROLLO_INFANTIL_TEMPRANO', 'NINEZ_EN_CRISIS');
+CREATE TYPE "public"."ProgrammaticSector" AS ENUM ('HEALTH', 'EDUCATION', 'LIVELIHOODS', 'PROTECTION', 'SUSTAINABILITY', 'EARLY_CHILD_DEVELOPMENT', 'CHILDREN_IN_CRISIS');
 
 -- CreateEnum
-CREATE TYPE "public"."TransparencyCategory" AS ENUM ('CENTRO_DOCUMENTOS', 'RENDICION_CUENTAS', 'FINANCIADORES_ALIADOS', 'INFORMES_ANUALES');
+CREATE TYPE "public"."TransparencyCategory" AS ENUM ('DOCUMENT_CENTER', 'ACCOUNTABILITY', 'FINANCIERS_AND_ALLIES', 'ANNUAL_REPORTS');
 
 -- CreateEnum
-CREATE TYPE "public"."ResourceCategory" AS ENUM ('CENTRO_MULTIMEDIA', 'PUBLICACIONES');
+CREATE TYPE "public"."ResourceCategory" AS ENUM ('MULTIMEDIA_CENTER', 'PUBLICATIONS');
 
 -- CreateEnum
-CREATE TYPE "public"."ResourceSubcategory" AS ENUM ('VIDEOS', 'AUDIOS', 'REPRODUCTOR_INTEGRADO', 'BIBLIOTECA_DIGITAL', 'GUIAS_DESCARGABLES', 'MANUALES');
+CREATE TYPE "public"."ResourceSubcategory" AS ENUM ('VIDEOS', 'AUDIOS', 'DIGITAL_LIBRARY', 'DOWNLOADABLE_GUIDES', 'MANUALS');
+
+-- CreateEnum
+CREATE TYPE "public"."DonationType" AS ENUM ('GENERAL', 'EMERGENCY', 'SPECIFIC_PROJECT', 'MONTHLY');
+
+-- CreateEnum
+CREATE TYPE "public"."DonationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'CANCELLED');
 
 -- CreateTable
 CREATE TABLE "public"."users" (
@@ -30,7 +36,7 @@ CREATE TABLE "public"."users" (
     "mustChangePassword" BOOLEAN NOT NULL DEFAULT false,
     "refreshToken" TEXT,
     "refreshTokenExp" TIMESTAMP(3),
-    "role" "public"."UserRole" NOT NULL DEFAULT 'GESTOR',
+    "role" "public"."UserRole" NOT NULL DEFAULT 'MANAGER',
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
@@ -94,7 +100,7 @@ CREATE TABLE "public"."news" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "createdBy" TEXT,
-    "programaId" TEXT,
+    "programId" TEXT,
     "methodologyId" TEXT,
     "projectId" TEXT,
 
@@ -106,7 +112,6 @@ CREATE TABLE "public"."events" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "content" TEXT,
     "imageUrl" TEXT,
     "imageAlt" TEXT,
     "eventDate" TIMESTAMP(3) NOT NULL,
@@ -151,7 +156,7 @@ CREATE TABLE "public"."methodologies" (
     "imageUrl" TEXT,
     "imageAlt" TEXT,
     "ageGroup" TEXT NOT NULL,
-    "sectors" "public"."SectorProgramatico"[],
+    "sectors" "public"."ProgrammaticSector"[],
     "targetAudience" TEXT NOT NULL,
     "objectives" TEXT NOT NULL,
     "implementation" TEXT NOT NULL,
@@ -229,17 +234,17 @@ CREATE TABLE "public"."video_testimonials" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."programas" (
+CREATE TABLE "public"."programs" (
     "id" TEXT NOT NULL,
-    "nombreSector" TEXT NOT NULL,
-    "descripcion" TEXT NOT NULL,
-    "videoPresentacion" TEXT,
-    "alineacionODS" TEXT,
-    "subareasResultados" TEXT,
-    "resultados" TEXT,
-    "gruposAtencion" TEXT,
-    "contenidosTemas" TEXT,
-    "enlaceMasInformacion" TEXT,
+    "sectorName" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "presentationVideo" TEXT,
+    "odsAlignment" TEXT,
+    "resultsAreas" TEXT,
+    "results" TEXT,
+    "targetGroups" TEXT,
+    "contentTopics" TEXT,
+    "moreInfoLink" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "isFeatured" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -248,7 +253,7 @@ CREATE TABLE "public"."programas" (
     "imageAlt" TEXT,
     "imageUrl" TEXT,
 
-    CONSTRAINT "programas_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "programs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -266,9 +271,73 @@ CREATE TABLE "public"."image_library" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "createdBy" TEXT,
-    "programaId" TEXT,
+    "programId" TEXT,
 
     CONSTRAINT "image_library_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."donation_projects" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "context" TEXT NOT NULL,
+    "objectives" TEXT NOT NULL,
+    "executionStart" TIMESTAMP(3) NOT NULL,
+    "executionEnd" TIMESTAMP(3) NOT NULL,
+    "accountNumber" TEXT NOT NULL,
+    "recipientName" TEXT NOT NULL,
+    "qrImageUrl" TEXT,
+    "qrImageAlt" TEXT,
+    "referenceImageUrl" TEXT,
+    "referenceImageAlt" TEXT,
+    "targetAmount" DECIMAL(10,2),
+    "currentAmount" DECIMAL(10,2) NOT NULL DEFAULT 0,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isCompleted" BOOLEAN NOT NULL DEFAULT false,
+    "isFeatured" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "donation_projects_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."donations" (
+    "id" TEXT NOT NULL,
+    "donorName" TEXT NOT NULL,
+    "donorEmail" TEXT NOT NULL,
+    "donorAddress" TEXT NOT NULL,
+    "donorPhone" TEXT NOT NULL,
+    "amount" DECIMAL(10,2) NOT NULL,
+    "donationType" "public"."DonationType" NOT NULL,
+    "message" TEXT,
+    "status" "public"."DonationStatus" NOT NULL DEFAULT 'PENDING',
+    "projectId" TEXT,
+    "donationProjectId" TEXT,
+    "bankTransferImage" TEXT,
+    "bankTransferImageAlt" TEXT,
+    "approvedBy" TEXT,
+    "approvedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "donations_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."annual_goals" (
+    "id" TEXT NOT NULL,
+    "year" INTEGER NOT NULL,
+    "targetAmount" DECIMAL(12,2) NOT NULL,
+    "currentAmount" DECIMAL(12,2) NOT NULL DEFAULT 0,
+    "description" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isFeatured" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "annual_goals_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -276,6 +345,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_refreshToken_key" ON "public"."users"("refreshToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "annual_goals_year_key" ON "public"."annual_goals"("year");
 
 -- AddForeignKey
 ALTER TABLE "public"."users" ADD CONSTRAINT "users_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -293,7 +365,7 @@ ALTER TABLE "public"."news" ADD CONSTRAINT "news_createdBy_fkey" FOREIGN KEY ("c
 ALTER TABLE "public"."news" ADD CONSTRAINT "news_methodologyId_fkey" FOREIGN KEY ("methodologyId") REFERENCES "public"."methodologies"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."news" ADD CONSTRAINT "news_programaId_fkey" FOREIGN KEY ("programaId") REFERENCES "public"."programas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."news" ADD CONSTRAINT "news_programId_fkey" FOREIGN KEY ("programId") REFERENCES "public"."programs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."news" ADD CONSTRAINT "news_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "public"."projects"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -317,10 +389,16 @@ ALTER TABLE "public"."resources" ADD CONSTRAINT "resources_createdBy_fkey" FOREI
 ALTER TABLE "public"."video_testimonials" ADD CONSTRAINT "video_testimonials_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."programas" ADD CONSTRAINT "programas_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."programs" ADD CONSTRAINT "programs_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."image_library" ADD CONSTRAINT "image_library_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."image_library" ADD CONSTRAINT "image_library_programaId_fkey" FOREIGN KEY ("programaId") REFERENCES "public"."programas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."image_library" ADD CONSTRAINT "image_library_programId_fkey" FOREIGN KEY ("programId") REFERENCES "public"."programs"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."donations" ADD CONSTRAINT "donations_donationProjectId_fkey" FOREIGN KEY ("donationProjectId") REFERENCES "public"."donation_projects"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."donations" ADD CONSTRAINT "donations_approvedBy_fkey" FOREIGN KEY ("approvedBy") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;

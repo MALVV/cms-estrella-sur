@@ -25,7 +25,7 @@ interface ImageLibraryItem {
   };
   programa?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
   };
 }
 
@@ -210,7 +210,7 @@ export function ImageLibraryView({ image, onClose }: ImageLibraryViewProps) {
               </CardHeader>
               <CardContent>
                 <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="font-medium text-blue-900">{image.programa.nombreSector}</p>
+                  <p className="font-medium text-blue-900">{image.programa.sectorName}</p>
                   <p className="text-sm text-blue-700">Esta imagen está asociada a este programa</p>
                 </div>
               </CardContent>
@@ -233,3 +233,4 @@ export function ImageLibraryView({ image, onClose }: ImageLibraryViewProps) {
     </div>
   );
 }
+

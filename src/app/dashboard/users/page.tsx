@@ -55,7 +55,13 @@ export default function UsersPage() {
       const response = await fetch(`/api/users?${params.toString()}`)
       
       if (!response.ok) {
-        throw new Error('Error al cargar usuarios')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Error en API de usuarios:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData
+        })
+        throw new Error(`Error al cargar usuarios: ${response.status} ${response.statusText}`)
       }
 
       const data = await response.json()
@@ -87,6 +93,7 @@ export default function UsersPage() {
     switch (role) {
       case 'ADMINISTRADOR': return 'destructive'
       case 'GESTOR': return 'secondary'
+      case 'ASESOR': return 'default'
       default: return 'outline'
     }
   }
@@ -363,6 +370,7 @@ export default function UsersPage() {
                   <SelectItem value="ALL">Todos los roles</SelectItem>
                   <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
                   <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
+                  <SelectItem value="ASESOR">Asesor de Donaciones</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -66,7 +66,7 @@ export async function GET() {
       prisma.methodology.findMany({
         select: { id: true, createdAt: true, updatedAt: true, isActive: true }
       }),
-      prisma.programas.findMany({
+      prisma.program.findMany({
         select: { id: true, createdAt: true, updatedAt: true, isActive: true }
       }),
       prisma.news.findMany({
@@ -75,13 +75,13 @@ export async function GET() {
       prisma.event.findMany({
         select: { id: true, createdAt: true, updatedAt: true, isActive: true }
       }),
-      prisma.stories.findMany({
+      prisma.story.findMany({
         select: { id: true, createdAt: true, updatedAt: true, isActive: true }
       }),
       prisma.imageLibrary.findMany({
         select: { id: true, createdAt: true }
       }),
-      prisma.allies.findMany({
+      prisma.ally.findMany({
         select: { id: true, createdAt: true, isActive: true }
       })
     ])
@@ -134,18 +134,24 @@ export async function GET() {
       // Fechas para contexto
       lastUpdated: new Date().toISOString(),
       dataRange: {
-        oldest: Math.min(
-          ...users.map(u => new Date(u.createdAt).getTime()),
-          ...projects.map(p => new Date(p.createdAt).getTime()),
-          ...methodologies.map(m => new Date(m.createdAt).getTime()),
-          ...programs.map(p => new Date(p.createdAt).getTime())
-        ),
-        newest: Math.max(
-          ...users.map(u => new Date(u.createdAt).getTime()),
-          ...projects.map(p => new Date(p.updatedAt).getTime()),
-          ...methodologies.map(m => new Date(m.updatedAt).getTime()),
-          ...programs.map(p => new Date(p.updatedAt).getTime())
-        )
+        oldest: (() => {
+          const timestamps = [
+            ...users.map(u => new Date(u.createdAt).getTime()),
+            ...projects.map(p => new Date(p.createdAt).getTime()),
+            ...methodologies.map(m => new Date(m.createdAt).getTime()),
+            ...programs.map(p => new Date(p.createdAt).getTime())
+          ]
+          return timestamps.length > 0 ? Math.min(...timestamps) : Date.now()
+        })(),
+        newest: (() => {
+          const timestamps = [
+            ...users.map(u => new Date(u.createdAt).getTime()),
+            ...projects.map(p => new Date(p.updatedAt).getTime()),
+            ...methodologies.map(m => new Date(m.updatedAt).getTime()),
+            ...programs.map(p => new Date(p.updatedAt).getTime())
+          ]
+          return timestamps.length > 0 ? Math.max(...timestamps) : Date.now()
+        })()
       }
     }
 

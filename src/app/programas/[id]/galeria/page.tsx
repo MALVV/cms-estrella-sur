@@ -7,5 +7,5 @@ interface GaleriaPageProps {
 export default async function GaleriaPage({ params }: GaleriaPageProps) {
   const { id } = await params;
   
-  return <GaleriaPrograma programaId={id} />;
+  return <GaleriaPrograma programId={id} />;
 }

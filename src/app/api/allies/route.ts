@@ -40,13 +40,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener aliados con información del creador
-    const allies = await prisma.allies.findMany({
+    const allies = await prisma.ally.findMany({
       where,
       orderBy: {
         [sortBy]: sortOrder,
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -69,11 +69,11 @@ export async function GET(request: NextRequest) {
       createdAt: ally.createdAt.toISOString().split('T')[0],
       updatedAt: ally.updatedAt.toISOString().split('T')[0],
       createdBy: ally.createdBy,
-      author: ally.users ? {
-        id: ally.users.id,
-        name: ally.users.name,
-        email: ally.users.email,
-        role: ally.users.role
+      author: ally.creator ? {
+        id: ally.creator.id,
+        name: ally.creator.name,
+        email: ally.creator.email,
+        role: ally.creator.role
       } : null
     }))
 
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       name: session.user.name
     })
 
-    const newAlly = await prisma.allies.create({
+    const newAlly = await prisma.ally.create({
       data: {
         id: allyId,
         name,
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
         createdBy: createdBy
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -164,11 +164,11 @@ export async function POST(request: NextRequest) {
       createdAt: newAlly.createdAt.toISOString().split('T')[0],
       updatedAt: newAlly.updatedAt.toISOString().split('T')[0],
       createdBy: newAlly.createdBy,
-      author: newAlly.users ? {
-        id: newAlly.users.id,
-        name: newAlly.users.name,
-        email: newAlly.users.email,
-        role: newAlly.users.role
+      author: newAlly.creator ? {
+        id: newAlly.creator.id,
+        name: newAlly.creator.name,
+        email: newAlly.creator.email,
+        role: newAlly.creator.role
       } : null
     }
 

@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar que la categoría sea válida
-    const validCategories = ['CENTRO_DOCUMENTOS', 'RENDICION_CUENTAS', 'FINANCIADORES_ALIADOS', 'INFORMES_ANUALES'];
+    const validCategories = ['DOCUMENT_CENTER', 'ACCOUNTABILITY', 'FINANCIERS_AND_ALLIES', 'ANNUAL_REPORTS'];
     if (!validCategories.includes(category)) {
       return NextResponse.json(
         { error: 'Categoría inválida' },

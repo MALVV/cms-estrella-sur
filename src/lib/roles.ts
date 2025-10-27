@@ -1,6 +1,20 @@
 export enum UserRole {
-  ADMINISTRADOR = 'ADMINISTRADOR',
-  GESTOR = 'GESTOR'
+  ADMINISTRATOR = 'ADMINISTRATOR',
+  MANAGER = 'MANAGER',
+  CONSULTANT = 'CONSULTANT'
+}
+
+// Función para convertir el rol de la base de datos al formato mostrado en la UI
+export function getRoleDisplayName(role: string): string {
+  const roleNames: Record<string, string> = {
+    'ADMINISTRATOR': 'Administrador',
+    'MANAGER': 'Gestor',
+    'CONSULTANT': 'Asesor',
+    'ADMINISTRADOR': 'Administrador',
+    'GESTOR': 'Gestor',
+    'ASESOR': 'Asesor'
+  }
+  return roleNames[role] || role
 }
 
 export interface Permission {
@@ -64,12 +78,28 @@ export const PERMISSIONS = {
   
   // Gestión de roles
   ROLES_MANAGE: { resource: 'roles', action: 'manage', description: 'Gestionar roles' },
+  
+  // Gestión de donaciones
+  DONATIONS_CREATE: { resource: 'donations', action: 'create', description: 'Crear proyectos de donación' },
+  DONATIONS_READ: { resource: 'donations', action: 'read', description: 'Ver donaciones' },
+  DONATIONS_UPDATE: { resource: 'donations', action: 'update', description: 'Editar proyectos de donación' },
+  DONATIONS_DELETE: { resource: 'donations', action: 'delete', description: 'Eliminar proyectos de donación' },
+  DONATIONS_APPROVE: { resource: 'donations', action: 'approve', description: 'Aprobar donaciones' },
+  DONATIONS_REJECT: { resource: 'donations', action: 'reject', description: 'Rechazar donaciones' },
+  DONATIONS_MANAGE: { resource: 'donations', action: 'manage', description: 'Gestionar donaciones' },
+  
+  // Gestión de metas anuales
+  ANNUAL_GOALS_CREATE: { resource: 'annual_goals', action: 'create', description: 'Crear metas anuales' },
+  ANNUAL_GOALS_READ: { resource: 'annual_goals', action: 'read', description: 'Ver metas anuales' },
+  ANNUAL_GOALS_UPDATE: { resource: 'annual_goals', action: 'update', description: 'Editar metas anuales' },
+  ANNUAL_GOALS_DELETE: { resource: 'annual_goals', action: 'delete', description: 'Eliminar metas anuales' },
+  ANNUAL_GOALS_MANAGE: { resource: 'annual_goals', action: 'manage', description: 'Gestionar metas anuales' },
 } as const
 
 // Definición de roles y sus permisos
 export const ROLE_PERMISSIONS: RolePermissions[] = [
   {
-    role: UserRole.ADMINISTRADOR,
+    role: UserRole.ADMINISTRATOR,
     description: 'Acceso completo al sistema - Gestión de usuarios, proyectos, innovaciones y programas',
     permissions: [
       // Todos los permisos de usuarios
@@ -119,10 +149,26 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       
       // Gestión de roles
       PERMISSIONS.ROLES_MANAGE,
+      
+      // Todos los permisos de donaciones
+      PERMISSIONS.DONATIONS_CREATE,
+      PERMISSIONS.DONATIONS_READ,
+      PERMISSIONS.DONATIONS_UPDATE,
+      PERMISSIONS.DONATIONS_DELETE,
+      PERMISSIONS.DONATIONS_APPROVE,
+      PERMISSIONS.DONATIONS_REJECT,
+      PERMISSIONS.DONATIONS_MANAGE,
+      
+      // Todos los permisos de metas anuales
+      PERMISSIONS.ANNUAL_GOALS_CREATE,
+      PERMISSIONS.ANNUAL_GOALS_READ,
+      PERMISSIONS.ANNUAL_GOALS_UPDATE,
+      PERMISSIONS.ANNUAL_GOALS_DELETE,
+      PERMISSIONS.ANNUAL_GOALS_MANAGE,
     ]
   },
   {
-    role: UserRole.GESTOR,
+    role: UserRole.MANAGER,
     description: 'Gestión de contenido - Noticias, metodologías, historias, recursos y demás secciones',
     permissions: [
       // Solo lectura de usuarios
@@ -147,6 +193,47 @@ export const ROLE_PERMISSIONS: RolePermissions[] = [
       
       // Reportes básicos
       PERMISSIONS.REPORTS_VIEW,
+    ]
+  },
+  {
+    role: UserRole.CONSULTANT,
+    description: 'Especialista en donaciones - Gestión completa de proyectos de donación, aprobación de donaciones y metas anuales',
+    permissions: [
+      // Solo lectura de usuarios
+      PERMISSIONS.USER_READ,
+      
+      // Solo lectura de contenido general
+      PERMISSIONS.CONTENT_READ,
+      
+      // Solo lectura de proyectos, innovaciones y programas
+      PERMISSIONS.PROJECTS_READ,
+      PERMISSIONS.INNOVATIONS_READ,
+      PERMISSIONS.PROGRAMS_READ,
+      
+      // Todos los permisos de donaciones
+      PERMISSIONS.DONATIONS_CREATE,
+      PERMISSIONS.DONATIONS_READ,
+      PERMISSIONS.DONATIONS_UPDATE,
+      PERMISSIONS.DONATIONS_DELETE,
+      PERMISSIONS.DONATIONS_APPROVE,
+      PERMISSIONS.DONATIONS_REJECT,
+      PERMISSIONS.DONATIONS_MANAGE,
+      
+      // Todos los permisos de metas anuales
+      PERMISSIONS.ANNUAL_GOALS_CREATE,
+      PERMISSIONS.ANNUAL_GOALS_READ,
+      PERMISSIONS.ANNUAL_GOALS_UPDATE,
+      PERMISSIONS.ANNUAL_GOALS_DELETE,
+      PERMISSIONS.ANNUAL_GOALS_MANAGE,
+      
+      // Gestión de archivos (para subir imágenes de proyectos de donación)
+      PERMISSIONS.FILE_UPLOAD,
+      PERMISSIONS.FILE_DELETE,
+      PERMISSIONS.FILE_MANAGE,
+      
+      // Reportes de donaciones
+      PERMISSIONS.REPORTS_VIEW,
+      PERMISSIONS.REPORTS_EXPORT,
     ]
   }
 ]
@@ -195,8 +282,9 @@ export function canPerformAction(role: UserRole, resource: string, action: strin
  */
 export function getRoleHierarchy(): UserRole[] {
   return [
-    UserRole.ADMINISTRADOR,
-    UserRole.GESTOR
+    UserRole.ADMINISTRATOR,
+    UserRole.MANAGER,
+    UserRole.CONSULTANT
   ]
 }
 

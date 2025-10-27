@@ -8,15 +8,15 @@ import { toast } from 'sonner';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
-  videoPresentacion?: string;
-  alineacionODS?: string;
-  subareasResultados?: string;
+  sectorName: string;
+  description: string;
+  presentationVideo?: string;
+  odsAlignment?: string;
+  resultsAreas?: string;
   resultados?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  enlaceMasInformacion?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  moreInfoLink?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -78,7 +78,7 @@ export const DeleteProgramaDialog: React.FC<DeleteProgramaDialogProps> = ({ prog
         <DialogHeader>
           <DialogTitle>Eliminar Programa</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que quieres eliminar el programa "{programa.nombreSector}"? Esta acción no se puede deshacer.
+            ¿Estás seguro de que quieres eliminar el programa "{programa.sectorName}"? Esta acción no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -100,3 +100,4 @@ export const DeleteProgramaDialog: React.FC<DeleteProgramaDialogProps> = ({ prog
     </Dialog>
   );
 };
+

@@ -21,8 +21,8 @@ import Image from 'next/image';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
 }
@@ -36,10 +36,10 @@ interface ImageItem {
 }
 
 interface GaleriaProgramaProps {
-  programaId: string;
+  programId: string;
 }
 
-export function GaleriaPrograma({ programaId }: GaleriaProgramaProps) {
+export function GaleriaPrograma({ programId }: GaleriaProgramaProps) {
   const [programa, setPrograma] = useState<Programa | null>(null);
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,12 +48,12 @@ export function GaleriaPrograma({ programaId }: GaleriaProgramaProps) {
 
   useEffect(() => {
     fetchGaleria();
-  }, [programaId]);
+  }, [programId]);
 
   const fetchGaleria = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/programas/${programaId}/galeria`);
+      const response = await fetch(`/api/programas/${programId}/galeria`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -165,124 +165,99 @@ export function GaleriaPrograma({ programaId }: GaleriaProgramaProps) {
             </Link>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Información del programa */}
-            <div className="lg:w-1/3">
-              <Card className="h-full flex flex-col">
-                <CardContent className="p-6 flex flex-col h-full">
-                  <div className="space-y-4 flex-1">
-                    {programa.imageUrl && (
-                      <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                        <Image
-                          src={programa.imageUrl}
-                          alt={programa.imageAlt || programa.nombreSector}
-                          width={400}
-                          height={225}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="flex-1">
-                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                        {programa.nombreSector}
-                      </h1>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                        {programa.descripcion}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <ImageIcon className="h-4 w-4" />
-                    <span>{images.length} imagen{images.length !== 1 ? 'es' : ''}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Galería de imágenes */}
-            <div className="lg:w-2/3 flex flex-col h-full">
-              {images.length > 0 ? (
-                <div className="space-y-6 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Galería de Imágenes
-                    </h2>
-                    <Badge variant="outline">
-                      {images.length} imagen{images.length !== 1 ? 'es' : ''}
-                    </Badge>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
-                    {images.map((image, index) => (
-                      <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer" onClick={() => openModal(index)}>
-                        <div 
-                          className="aspect-video bg-gray-100 dark:bg-gray-800 relative overflow-hidden"
-                          title={image.imageAlt || ''}
-                        >
-                          <Image
-                            src={image.imageUrl}
-                            alt={image.imageAlt || image.title || 'Imagen del programa'}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-200"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          />
-                          
-                          {/* Overlay con información */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="absolute bottom-2 left-2 right-2">
-                              {image.imageAlt && (
-                                <p className="text-white/80 text-xs font-normal line-clamp-4 leading-relaxed">
-                                  {image.imageAlt}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Botón Ver todas las fotos */}
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button
-                              size="sm"
-                              className="bg-black/50 hover:bg-black/70 text-white text-xs px-2 py-1 h-auto"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openModal(index);
-                              }}
-                            >
-                              Ver todas las fotos
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <CardContent className="p-3">
-                          <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1">
-                            {image.title}
-                          </h3>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(image.createdAt).toLocaleDateString()}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <Card className="h-full">
-                  <CardContent className="p-12 text-center h-full flex flex-col justify-center">
-                    <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                      No hay imágenes disponibles
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Este programa aún no tiene imágenes en su galería.
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
+          {/* Título del programa */}
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              {programa.sectorName}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed">
+              {programa.description}
+            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500 mt-4">
+              <ImageIcon className="h-4 w-4" />
+              <span>{images.length} imagen{images.length !== 1 ? 'es' : ''} en la galería</span>
             </div>
           </div>
+
+          {/* Galería de imágenes en grid */}
+          {images.length > 0 ? (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Galería de Imágenes
+                </h2>
+                <Badge variant="outline">
+                  {images.length} imagen{images.length !== 1 ? 'es' : ''}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {images.map((image, index) => (
+                  <Card key={image.id} className="overflow-hidden hover:shadow-lg transition-shadow group cursor-pointer" onClick={() => openModal(index)}>
+                    <div 
+                      className="aspect-video bg-gray-100 dark:bg-gray-800 relative overflow-hidden"
+                      title={image.imageAlt || ''}
+                    >
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.imageAlt || image.title || 'Imagen del programa'}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                      
+                      {/* Overlay con información */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div className="absolute bottom-2 left-2 right-2">
+                          {image.imageAlt && (
+                            <p className="text-white/80 text-xs font-normal line-clamp-4 leading-relaxed">
+                              {image.imageAlt}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Botón Ver todas las fotos */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <Button
+                          size="sm"
+                          className="bg-black/50 hover:bg-black/70 text-white text-xs px-2 py-1 h-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModal(index);
+                          }}
+                        >
+                          Ver todas las fotos
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <CardContent className="p-3">
+                      <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1">
+                        {image.title}
+                      </h3>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(image.createdAt).toLocaleDateString()}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Card className="h-full">
+              <CardContent className="p-12 text-center h-full flex flex-col justify-center">
+                <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  No hay imágenes disponibles
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Este programa aún no tiene imágenes en su galería.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </main>
       <SiteFooter />

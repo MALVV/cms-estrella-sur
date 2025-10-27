@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
     const {
       title,
       description,
-      content,
       imageUrl,
       imageAlt,
       eventDate,
@@ -110,7 +109,6 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description,
-        content,
         imageUrl,
         imageAlt,
         eventDate: new Date(eventDate),

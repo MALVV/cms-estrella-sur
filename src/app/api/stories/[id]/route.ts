@@ -18,7 +18,7 @@ export async function DELETE(
     const { id } = resolvedParams
 
     // Verificar que la story existe
-    const existingStory = await prisma.stories.findUnique({
+    const existingStory = await prisma.story.findUnique({
       where: { id }
     })
 
@@ -30,7 +30,7 @@ export async function DELETE(
     }
 
     // Eliminar la story
-    await prisma.stories.delete({
+    await prisma.story.delete({
       where: { id }
     })
 
@@ -63,7 +63,7 @@ export async function PUT(
     const { title, content, summary, imageUrl, imageAlt, isActive } = body
 
     // Verificar que la story existe
-    const existingStory = await prisma.stories.findUnique({
+    const existingStory = await prisma.story.findUnique({
       where: { id }
     })
 
@@ -83,7 +83,7 @@ export async function PUT(
     }
 
     // Actualizar la story
-    const updatedStory = await prisma.stories.update({
+    const updatedStory = await prisma.story.update({
       where: { id },
       data: {
         title,

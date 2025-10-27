@@ -29,7 +29,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Actualizar múltiples aliados
-    const result = await prisma.allies.updateMany({
+    const result = await prisma.ally.updateMany({
       where: {
         id: {
           in: ids

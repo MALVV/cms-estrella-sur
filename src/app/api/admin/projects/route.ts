@@ -3,6 +3,61 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const {
+      title,
+      context,
+      objectives,
+      content,
+      executionStart,
+      executionEnd,
+      isActive,
+      isFeatured
+    } = body;
+
+    // Validar campos requeridos
+    if (!title || !context || !objectives || !content) {
+      return NextResponse.json(
+        { error: 'Faltan campos requeridos: title, context, objectives, content' },
+        { status: 400 }
+      );
+    }
+
+    // Crear el proyecto
+    const project = await prisma.project.create({
+      data: {
+        title,
+        context,
+        objectives,
+        content,
+        executionStart: executionStart ? new Date(executionStart) : new Date(),
+        executionEnd: executionEnd ? new Date(executionEnd) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        isActive: isActive !== undefined ? isActive : true,
+        isFeatured: isFeatured !== undefined ? isFeatured : false,
+        creator: {
+          connect: { id: session.user.id }
+        }
+      }
+    });
+
+    return NextResponse.json(project, { status: 201 });
+  } catch (error) {
+    console.error('Error creating project:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

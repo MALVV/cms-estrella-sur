@@ -19,7 +19,6 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    content: '',
     imageUrl: '',
     imageAlt: '',
     eventDate: '',
@@ -70,7 +69,6 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
       setFormData({
         title: '',
         description: '',
-        content: '',
         imageUrl: '',
         imageAlt: '',
         eventDate: '',
@@ -135,15 +133,6 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
             />
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Contenido Detallado</label>
-            <Textarea
-              value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
-              placeholder="Contenido detallado del evento"
-              rows={4}
-            />
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

@@ -5,13 +5,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    const story = await prisma.stories.findUnique({
+    const story = await prisma.story.findUnique({
       where: { 
         id,
         isActive: true // Solo stories activas
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -38,11 +38,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       imageAlt: story.imageAlt,
       createdAt: story.createdAt.toISOString(),
       updatedAt: story.updatedAt.toISOString(),
-      author: story.users ? {
-        id: story.users.id,
-        name: story.users.name,
-        email: story.users.email,
-        role: story.users.role
+      author: story.creator ? {
+        id: story.creator.id,
+        name: story.creator.name,
+        email: story.creator.email,
+        role: story.creator.role
       } : null
     }
 

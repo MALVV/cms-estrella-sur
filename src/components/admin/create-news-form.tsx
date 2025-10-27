@@ -16,7 +16,7 @@ interface CreateNewsFormProps {
 
 interface Programa {
   id: string;
-  nombreSector: string;
+  sectorName: string;
 }
 
 interface Project {
@@ -43,7 +43,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
     imageAlt: '',
     isActive: true,
     isFeatured: false,
-    programaId: 'none',
+    programId: 'none',
     projectId: 'none',
     methodologyId: 'none',
   });
@@ -117,7 +117,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         body: JSON.stringify({
           ...formData,
           publishedAt: new Date().toISOString(),
-          programaId: formData.programaId === 'none' ? null : formData.programaId,
+          programId: formData.programId === 'none' ? null : formData.programId,
           projectId: formData.projectId === 'none' ? null : formData.projectId,
           methodologyId: formData.methodologyId === 'none' ? null : formData.methodologyId,
         }),
@@ -141,7 +141,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         imageAlt: '',
         isActive: true,
         isFeatured: false,
-        programaId: 'none',
+        programId: 'none',
         projectId: 'none',
         methodologyId: 'none',
       });
@@ -238,7 +238,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
             
             <div>
               <label className="text-sm font-medium">Programa</label>
-              <Select value={formData.programaId} onValueChange={(value) => handleChange('programaId', value)}>
+              <Select value={formData.programId} onValueChange={(value) => handleChange('programId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar programa" />
                 </SelectTrigger>
@@ -246,7 +246,7 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
                   <SelectItem value="none">Sin programa</SelectItem>
                   {programas.map((programa) => (
                     <SelectItem key={programa.id} value={programa.id}>
-                      {programa.nombreSector}
+                      {programa.sectorName}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -47,21 +47,23 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
   const { data: session } = useSession();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Inicializar el estado con los valores del methodology desde el inicio
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    shortDescription: '',
-    imageUrl: '',
-    imageAlt: '',
-    ageGroup: '',
-    sectors: [] as ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[],
-    targetAudience: '',
-    objectives: '',
-    implementation: '',
-    results: '',
-    methodology: '',
-    resources: '',
-    evaluation: ''
+    title: methodology?.title || '',
+    description: methodology?.description || '',
+    shortDescription: methodology?.shortDescription || '',
+    imageUrl: methodology?.imageUrl || '',
+    imageAlt: methodology?.imageAlt || '',
+    ageGroup: methodology?.ageGroup || '',
+    sectors: (methodology?.sectors || []) as ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[],
+    targetAudience: methodology?.targetAudience || '',
+    objectives: methodology?.objectives || '',
+    implementation: methodology?.implementation || '',
+    results: methodology?.results || '',
+    methodology: methodology?.methodology || '',
+    resources: methodology?.resources || '',
+    evaluation: methodology?.evaluation || ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -69,17 +71,17 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
   useEffect(() => {
     if (methodology) {
       setFormData({
-        title: methodology.title,
-        description: methodology.description,
-        shortDescription: methodology.shortDescription,
+        title: methodology.title || '',
+        description: methodology.description || '',
+        shortDescription: methodology.shortDescription || '',
         imageUrl: methodology.imageUrl || '',
         imageAlt: methodology.imageAlt || '',
-        ageGroup: methodology.ageGroup,
+        ageGroup: methodology.ageGroup || '',
         sectors: methodology.sectors || [],
-        targetAudience: methodology.targetAudience,
-        objectives: methodology.objectives,
-        implementation: methodology.implementation,
-        results: methodology.results,
+        targetAudience: methodology.targetAudience || '',
+        objectives: methodology.objectives || '',
+        implementation: methodology.implementation || '',
+        results: methodology.results || '',
         methodology: methodology.methodology || '',
         resources: methodology.resources || '',
         evaluation: methodology.evaluation || ''

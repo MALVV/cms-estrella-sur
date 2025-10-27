@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Play, Image as ImageIcon, Target, Users, BookOpen, Award } from 'lucide-react';
+import { Play, Image as ImageIcon, Target, Users, BookOpen, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -13,16 +13,17 @@ import { RelatedNewsCarousel } from '@/components/sections/related-news-carousel
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
-  videoPresentacion?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  resultados?: string;
-  subareasResultados?: string;
-  enlaceMasInformacion?: string;
+  presentationVideo?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  results?: string;
+  resultsAreas?: string;
+  odsAlignment?: string;
+  moreInfoLink?: string;
   isFeatured: boolean;
   news: Array<{
     id: string;
@@ -120,7 +121,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
     );
   }
 
-  const youtubeId = programa.videoPresentacion ? extractYouTubeId(programa.videoPresentacion) : null;
+  const youtubeId = programa.presentationVideo ? extractYouTubeId(programa.presentationVideo) : null;
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -138,6 +139,19 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
         <div className="absolute inset-0 bg-black opacity-50 dark:opacity-70"></div>
         <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl">
+            {/* Botón de regreso */}
+            <div className="mb-6">
+              <Link href="/programas">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-white hover:text-white hover:bg-white/20 backdrop-blur-sm"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver a Programas
+                </Button>
+              </Link>
+            </div>
             
             <div className="text-white">
               <div className="mb-4">
@@ -146,10 +160,10 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                 </span>
                   </div>
               <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
-                {programa.nombreSector}
+                {programa.sectorName}
               </h1>
               <p className="text-lg md:text-xl text-gray-200 max-w-3xl">
-                    {programa.descripcion}
+                    {programa.description}
                   </p>
             </div>
           </div>
@@ -161,30 +175,69 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
           {/* Video y Sidebar */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Video de Presentación */}
-            <div className="lg:col-span-2">
-            {youtubeId && (
+            <div className="lg:col-span-2 space-y-6">
+              {programa.presentationVideo ? (
                 <Card className="bg-card-light dark:bg-card-dark shadow-lg">
-                <CardHeader>
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-text-light dark:text-text-dark">
                       <Play className="h-5 w-5 text-primary" />
-                    Video de Presentación
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                    <img
-                      src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
-                      alt={`Video de ${programa.nombreSector}`}
-                      className="w-full h-full object-cover"
-                    />
-                    </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                      Video de Presentación
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {youtubeId ? (
+                      <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                        <a 
+                          href={programa.presentationVideo}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block relative group"
+                        >
+                          <img
+                            src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
+                            alt={`Video de ${programa.sectorName}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/50 transition-colors">
+                            <div className="bg-red-600 text-white rounded-full p-4 group-hover:bg-red-700 transition-colors">
+                              <Play className="h-12 w-12" />
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    ) : (
+                      <a 
+                        href={programa.presentationVideo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <Button className="w-full" variant="default">
+                          <Play className="h-4 w-4 mr-2" />
+                          Ver Video de Presentación
+                        </Button>
+                      </a>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="bg-card-light dark:bg-card-dark shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-text-light dark:text-text-dark">
+                      Información del Programa
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                      {programa.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+            {/* Sidebar */}
+            <div className="space-y-6">
             {/* Galería de Imágenes */}
             {programa.imageLibrary.length > 0 && (
                 <Card className="bg-card-light dark:bg-card-dark shadow-lg">
@@ -201,7 +254,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                           <div className="aspect-video bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden relative">
                             <img
                               src={image.imageUrl}
-                              alt={image.imageAlt || image.title || `Imagen del programa ${programa.nombreSector}`}
+                              alt={image.imageAlt || image.title || `Imagen del programa ${programa.sectorName}`}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                             />
                             {/* Overlay con título */}
@@ -229,16 +282,15 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                 </CardContent>
               </Card>
             )}
-
             </div>
           </div>
 
           {/* Información del Programa - Ancho completo */}
-          <div className="space-y-8">
+          <div className="space-y-8 mt-8">
             {/* Información del Programa - Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Grupos de Atención */}
-              {programa.gruposAtencion && (
+              {programa.targetGroups && (
                 <Card className="bg-card-light dark:bg-card-dark shadow-lg">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-3 text-text-light dark:text-text-dark text-lg">
@@ -249,7 +301,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                   <CardContent className="pt-0">
                     <div className="prose max-w-none">
                       <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                        {programa.gruposAtencion}
+                        {programa.targetGroups}
                       </p>
                     </div>
                   </CardContent>
@@ -257,7 +309,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
               )}
 
               {/* Contenidos/Temas */}
-              {programa.contenidosTemas && (
+              {programa.contentTopics && (
                 <Card className="bg-card-light dark:bg-card-dark shadow-lg">
                   <CardHeader className="pb-4">
                     <CardTitle className="flex items-center gap-3 text-text-light dark:text-text-dark text-lg">
@@ -268,7 +320,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                   <CardContent className="pt-0">
                     <div className="prose max-w-none">
                       <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                        {programa.contenidosTemas}
+                        {programa.contentTopics}
                       </p>
                     </div>
                   </CardContent>
@@ -277,7 +329,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             {/* Resultados - Sección destacada */}
-            {programa.resultados && (
+            {programa.results && (
               <Card className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20 shadow-lg border-orange-200 dark:border-orange-800">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-text-light dark:text-text-dark text-xl">
@@ -288,7 +340,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                 <CardContent className="pt-0">
                   <div className="prose max-w-none">
                     <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed text-base">
-                      {programa.resultados}
+                      {programa.results}
                     </p>
                   </div>
                 </CardContent>
@@ -296,7 +348,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
             )}
 
             {/* Subareas de Resultados */}
-            {programa.subareasResultados && (
+            {programa.resultsAreas && (
               <Card className="bg-card-light dark:bg-card-dark shadow-lg">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-3 text-text-light dark:text-text-dark text-lg">
@@ -307,21 +359,42 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                 <CardContent className="pt-0">
                   <div className="prose max-w-none">
                     <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                      {programa.subareasResultados}
+                      {programa.resultsAreas}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Alineación ODS */}
+            {programa.odsAlignment && (
+              <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 shadow-lg border-blue-200 dark:border-blue-800">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-3 text-text-light dark:text-text-dark text-lg">
+                    <Award className="h-6 w-6 text-blue-600" />
+                    Alineación con ODS
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="prose max-w-none">
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                      {programa.odsAlignment}
                     </p>
                   </div>
                 </CardContent>
               </Card>
             )}
           </div>
-        </div>
+          </div>
 
         {/* Carrusel de Noticias Relacionadas */}
+        <div className="mt-8">
         <RelatedNewsCarousel 
-          programaId={programa.id}
-          title={`Noticias sobre ${programa.nombreSector}`}
+          programId={programa.id}
+          title={`Noticias sobre ${programa.sectorName}`}
           limit={6}
         />
+        </div>
       </div>
       <SiteFooter />
     </div>

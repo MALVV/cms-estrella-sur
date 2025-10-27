@@ -21,8 +21,8 @@ export async function GET(
         creator: {
           select: { id: true, name: true, email: true }
         },
-        programa: {
-          select: { id: true, nombreSector: true }
+        program: {
+          select: { id: true, sectorName: true }
         }
       }
     });
@@ -62,7 +62,7 @@ export async function PUT(
       fileName,
       fileSize,
       fileType,
-      programaId,
+      programId,
       isFeatured,
       isActive
     } = body;
@@ -77,7 +77,7 @@ export async function PUT(
         fileName,
         fileSize,
         fileType,
-        programaId,
+        programId,
         isFeatured,
         isActive
       },
@@ -85,8 +85,8 @@ export async function PUT(
         creator: {
           select: { id: true, name: true, email: true }
         },
-        programa: {
-          select: { id: true, nombreSector: true }
+        program: {
+          select: { id: true, sectorName: true }
         }
       }
     });

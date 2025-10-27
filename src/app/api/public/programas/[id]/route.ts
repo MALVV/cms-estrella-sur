@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const programa = await prisma.programas.findUnique({
+    const programa = await prisma.program.findUnique({
       where: { 
         id: id,
         isActive: true 

@@ -13,7 +13,9 @@ import {
   Share2, 
   ExternalLink,
   Clock,
-  FolderOpen
+  FolderOpen,
+  Image as ImageIcon,
+  ArrowRight
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,6 +45,13 @@ interface Project {
     name?: string;
     email: string;
   };
+  imageLibrary?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    imageUrl: string;
+    imageAlt?: string;
+  }>;
 }
 
 interface ProjectDetailPageProps {
@@ -328,6 +337,64 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </Card>
             )}
           </div>
+
+          {/* Galería de Imágenes */}
+          {project.imageLibrary && project.imageLibrary.length > 0 && (
+            <div className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <ImageIcon className="h-6 w-6 text-primary" />
+                  Galería de Imágenes
+                </h3>
+                <Button variant="outline" asChild>
+                  <Link href={`/proyectos/${resolvedParams.id}/galeria`} className="flex items-center gap-2">
+                    Ver Todas
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+                {project.imageLibrary.slice(0, 6).map((image) => (
+                  <Card key={image.id} className="flex-shrink-0 w-80 overflow-hidden hover:shadow-lg transition-all duration-300 group">
+                    {/* Imagen */}
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.imageAlt || image.title || `Imagen del proyecto ${project.title}`}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+
+                    <CardContent className="p-4 space-y-3">
+                      {/* Título */}
+                      <h4 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                        {image.title}
+                      </h4>
+
+                      {/* Descripción */}
+                      {image.description && (
+                        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 leading-relaxed">
+                          {image.description}
+                        </p>
+                      )}
+
+                      {/* Botón Ver Más */}
+                      <div className="pt-2">
+                        <Button asChild className="w-full" variant="outline">
+                          <Link href={`/proyectos/${resolvedParams.id}/galeria`} className="flex items-center justify-center gap-2">
+                            Ver Todas las Fotos
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Noticias Relacionadas */}
           <div className="mt-12">

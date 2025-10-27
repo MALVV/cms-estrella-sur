@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [programas, total] = await Promise.all([
-      prisma.programas.findMany({
+      prisma.program.findMany({
         where,
         skip,
         take: limit,
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
-      prisma.programas.count({ where })
+      prisma.program.count({ where })
     ]);
 
     return NextResponse.json({

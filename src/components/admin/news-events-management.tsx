@@ -144,7 +144,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
         : {
             title: formData.title,
             description: formData.description,
-            content: formData.content,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             eventDate: formData.eventDate,
@@ -198,7 +197,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
         : {
             title: formData.title,
             description: formData.description,
-            content: formData.content,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             eventDate: formData.eventDate,
@@ -345,11 +343,11 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
       title: item.title,
       content: 'content' in item ? item.content || '' : '',
       excerpt: 'excerpt' in item ? item.excerpt || '' : '',
+      description: 'description' in item ? item.description : '',
       imageUrl: item.imageUrl || '',
       imageAlt: item.imageAlt || '',
       isFeatured: item.isFeatured,
       isActive: item.isActive,
-      description: 'description' in item ? item.description : '',
       eventDate: 'eventDate' in item ? item.eventDate.split('T')[0] : '',
       location: 'location' in item ? item.location || '' : '',
     });
@@ -442,15 +440,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Descripción del evento"
-                      rows={4}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Contenido adicional</label>
-                    <Textarea
-                      value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                      placeholder="Contenido adicional (opcional)"
                       rows={4}
                     />
                   </div>
@@ -714,15 +703,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     placeholder="Descripción del evento"
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Contenido adicional</label>
-                  <Textarea
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    placeholder="Contenido adicional (opcional)"
                     rows={4}
                   />
                 </div>

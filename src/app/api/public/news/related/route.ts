@@ -6,12 +6,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
     const methodologyId = searchParams.get('methodologyId');
-    const programaId = searchParams.get('programaId');
+    const programId = searchParams.get('programId');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    if (!projectId && !methodologyId && !programaId) {
+    if (!projectId && !methodologyId && !programId) {
       return NextResponse.json(
-        { error: 'Se requiere projectId, methodologyId o programaId' },
+        { error: 'Se requiere projectId, methodologyId o programId' },
         { status: 400 }
       );
     }
@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
       where.methodologyId = methodologyId;
     }
 
-    if (programaId) {
-      where.programaId = programaId;
+    if (programId) {
+      where.programId = programId;
     }
 
     const news = await prisma.news.findMany({
@@ -41,10 +41,10 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true,
+            sectorName: true,
           },
         },
         project: {

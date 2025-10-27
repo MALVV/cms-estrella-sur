@@ -269,10 +269,6 @@ export default function StoriesPage() {
                 <EyeOff className="mr-1 h-3 w-3" />
                 Desactivar
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkAction('export')}>
-                <Download className="mr-1 h-3 w-3" />
-                Exportar
-              </Button>
               <Button size="sm" variant="outline" onClick={() => setSelectedStories([])}>
                 Limpiar
               </Button>

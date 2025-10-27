@@ -12,6 +12,10 @@ import InteractiveMap from '@/components/maps/interactive-map';
 
 export default function ContactoPage() {
   const [activeTab, setActiveTab] = useState<'contact' | 'complaint'>('contact');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitMessage, setSubmitMessage] = useState('');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -62,27 +66,101 @@ export default function ContactoPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Formulario enviado:', formData);
-    alert('Mensaje enviado correctamente. Te contactaremos pronto.');
-    setFormData({ name: '', email: '', phone: '', message: '' });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    
+    try {
+      const response = await fetch('/api/public/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al enviar mensaje');
+      }
+
+      setSubmitStatus('success');
+      setSubmitMessage('Mensaje enviado correctamente. Te contactaremos pronto.');
+      setFormData({ name: '', email: '', phone: '', message: '' });
+      
+      // Limpiar mensaje después de 5 segundos
+      setTimeout(() => {
+        setSubmitStatus('idle');
+        setSubmitMessage('');
+      }, 5000);
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+      setSubmitStatus('error');
+      setSubmitMessage(error instanceof Error ? error.message : 'Error al enviar mensaje. Por favor intenta de nuevo.');
+      
+      // Limpiar mensaje después de 5 segundos
+      setTimeout(() => {
+        setSubmitStatus('idle');
+        setSubmitMessage('');
+      }, 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleComplaintSubmit = (e: React.FormEvent) => {
+  const handleComplaintSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Denuncia enviada:', complaintData);
-    alert('Tu denuncia ha sido enviada de forma segura. Nuestro equipo de salvaguarda la revisará siguiendo nuestros protocolos establecidos.');
-    setComplaintData({
-      complaintType: '',
-      description: '',
-      incidentDate: '',
-      incidentLocation: '',
-      peopleInvolved: '',
-      evidence: '',
-      contactName: '',
-      contactEmail: ''
-    });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    
+    try {
+      const response = await fetch('/api/public/complaints', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(complaintData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al enviar denuncia');
+      }
+
+      setSubmitStatus('success');
+      setSubmitMessage('Tu denuncia ha sido enviada de forma segura. Nuestro equipo de salvaguarda la revisará siguiendo nuestros protocolos establecidos.');
+      setComplaintData({
+        complaintType: '',
+        description: '',
+        incidentDate: '',
+        incidentLocation: '',
+        peopleInvolved: '',
+        evidence: '',
+        contactName: '',
+        contactEmail: ''
+      });
+      
+      // Limpiar mensaje después de 8 segundos
+      setTimeout(() => {
+        setSubmitStatus('idle');
+        setSubmitMessage('');
+      }, 8000);
+    } catch (error) {
+      console.error('Error al enviar denuncia:', error);
+      setSubmitStatus('error');
+      setSubmitMessage(error instanceof Error ? error.message : 'Error al enviar denuncia. Por favor intenta de nuevo.');
+      
+      // Limpiar mensaje después de 8 segundos
+      setTimeout(() => {
+        setSubmitStatus('idle');
+        setSubmitMessage('');
+      }, 8000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -572,14 +650,34 @@ export default function ContactoPage() {
                     
                   {/* Botón de Envío - Ancho Completo */}
                   <div className="mt-8">
-                      <button 
+                    {submitStatus === 'idle' ? null : (
+                      <div className={`mb-4 p-4 rounded-md ${submitStatus === 'success' ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
+                        <p className={`text-sm ${submitStatus === 'success' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                          {submitMessage}
+                        </p>
+                      </div>
+                    )}
+                    <button 
                       onClick={handleSubmit}
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center space-x-2 transition-colors text-lg" 
+                      disabled={isSubmitting || activeTab !== 'contact'}
+                      className="w-full bg-primary hover:bg-primary/90 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center space-x-2 transition-colors text-lg disabled:cursor-not-allowed" 
                       type="button"
                       >
-                      <span>ENVIAR MENSAJE</span>
-                        <ArrowRight className="h-5 w-5" />
-                      </button>
+                      {isSubmitting && activeTab === 'contact' ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>ENVIANDO...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>ENVIAR MENSAJE</span>
+                          <ArrowRight className="h-5 w-5" />
+                        </>
+                      )}
+                    </button>
                     </div>
                 </div>
               )}
@@ -762,14 +860,34 @@ export default function ContactoPage() {
                         
                   {/* Botón de Envío - Ancho Completo */}
                   <div className="mt-8">
-                        <button 
+                    {submitStatus === 'idle' ? null : (
+                      <div className={`mb-4 p-4 rounded-md ${submitStatus === 'success' ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'}`}>
+                        <p className={`text-sm ${submitStatus === 'success' ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}`}>
+                          {submitMessage}
+                        </p>
+                      </div>
+                    )}
+                    <button 
                       onClick={handleComplaintSubmit}
-                      className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center space-x-2 transition-colors text-lg" 
+                      disabled={isSubmitting || activeTab !== 'complaint'}
+                      className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center space-x-2 transition-colors text-lg disabled:cursor-not-allowed" 
                       type="button"
-                        >
-                      <span>ENVIAR DENUNCIA DE FORMA SEGURA</span>
+                    >
+                      {isSubmitting && activeTab === 'complaint' ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          <span>ENVIANDO...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>ENVIAR DENUNCIA DE FORMA SEGURA</span>
                           <AlertTriangle className="h-5 w-5" />
-                        </button>
+                        </>
+                      )}
+                    </button>
                     </div>
 
                   {/* Sección de Información */}

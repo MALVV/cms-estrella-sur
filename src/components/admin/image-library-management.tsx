@@ -30,13 +30,13 @@ interface ImageLibraryItem {
   };
   programa?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
   };
 }
 
 interface Programa {
   id: string;
-  nombreSector: string;
+  sectorName: string;
 }
 
 export function ImageLibraryManagement() {
@@ -227,7 +227,7 @@ export function ImageLibraryManagement() {
                 <SelectItem value="">Todos los programas</SelectItem>
                 {programas.map((programa) => (
                   <SelectItem key={programa.id} value={programa.id}>
-                    {programa.nombreSector}
+                    {programa.sectorName}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -270,7 +270,7 @@ export function ImageLibraryManagement() {
                       </h3>
                       {image.programa && (
                         <p className="text-xs text-blue-600 mb-2">
-                          {image.programa.nombreSector}
+                          {image.programa.sectorName}
                         </p>
                       )}
                       <div className="flex justify-between items-center">
@@ -337,3 +337,4 @@ export function ImageLibraryManagement() {
     </div>
   );
 }
+

@@ -36,7 +36,7 @@ interface RelatedNews {
 interface RelatedNewsCarouselProps {
   projectId?: string;
   methodologyId?: string;
-  programaId?: string;
+  programId?: string;
   newsId?: string;
   eventId?: string;
   title?: string;
@@ -46,7 +46,7 @@ interface RelatedNewsCarouselProps {
 export function RelatedNewsCarousel({ 
   projectId, 
   methodologyId, 
-  programaId,
+  programId,
   newsId,
   eventId,
   title = "Noticias Relacionadas",
@@ -74,7 +74,7 @@ export function RelatedNewsCarousel({
           const params = new URLSearchParams();
           if (projectId) params.append('projectId', projectId);
           if (methodologyId) params.append('methodologyId', methodologyId);
-          if (programaId) params.append('programaId', programaId);
+          if (programId) params.append('programId', programId);
           params.append('limit', limit.toString());
 
           const response = await fetch(`/api/public/news/related?${params}`);
@@ -91,7 +91,7 @@ export function RelatedNewsCarousel({
     };
 
     fetchRelatedNews();
-  }, [projectId, methodologyId, programaId, newsId, eventId, limit]);
+  }, [projectId, methodologyId, programId, newsId, eventId, limit]);
 
   if (loading) {
     return (

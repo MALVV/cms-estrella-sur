@@ -17,6 +17,21 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             email: true,
           },
         },
+        imageLibrary: {
+          where: {
+            isActive: true,
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            imageAlt: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
       },
     });
 

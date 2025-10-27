@@ -3,7 +3,8 @@
 import React, { useState, useEffect, use } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Share2, ExternalLink, BookOpen, Users, Target } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Share2, ExternalLink, BookOpen, Users, Target, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -18,17 +19,24 @@ interface Initiative {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: string[];
   targetAudience: string;
   objectives: string;
   implementation: string;
   results: string;
-  methodology: string;
-  resources: string;
-  evaluation: string;
+  methodology?: string;
+  resources?: string;
+  evaluation?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  imageLibrary?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    imageUrl: string;
+    imageAlt?: string;
+  }>;
 }
 
 interface InitiativeDetailPageProps {
@@ -57,6 +65,7 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
       }
       const data = await response.json();
       console.log('✅ Iniciativa encontrada:', data.title);
+      console.log('📊 Datos completos de la iniciativa:', data);
       setInitiative(data);
     } catch (error) {
       console.error('❌ Error al cargar iniciativa:', error);
@@ -85,15 +94,15 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
   };
 
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'EDUCACION':
+  const getCategoryColor = (sector: string) => {
+    switch (sector) {
+      case 'EDUCATION':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'SALUD':
+      case 'HEALTH':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'SOCIAL':
+      case 'PROTECTION':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'AMBIENTAL':
+      case 'SUSTAINABILITY':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
@@ -155,28 +164,17 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
               </Badge>
               <div className="flex items-center gap-2">
                 {getInitiativeIcon()}
-                <Badge className={getCategoryColor(initiative.category)}>
-                  {initiative.category}
-                </Badge>
+                {initiative.sectors && initiative.sectors.length > 0 && (
+                  <Badge className={getCategoryColor(initiative.sectors[0])}>
+                    {initiative.sectors[0]}
+                  </Badge>
+                )}
               </div>
             </div>
             
             <h1 className="text-4xl md:text-5xl font-black text-text-light dark:text-text-dark leading-tight mb-6">
               {initiative.title}
             </h1>
-
-            {/* Metadatos */}
-            <div className="flex flex-wrap items-center gap-6 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-6">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>Grupo etario: {initiative.ageGroup}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                <span>Público objetivo: {initiative.targetAudience}</span>
-              </div>
-            </div>
 
             {/* Botones de acción */}
             <div className="flex gap-3">
@@ -269,6 +267,108 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
             </div>
           </article>
 
+          {/* Información adicional */}
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Grupo Etario */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  Grupo Etario
+                </h3>
+                <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                  {initiative.ageGroup}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Público Objetivo */}
+            <Card>
+              <CardContent className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Público Objetivo
+                </h3>
+                <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                  {initiative.targetAudience}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sectores */}
+          {initiative.sectors && initiative.sectors.length > 0 && (
+            <div className="mt-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    Sectores
+                  </h3>
+                  <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
+                    {initiative.sectors.join(', ')}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Galería de Imágenes */}
+          {initiative.imageLibrary && initiative.imageLibrary.length > 0 && (
+            <div className="mt-12">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold flex items-center gap-2">
+                  <ImageIcon className="h-6 w-6 text-primary" />
+                  Galería de Imágenes
+                </h3>
+                <Button variant="outline" asChild>
+                  <Link href={`/iniciativas/${resolvedParams.id}/galeria`} className="flex items-center gap-2">
+                    Ver Todas
+                    <ExternalLink className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+                {initiative.imageLibrary.slice(0, 6).map((image) => (
+                  <div key={image.id} className="flex-shrink-0 hover:shadow-lg transition-all duration-300 group rounded-lg" style={{ width: '390px' }}>
+                    <div className="bg-gray-100 dark:bg-gray-800 overflow-hidden rounded-t-lg" style={{ width: '390px', height: '260px' }}>
+                      <img
+                        src={image.imageUrl}
+                        alt={image.imageAlt || image.title || `Imagen de la iniciativa ${initiative.title}`}
+                        style={{ 
+                          width: '390px', 
+                          height: '260px', 
+                          objectFit: 'cover',
+                          transition: 'transform 0.3s ease'
+                        }}
+                        className="group-hover:scale-105"
+                      />
+                    </div>
+                    <div className="bg-card-light dark:bg-card-dark p-4 space-y-3 rounded-b-lg">
+                      <h4 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                        {image.title}
+                      </h4>
+                      {image.description && (
+                        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 leading-relaxed">
+                          {image.description}
+                        </p>
+                      )}
+                      <div className="pt-2">
+                        <Button asChild className="w-full" variant="outline">
+                          <Link href={`/iniciativas/${resolvedParams.id}/galeria`} className="flex items-center justify-center gap-2">
+                            Ver Todas las Fotos
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Noticias Relacionadas */}
           <div className="mt-12">
             <RelatedNewsCarousel 
@@ -315,3 +415,4 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
     </div>
   );
 }
+

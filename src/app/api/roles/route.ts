@@ -5,7 +5,7 @@ import { UserRole, ROLE_PERMISSIONS, getAllRoles, getRoleDescription } from '@/l
 /**
  * GET /api/roles - Obtener información de roles y permisos
  */
-export const GET = withRole(UserRole.ADMINISTRADOR)(async (request: NextRequest) => {
+export const GET = withRole(UserRole.ADMINISTRATOR)(async (request: NextRequest) => {
   try {
     const roles = getAllRoles().map(role => ({
       role,
@@ -16,8 +16,8 @@ export const GET = withRole(UserRole.ADMINISTRADOR)(async (request: NextRequest)
     return NextResponse.json({
       roles,
       hierarchy: [
-        { role: UserRole.ADMINISTRADOR, level: 1, description: 'Máximo privilegio - Gestión completa' },
-        { role: UserRole.GESTOR, level: 2, description: 'Gestión de contenido' }
+        { role: UserRole.ADMINISTRATOR, level: 1, description: 'Máximo privilegio - Gestión completa' },
+        { role: UserRole.MANAGER, level: 2, description: 'Gestión de contenido' }
       ]
     })
 

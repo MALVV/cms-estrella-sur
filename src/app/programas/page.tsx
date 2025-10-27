@@ -8,17 +8,17 @@ import { SiteFooter } from '@/components/layout/site-footer';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
-  videoPresentacion?: string;
-  alineacionODS?: string;
-  subareasResultados?: string;
+  presentationVideo?: string;
+  odsAlignment?: string;
+  resultsAreas?: string;
   resultados?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  enlaceMasInformacion?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  moreInfoLink?: string;
   isActive: boolean;
   isFeatured: boolean;
   createdAt: string;
@@ -152,10 +152,10 @@ export default function ProgramasPage() {
                   : fallbackImages[index % fallbackImages.length];
               
               const imageAlt = programa.imageUrl && programa.imageUrl.trim() !== ''
-                ? (programa.imageAlt || programa.nombreSector)
+                ? (programa.imageAlt || programa.sectorName)
                 : hasLibraryImage 
-                  ? (programa.imageLibrary[0].imageAlt || programa.nombreSector)
-                  : programa.nombreSector;
+                  ? (programa.imageLibrary[0].imageAlt || programa.sectorName)
+                  : programa.sectorName;
               
               return (
                 <div key={programa.id} className="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition-all duration-300 border border-white/20 dark:border-gray-600/20">
@@ -175,12 +175,12 @@ export default function ProgramasPage() {
                     <div className="text-left">
                       {/* Título del programa */}
                       <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1.5">
-                        {programa.nombreSector}
+                        {programa.sectorName}
                       </h3>
                       
                       {/* Descripción del programa */}
                       <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-1.5 line-clamp-2">
-                        {programa.descripcion}
+                        {programa.description}
                       </p>
                       
                       {/* Metadatos */}
@@ -212,9 +212,9 @@ export default function ProgramasPage() {
                             <ImageIcon className="h-3 w-3" />
                           </Link>
                         )}
-                        {programa.videoPresentacion && (
+                        {programa.presentationVideo && (
                           <a 
-                            href={programa.videoPresentacion} 
+                            href={programa.presentationVideo} 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-white/60 dark:bg-gray-600/60 backdrop-blur-sm text-gray-700 dark:text-gray-200 text-xs font-medium py-2 px-3 rounded border border-white/30 dark:border-gray-500/30 hover:bg-opacity-80 transition-colors"

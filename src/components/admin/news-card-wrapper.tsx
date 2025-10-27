@@ -26,7 +26,7 @@ interface NewsItem {
   };
   programa?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
   };
   project?: {
     id: string;
@@ -81,7 +81,7 @@ export const NewsCardWrapper: React.FC<NewsCardWrapperProps> = ({
   if (news.programa) {
     relations.push({
       type: 'programa',
-      label: news.programa.nombreSector
+      label: news.programa.sectorName
     });
   }
   if (news.project) {
@@ -147,3 +147,4 @@ export const NewsCardWrapper: React.FC<NewsCardWrapperProps> = ({
     </>
   );
 };
+

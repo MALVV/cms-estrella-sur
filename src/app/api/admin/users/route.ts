@@ -7,7 +7,7 @@ import { generateTemporaryPassword } from '@/lib/temp-password'
 /**
  * POST /api/admin/users - Crear nuevo usuario (solo administradores)
  */
-export const POST = withRole(UserRole.ADMINISTRADOR)(async (request: NextRequest) => {
+export const POST = withRole(UserRole.ADMINISTRATOR)(async (request: NextRequest) => {
   try {
     const { email, name, role } = await request.json()
 
@@ -35,7 +35,7 @@ export const POST = withRole(UserRole.ADMINISTRADOR)(async (request: NextRequest
       email,
       password: temporaryPassword,
       name,
-      role: role || UserRole.GESTOR,
+      role: role || UserRole.MANAGER,
       isTemporaryPassword: true,
       createdBy: (request as { user?: { id: string } }).user?.id // ID del administrador actual
     })

@@ -17,6 +17,32 @@ import InteractiveMap, { getMapStatistics } from '@/components/maps/interactive-
 
 export default function AboutUsPage() {
   const [selectedTeam, setSelectedTeam] = useState<1 | 2 | 3 | 4>(1);
+  const [isMissionVisible, setIsMissionVisible] = useState(false);
+  
+  // Effect para activar animaciones cuando la sección sea visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsMissionVisible(true);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const missionSection = document.getElementById('mision');
+    if (missionSection) {
+      observer.observe(missionSection);
+    }
+
+    return () => {
+      if (missionSection) {
+        observer.unobserve(missionSection);
+      }
+    };
+  }, []);
   
   // Importar las ubicaciones para calcular estadísticas dinámicas
   const allLocations = [
@@ -81,7 +107,7 @@ export default function AboutUsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark overflow-x-hidden">
       <SiteHeader />
       
       {/* Hero Section */}
@@ -135,8 +161,8 @@ export default function AboutUsPage() {
       </div>
 
       {/* Misión y Propósito Section */}
-      <section id="mision" className="py-6 bg-background-light dark:bg-background-dark">
-        <div className="container mx-auto px-4 py-4">
+      <section id="mision" className="py-6 bg-background-light dark:bg-background-dark overflow-hidden max-w-full">
+        <div className="container mx-auto px-4 py-4 max-w-full">
           <div className="text-center mb-12">
             <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
               MISIÓN Y PROPÓSITO
@@ -146,45 +172,27 @@ export default function AboutUsPage() {
             </h1>
           </div>
           
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 gap-8"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 1.5, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
-                <span className="material-symbols-outlined text-blue-500 text-3xl">flag</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8" style={{ overflow: 'hidden', maxWidth: '100%' }}>
+            <div className={`bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-all duration-500 h-full flex flex-col ${isMissionVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
+              <div className={`flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6 ${isMissionVisible ? 'animate-scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }}>
+                <span className={`material-symbols-outlined text-blue-500 text-3xl ${isMissionVisible ? 'animate-pulse-slow' : ''}`}>flag</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">NUESTRA MISIÓN</h3>
-              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+              <h3 className={`text-xl font-bold mb-3 text-text-light dark:text-text-dark ${isMissionVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.5s' }}>NUESTRA MISIÓN</h3>
+              <p className={`text-gray-600 dark:text-gray-400 flex-grow ${isMissionVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.7s' }}>
                 Buscamos que la niñez, la juventud, sus familias y comunidades logren su desarrollo integral y protección.
               </p>
-            </motion.div>
+            </div>
             
-            <motion.div 
-              className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.4 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
-                <span className="material-symbols-outlined text-green-500 text-3xl">visibility</span>
+            <div className={`bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-all duration-500 h-full flex flex-col ${isMissionVisible ? 'animate-fade-in-up' : 'opacity-0'}`} style={{ animationDelay: '0.2s' }}>
+              <div className={`flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6 ${isMissionVisible ? 'animate-scale-in' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+                <span className={`material-symbols-outlined text-green-500 text-3xl ${isMissionVisible ? 'animate-pulse-slow' : ''}`}>visibility</span>
               </div>
-              <h3 className="text-xl font-bold mb-3 text-text-light dark:text-text-dark">NUESTRA VISIÓN</h3>
-              <p className="text-gray-600 dark:text-gray-400 flex-grow">
+              <h3 className={`text-xl font-bold mb-3 text-text-light dark:text-text-dark ${isMissionVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.6s' }}>NUESTRA VISIÓN</h3>
+              <p className={`text-gray-600 dark:text-gray-400 flex-grow ${isMissionVisible ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
                 Comunidades y familias donde la niñez goza de protección y bienestar integral.
               </p>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
           
           <div className="text-center mt-16 mb-8">
             <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark leading-tight">
@@ -192,20 +200,15 @@ export default function AboutUsPage() {
             </h2>
           </div>
           
-          <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 1.5, delay: 0.6 }}
-            viewport={{ once: true }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Primera fila - 4 tarjetas */}
             <motion.div 
               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.1 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              style={{ willChange: 'opacity' }}
             >
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 dark:bg-blue-900 mb-6">
                 <span className="material-symbols-outlined text-blue-500 text-3xl">balance</span>
@@ -218,10 +221,11 @@ export default function AboutUsPage() {
             
             <motion.div 
               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.2 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+              style={{ willChange: 'opacity' }}
             >
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-green-100 dark:bg-green-900 mb-6">
                 <span className="material-symbols-outlined text-green-500 text-3xl">verified</span>
@@ -234,10 +238,11 @@ export default function AboutUsPage() {
 
             <motion.div 
               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.3 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.3 }}
+              viewport={{ once: true, margin: "-100px" }}
+              style={{ willChange: 'opacity' }}
             >
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-purple-100 dark:bg-purple-900 mb-6">
                 <span className="material-symbols-outlined text-purple-500 text-3xl">psychology</span>
@@ -250,10 +255,11 @@ export default function AboutUsPage() {
             
             <motion.div 
               className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.4 }}
-              viewport={{ once: true }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.4 }}
+              viewport={{ once: true, margin: "-100px" }}
+              style={{ willChange: 'opacity' }}
             >
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 dark:bg-orange-900 mb-6">
                 <span className="material-symbols-outlined text-orange-500 text-3xl">handshake</span>
@@ -264,7 +270,7 @@ export default function AboutUsPage() {
               </p>
             </motion.div>
 
-          </motion.div>
+          </div>
           
           {/* Segunda fila - 3 tarjetas centradas */}
           <motion.div 

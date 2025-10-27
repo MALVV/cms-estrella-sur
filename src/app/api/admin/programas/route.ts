@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     const where: {
       isActive?: boolean;
       OR?: Array<{
-        nombreSector?: { contains: string; mode: 'insensitive' };
-        descripcion?: { contains: string; mode: 'insensitive' };
+        sectorName?: { contains: string; mode: 'insensitive' };
+        description?: { contains: string; mode: 'insensitive' };
       }>;
     } = {};
 
@@ -39,19 +39,19 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { nombreSector: { contains: search, mode: 'insensitive' } },
-        { descripcion: { contains: search, mode: 'insensitive' } },
+        { sectorName: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
       ];
     }
 
     // Configurar ordenamiento
     const orderBy: {
-      nombreSector?: 'asc' | 'desc';
+      sectorName?: 'asc' | 'desc';
       updatedAt?: 'asc' | 'desc';
       createdAt?: 'asc' | 'desc';
     } = {};
-    if (sortBy === 'nombreSector') {
-      orderBy.nombreSector = sortOrder;
+    if (sortBy === 'sectorName') {
+      orderBy.sectorName = sortOrder;
     } else if (sortBy === 'updatedAt') {
       orderBy.updatedAt = sortOrder;
     } else {
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [programas, total] = await Promise.all([
-      prisma.programas.findMany({
+      prisma.program.findMany({
         where,
         skip,
         take: limit,
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
-      prisma.programas.count({ where })
+      prisma.program.count({ where })
     ]);
 
     return NextResponse.json({
@@ -128,19 +128,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const programa = await prisma.programas.create({
+    const programa = await prisma.program.create({
       data: {
-        nombreSector,
-        descripcion,
+        sectorName: nombreSector,
+        description: descripcion,
         imageUrl,
         imageAlt,
-        videoPresentacion,
-        alineacionODS,
-        subareasResultados,
-        resultados,
-        gruposAtencion,
-        contenidosTemas,
-        enlaceMasInformacion,
+        presentationVideo: videoPresentacion,
+        odsAlignment: alineacionODS,
+        resultsAreas: subareasResultados,
+        results: resultados,
+        targetGroups: gruposAtencion,
+        contentTopics: contenidosTemas,
+        moreInfoLink: enlaceMasInformacion,
         isFeatured,
         createdBy: session.user.id
       },

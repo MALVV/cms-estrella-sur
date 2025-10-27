@@ -76,6 +76,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         console.log('🎫 Creando JWT token:', {
           email: user.email,
+          role: user.role,
           mustChangePassword: user.mustChangePassword
         })
         token.id = user.id
@@ -83,6 +84,8 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name
         token.role = user.role
         token.mustChangePassword = user.mustChangePassword
+        
+        console.log('🔐 Token role value:', token.role)
         
         // Generar token personalizado para autenticación en APIs
         token.customToken = generateAccessToken({
@@ -104,6 +107,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         console.log('📋 Creando sesión:', {
           email: token.email,
+          role: token.role,
           mustChangePassword: token.mustChangePassword,
           customTokenExists: !!token.customToken,
           customTokenLength: token.customToken ? token.customToken.length : 0

@@ -21,12 +21,12 @@ interface ImageLibraryItem {
   fileType?: string;
   isActive: boolean;
   isFeatured: boolean;
-  programaId?: string;
+  programId?: string;
 }
 
 interface Programa {
   id: string;
-  nombreSector: string;
+  sectorName: string;
 }
 
 interface ImageLibraryFormProps {
@@ -41,7 +41,7 @@ export function ImageLibraryForm({ image, programas, onClose }: ImageLibraryForm
     description: '',
     imageUrl: '',
     imageAlt: '',
-    programaId: '',
+    programId: '',
     isFeatured: false,
   });
   const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ export function ImageLibraryForm({ image, programas, onClose }: ImageLibraryForm
         description: image.description || '',
         imageUrl: image.imageUrl,
         imageAlt: image.imageAlt || '',
-        programaId: image.programaId || '',
+        programId: image.programId || '',
         isFeatured: image.isFeatured,
       });
     }
@@ -171,8 +171,8 @@ export function ImageLibraryForm({ image, programas, onClose }: ImageLibraryForm
             </div>
 
             <div>
-              <Label htmlFor="programaId">Programa Relacionado</Label>
-              <Select value={formData.programaId} onValueChange={(value) => handleInputChange('programaId', value)}>
+              <Label htmlFor="programId">Programa Relacionado</Label>
+              <Select value={formData.programId} onValueChange={(value) => handleInputChange('programId', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar programa (opcional)" />
                 </SelectTrigger>
@@ -180,7 +180,7 @@ export function ImageLibraryForm({ image, programas, onClose }: ImageLibraryForm
                   <SelectItem value="">Sin programa específico</SelectItem>
                   {programas.map((programa) => (
                     <SelectItem key={programa.id} value={programa.id}>
-                      {programa.nombreSector}
+                      {programa.sectorName}
                     </SelectItem>
                   ))}
                 </SelectContent>

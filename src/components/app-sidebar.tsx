@@ -21,6 +21,11 @@ import {
   Megaphone,
   Palette,
   Images,
+  DollarSign,
+  Heart,
+  Target,
+  MessageSquare,
+  AlertTriangle,
 } from "lucide-react"
 import Link from "next/link"
 import { useSession, signOut } from "next-auth/react"
@@ -43,8 +48,60 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+// Función para normalizar el rol
+const normalizeRole = (role: string): string => {
+  const roleMap: Record<string, string> = {
+    'ADMINISTRATOR': 'ADMINISTRATOR',
+    'MANAGER': 'MANAGER',
+    'CONSULTANT': 'CONSULTANT',
+    'ADMINISTRADOR': 'ADMINISTRATOR',
+    'GESTOR': 'MANAGER',
+    'ASESOR': 'CONSULTANT'
+  }
+  return roleMap[role] || 'MANAGER'
+}
+
 // Organización del sidebar por secciones con estructura original
 const getNavSections = (userRole: string) => {
+  // Normalizar el rol
+  const normalizedRole = normalizeRole(userRole)
+  
+  // Si es CONSULTANT (Asesor), solo mostrar secciones de donaciones
+  if (normalizedRole === "CONSULTANT") {
+    return [
+      {
+        title: "Donaciones",
+        icon: DollarSign,
+        items: [
+          {
+            title: "Panel de Control",
+            url: "/dashboard",
+            icon: Home,
+            showFor: ["CONSULTANT"]
+          },
+          {
+            title: "Gestión de Donaciones",
+            url: "/dashboard/donaciones",
+            icon: Heart,
+            showFor: ["CONSULTANT"]
+          },
+          {
+            title: "Proyectos de Donación",
+            url: "/dashboard/proyectos-donacion",
+            icon: Target,
+            showFor: ["CONSULTANT"]
+          },
+          {
+            title: "Metas Anuales",
+            url: "/dashboard/metas-anuales",
+            icon: Target,
+            showFor: ["CONSULTANT"]
+          },
+        ]
+      }
+    ]
+  }
+
   const sections = [
     {
       title: "Operaciones",
@@ -54,19 +111,19 @@ const getNavSections = (userRole: string) => {
           title: "Panel de Control",
           url: "/dashboard",
           icon: Home,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
         {
           title: "Usuarios",
           url: "#",
           icon: Users,
-          showFor: ["ADMINISTRADOR"],
-          items: [
-            {
-              title: "Gestión de Usuarios",
-              url: "/dashboard/users",
-              showFor: ["ADMINISTRADOR"]
-            },
+          showFor: ["ADMINISTRATOR"],
+              items: [
+                {
+                  title: "Gestión de Usuarios",
+                  url: "/dashboard/users",
+                  showFor: ["ADMINISTRATOR"]
+                },
           ],
         },
       ]
@@ -79,19 +136,19 @@ const getNavSections = (userRole: string) => {
           title: "Proyectos",
           url: "/dashboard/proyectos",
           icon: Briefcase,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
         {
           title: "Iniciativas",
-          url: "/dashboard/metodologias",
+          url: "/dashboard/iniciativas",
           icon: Settings,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
         {
           title: "Programas",
           url: "/dashboard/programas",
-          icon: FileText,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          icon: BookOpen,
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
       ]
     },
@@ -103,17 +160,17 @@ const getNavSections = (userRole: string) => {
           title: "Blog",
           url: "#",
           icon: BookOpen,
-          showFor: ["ADMINISTRADOR", "GESTOR"],
+          showFor: ["ADMINISTRATOR", "MANAGER"],
           items: [
             {
               title: "Noticias",
               url: "/dashboard/noticias",
-              showFor: ["ADMINISTRADOR", "GESTOR"]
+              showFor: ["ADMINISTRATOR", "MANAGER"]
             },
             {
               title: "Eventos",
               url: "/dashboard/eventos",
-              showFor: ["ADMINISTRADOR", "GESTOR"]
+              showFor: ["ADMINISTRATOR", "MANAGER"]
             },
           ],
         },
@@ -121,17 +178,17 @@ const getNavSections = (userRole: string) => {
           title: "Contenido",
           url: "#",
           icon: FileText,
-          showFor: ["ADMINISTRADOR", "GESTOR"],
+          showFor: ["ADMINISTRATOR", "MANAGER"],
           items: [
             {
               title: "Historias de Impacto",
               url: "/dashboard/historias",
-              showFor: ["ADMINISTRADOR", "GESTOR"]
+              showFor: ["ADMINISTRATOR", "MANAGER"]
             },
             {
               title: "Videos",
               url: "/dashboard/videos-testimoniales",
-              showFor: ["ADMINISTRADOR", "GESTOR"]
+              showFor: ["ADMINISTRATOR", "MANAGER"]
             },
           ],
         },
@@ -145,19 +202,49 @@ const getNavSections = (userRole: string) => {
           title: "Galería",
           url: "/dashboard/galeria-imagenes",
           icon: Camera,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
         {
           title: "Aliados",
           url: "/dashboard/aliados",
           icon: Handshake,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
         },
         {
           title: "Recursos",
           url: "/dashboard/recursos",
           icon: FolderOpen,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
+        },
+      ]
+    },
+    {
+      title: "Finanzas",
+      icon: DollarSign,
+      items: [
+        {
+          title: "Donaciones",
+          url: "#",
+          icon: Heart,
+          showFor: ["ADMINISTRATOR", "MANAGER", "CONSULTANT"],
+          items: [
+            {
+              title: "Gestión de Donaciones",
+              url: "/dashboard/donaciones",
+              showFor: ["ADMINISTRATOR", "MANAGER", "CONSULTANT"]
+            },
+            {
+              title: "Proyectos de Donación",
+              url: "/dashboard/proyectos-donacion",
+              showFor: ["ADMINISTRATOR", "MANAGER", "CONSULTANT"]
+            },
+          ],
+        },
+        {
+          title: "Metas Anuales",
+          url: "/dashboard/metas-anuales",
+          icon: Target,
+          showFor: ["ADMINISTRATOR", "MANAGER", "CONSULTANT"]
         },
       ]
     },
@@ -169,7 +256,25 @@ const getNavSections = (userRole: string) => {
           title: "Documentos",
           url: "/dashboard/transparencia",
           icon: Shield,
-          showFor: ["ADMINISTRADOR", "GESTOR"]
+          showFor: ["ADMINISTRATOR", "MANAGER"]
+        },
+      ]
+    },
+    {
+      title: "Comunicación",
+      icon: MessageSquare,
+      items: [
+        {
+          title: "Mensajes de Contacto",
+          url: "/dashboard/mensajes-contacto",
+          icon: MessageSquare,
+          showFor: ["ADMINISTRATOR", "MANAGER"]
+        },
+        {
+          title: "Canal de Denuncias",
+          url: "/dashboard/denuncias",
+          icon: AlertTriangle,
+          showFor: ["ADMINISTRATOR"]
         },
       ]
     },
@@ -180,12 +285,12 @@ const getNavSections = (userRole: string) => {
     ...section,
     items: section.items.filter(item => {
       if (!item.showFor) return true
-      return item.showFor.includes(userRole)
+      return item.showFor.includes(normalizedRole)
     }).map(item => ({
       ...item,
       items: item.items?.filter(subItem => {
         if (!subItem.showFor) return true
-        return subItem.showFor.includes(userRole)
+        return subItem.showFor.includes(normalizedRole)
       })
     }))
   })).filter(section => section.items.length > 0)
@@ -193,6 +298,12 @@ const getNavSections = (userRole: string) => {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession()
+
+  // Debug: mostrar información de la sesión
+  if (session?.user) {
+    console.log('🔍 Sidebar - Rol del usuario:', session.user.role)
+    console.log('🔍 Sidebar - Datos completos:', session.user)
+  }
 
   // Si no hay sesión, no mostrar el sidebar
   if (status === 'unauthenticated' || !session) {
@@ -219,7 +330,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {getNavSections(session?.user?.role || 'GESTOR').map((section) => (
+        {getNavSections(session?.user?.role || 'MANAGER').map((section) => (
           <SidebarGroup key={section.title}>
             <SidebarGroupLabel className="flex items-center gap-2">
               <section.icon className="h-4 w-4" />

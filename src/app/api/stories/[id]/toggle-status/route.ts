@@ -19,7 +19,7 @@ export async function PATCH(
     const body = await request.json()
     const { isActive } = body
 
-    const updatedStory = await prisma.stories.update({
+    const updatedStory = await prisma.story.update({
       where: { id },
       data: { isActive },
       include: {

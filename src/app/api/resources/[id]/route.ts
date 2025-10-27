@@ -93,7 +93,7 @@ export async function PUT(
 
     // Validar que la categoría sea válida si se proporciona
     if (category) {
-      const validCategories = ['CENTRO_MULTIMEDIA', 'PUBLICACIONES'];
+      const validCategories = ['MULTIMEDIA_CENTER', 'PUBLICATIONS'];
       if (!validCategories.includes(category)) {
         return NextResponse.json(
           { error: 'Categoría inválida' },
@@ -104,7 +104,7 @@ export async function PUT(
 
     // Validar subcategoría si se proporciona
     if (subcategory) {
-      const validSubcategories = ['VIDEOS', 'AUDIOS', 'REPRODUCTOR_INTEGRADO', 'BIBLIOTECA_DIGITAL', 'GUIAS_DESCARGABLES', 'MANUALES'];
+      const validSubcategories = ['VIDEOS', 'AUDIOS', 'DIGITAL_LIBRARY', 'DOWNLOADABLE_GUIDES', 'MANUALS'];
       if (!validSubcategories.includes(subcategory)) {
         return NextResponse.json(
           { error: 'Subcategoría inválida' },

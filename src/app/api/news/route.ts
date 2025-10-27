@@ -62,10 +62,10 @@ export async function GET(request: NextRequest) {
             email: true,
           },
         },
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true,
+            sectorName: true,
           },
         },
         project: {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       imageUrl,
       imageAlt,
       isFeatured = false,
-      programaId,
+      programId,
       projectId,
       methodologyId,
     } = body;
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         imageUrl,
         imageAlt,
         isFeatured,
-        programaId,
+        programId,
         projectId,
         methodologyId,
         createdBy: authResult.user.id,
@@ -146,10 +146,10 @@ export async function POST(request: NextRequest) {
             email: true,
           },
         },
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true,
+            sectorName: true,
           },
         },
         project: {

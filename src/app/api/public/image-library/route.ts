@@ -4,15 +4,30 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const programaId = searchParams.get('programaId');
+    const programId = searchParams.get('programId');
+    const projectId = searchParams.get('projectId');
+    const methodologyId = searchParams.get('methodologyId');
+    const featured = searchParams.get('featured');
     const limit = parseInt(searchParams.get('limit') || '20');
 
     const where: any = {
       isActive: true,
     };
 
-    if (programaId) {
-      where.programaId = programaId;
+    if (programId) {
+      where.programId = programId;
+    }
+
+    if (projectId) {
+      where.projectId = projectId;
+    }
+
+    if (methodologyId) {
+      where.methodologyId = methodologyId;
+    }
+
+    if (featured === 'true') {
+      where.isFeatured = true;
     }
 
     const images = await prisma.imageLibrary.findMany({
@@ -26,8 +41,14 @@ export async function GET(request: NextRequest) {
         imageUrl: true,
         imageAlt: true,
         createdAt: true,
-        programa: {
-          select: { id: true, nombreSector: true }
+        program: {
+          select: { id: true, sectorName: true }
+        },
+        project: {
+          select: { id: true, title: true }
+        },
+        methodology: {
+          select: { id: true, title: true }
         }
       }
     });

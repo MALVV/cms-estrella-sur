@@ -21,10 +21,10 @@ export async function GET(
             email: true,
           },
         },
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true,
+            sectorName: true,
           },
         },
         project: {
@@ -83,7 +83,7 @@ export async function PUT(
       imageAlt,
       isFeatured,
       isActive,
-      programaId,
+      programId,
       projectId,
       methodologyId,
     } = body;
@@ -110,7 +110,7 @@ export async function PUT(
         ...(isFeatured !== undefined && { isFeatured }),
         ...(isActive !== undefined && { isActive }),
         // Actualizar relaciones
-        programaId: programaId || null,
+        programId: programId || null,
         projectId: projectId || null,
         methodologyId: methodologyId || null,
       },
@@ -121,10 +121,10 @@ export async function PUT(
             email: true,
           },
         },
-        programa: {
+        program: {
           select: {
             id: true,
-            nombreSector: true,
+            sectorName: true,
           },
         },
         project: {

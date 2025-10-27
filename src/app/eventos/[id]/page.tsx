@@ -257,13 +257,13 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               </div>
 
               {/* Contenido completo */}
-              {event.content && (
+              {event.description && (
                 <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
                   <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
                     Información Adicional
                   </h2>
                   <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                    {event.content.split('\n').map((paragraph, index) => (
+                    {event.description.split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-4 last:mb-0">
                         {paragraph}
                       </p>

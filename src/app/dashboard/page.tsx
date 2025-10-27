@@ -5,9 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { AnalyticsCards } from '@/components/dashboard/analytics-cards'
 import { QuickActions } from '@/components/dashboard/quick-actions'
 import { ContentStats } from '@/components/dashboard/metrics-chart'
+import { AdvisorDashboard } from '@/components/dashboard/advisor-dashboard'
 
 export default function DashboardPage() {
   const { data: session } = useSession()
+
+  // Si el usuario es ASESOR, mostrar el dashboard específico para asesores
+  if (session?.user?.role === 'ASESOR') {
+    return <AdvisorDashboard />
+  }
 
   return (
     <div className="space-y-6">

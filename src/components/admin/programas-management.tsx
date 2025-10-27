@@ -20,8 +20,8 @@ import { ProgramaCardWrapper } from './programa-card-wrapper';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
   videoPresentacion?: string;
@@ -214,7 +214,7 @@ export function ProgramasManagement() {
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nombreSector">Nombre</SelectItem>
+              <SelectItem value="sectorName">Nombre</SelectItem>
               <SelectItem value="createdAt">Fecha creación</SelectItem>
               <SelectItem value="updatedAt">Fecha actualización</SelectItem>
             </SelectContent>

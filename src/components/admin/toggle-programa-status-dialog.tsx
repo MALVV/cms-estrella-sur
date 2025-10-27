@@ -8,15 +8,15 @@ import { toast } from 'sonner';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
-  videoPresentacion?: string;
-  alineacionODS?: string;
-  subareasResultados?: string;
+  sectorName: string;
+  description: string;
+  presentationVideo?: string;
+  odsAlignment?: string;
+  resultsAreas?: string;
   resultados?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  enlaceMasInformacion?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  moreInfoLink?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -85,7 +85,7 @@ export const ToggleProgramaStatusDialog: React.FC<ToggleProgramaStatusDialogProp
         <DialogHeader>
           <DialogTitle>{actionCapitalized} Programa</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que quieres {action} el programa "{programa.nombreSector}"?
+            ¿Estás seguro de que quieres {action} el programa "{programa.sectorName}"?
             {isActivating 
               ? ' El programa será visible en la página pública.' 
               : ' El programa ya no será visible en la página pública.'
@@ -115,3 +115,4 @@ export const ToggleProgramaStatusDialog: React.FC<ToggleProgramaStatusDialogProp
     </Dialog>
   );
 };
+

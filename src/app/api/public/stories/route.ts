@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     // Obtener solo stories activas para la landing page
-    const stories = await prisma.stories.findMany({
+    const stories = await prisma.story.findMany({
       where: {
         isActive: true
       },
@@ -12,7 +12,7 @@ export async function GET() {
         createdAt: 'desc'
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -32,11 +32,11 @@ export async function GET() {
       imageUrl: story.imageUrl,
       imageAlt: story.imageAlt,
       createdAt: story.createdAt.toISOString().split('T')[0],
-      author: story.users ? {
-        id: story.users.id,
-        name: story.users.name,
-        email: story.users.email,
-        role: story.users.role
+      author: story.creator ? {
+        id: story.creator.id,
+        name: story.creator.name,
+        email: story.creator.email,
+        role: story.creator.role
       } : null
     }))
 

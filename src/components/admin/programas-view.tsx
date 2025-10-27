@@ -7,15 +7,15 @@ import { X, ExternalLink, Play, Image as ImageIcon, Newspaper } from 'lucide-rea
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
-  videoPresentacion?: string;
-  alineacionODS?: string;
-  subareasResultados?: string;
+  sectorName: string;
+  description: string;
+  presentationVideo?: string;
+  odsAlignment?: string;
+  resultsAreas?: string;
   resultados?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  enlaceMasInformacion?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  moreInfoLink?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -57,12 +57,12 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
     return match ? match[1] : null;
   };
 
-  const youtubeId = programa.videoPresentacion ? extractYouTubeId(programa.videoPresentacion) : null;
+  const youtubeId = programa.presentationVideo ? extractYouTubeId(programa.presentationVideo) : null;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{programa.nombreSector}</h1>
+        <h1 className="text-3xl font-bold">{programa.sectorName}</h1>
         <Button variant="outline" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
@@ -85,13 +85,13 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold mb-2">Descripción</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">{programa.descripcion}</p>
+                <p className="text-gray-700 whitespace-pre-wrap">{programa.description}</p>
               </div>
 
-              {programa.subareasResultados && (
+              {programa.resultsAreas && (
                 <div>
                   <h3 className="font-semibold mb-2">Subáreas de Resultados</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{programa.subareasResultados}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{programa.resultsAreas}</p>
                 </div>
               )}
 
@@ -102,24 +102,24 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
                 </div>
               )}
 
-              {programa.gruposAtencion && (
+              {programa.targetGroups && (
                 <div>
                   <h3 className="font-semibold mb-2">Grupos de Atención</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{programa.gruposAtencion}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{programa.targetGroups}</p>
                 </div>
               )}
 
-              {programa.contenidosTemas && (
+              {programa.contentTopics && (
                 <div>
                   <h3 className="font-semibold mb-2">Contenidos/Temas</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{programa.contenidosTemas}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{programa.contentTopics}</p>
                 </div>
               )}
 
-              {programa.alineacionODS && (
+              {programa.odsAlignment && (
                 <div>
                   <h3 className="font-semibold mb-2">Alineación a ODS</h3>
-                  <p className="text-gray-700 whitespace-pre-wrap">{programa.alineacionODS}</p>
+                  <p className="text-gray-700 whitespace-pre-wrap">{programa.odsAlignment}</p>
                 </div>
               )}
             </CardContent>
@@ -148,7 +148,7 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
           )}
 
           {/* Enlace Externo */}
-          {programa.enlaceMasInformacion && (
+          {programa.moreInfoLink && (
             <Card>
               <CardContent className="pt-6">
                 <Button
@@ -157,7 +157,7 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
                   variant="outline"
                 >
                   <a
-                    href={programa.enlaceMasInformacion}
+                    href={programa.moreInfoLink}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"
@@ -267,3 +267,4 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
     </div>
   );
 }
+

@@ -9,10 +9,10 @@ import Link from 'next/link';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
-  videoPresentacion?: string;
-  enlaceMasInformacion?: string;
+  sectorName: string;
+  description: string;
+  presentationVideo?: string;
+  moreInfoLink?: string;
   isFeatured: boolean;
   _count: {
     news: number;
@@ -81,20 +81,20 @@ export function ProgramasDestacadosSection() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             {programas.map((programa) => {
-              const youtubeId = programa.videoPresentacion ? extractYouTubeId(programa.videoPresentacion) : null;
+              const youtubeId = programa.presentationVideo ? extractYouTubeId(programa.presentationVideo) : null;
               
               return (
                 <Card key={programa.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between mb-2">
                       <CardTitle className="text-xl line-clamp-2">
-                        {programa.nombreSector}
+                        {programa.sectorName}
                       </CardTitle>
                       <Badge variant="secondary" className="ml-2">Destacado</Badge>
                     </div>
                     
                     <p className="text-gray-600 dark:text-gray-400 line-clamp-3">
-                      {programa.descripcion}
+                      {programa.description}
                     </p>
                   </CardHeader>
 
@@ -104,7 +104,7 @@ export function ProgramasDestacadosSection() {
                       <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden relative">
                         <img
                           src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
-                          alt={`Video de ${programa.nombreSector}`}
+                          alt={`Video de ${programa.sectorName}`}
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -135,14 +135,14 @@ export function ProgramasDestacadosSection() {
                         </Link>
                       </Button>
                       
-                      {programa.enlaceMasInformacion && (
+                      {programa.moreInfoLink && (
                         <Button
                           variant="outline"
                           asChild
                           className="flex items-center gap-2"
                         >
                           <a
-                            href={programa.enlaceMasInformacion}
+                            href={programa.moreInfoLink}
                             target="_blank"
                             rel="noopener noreferrer"
                           >

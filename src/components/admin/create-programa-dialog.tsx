@@ -19,17 +19,17 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    nombreSector: '',
-    descripcion: '',
+    sectorName: '',
+    description: '',
     imageUrl: '',
     imageAlt: '',
-    videoPresentacion: '',
-    alineacionODS: '',
-    subareasResultados: '',
+    presentationVideo: '',
+    odsAlignment: '',
+    resultsAreas: '',
     resultados: '',
-    gruposAtencion: '',
-    contenidosTemas: '',
-    enlaceMasInformacion: '',
+    targetGroups: '',
+    contentTopics: '',
+    moreInfoLink: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,17 +54,17 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
       
       // Reset form
       setFormData({
-        nombreSector: '',
-        descripcion: '',
+        sectorName: '',
+        description: '',
         imageUrl: '',
         imageAlt: '',
-        videoPresentacion: '',
-        alineacionODS: '',
-        subareasResultados: '',
+        presentationVideo: '',
+        odsAlignment: '',
+        resultsAreas: '',
         resultados: '',
-        gruposAtencion: '',
-        contenidosTemas: '',
-        enlaceMasInformacion: '',
+        targetGroups: '',
+        contentTopics: '',
+        moreInfoLink: '',
       });
       
       onSuccess?.();
@@ -93,11 +93,11 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="nombreSector">Nombre del Sector *</Label>
+                <Label htmlFor="sectorName">Nombre del Sector *</Label>
                 <Input
-                  id="nombreSector"
-                  value={formData.nombreSector}
-                  onChange={(e) => setFormData({ ...formData, nombreSector: e.target.value })}
+                  id="sectorName"
+                  value={formData.sectorName}
+                  onChange={(e) => setFormData({ ...formData, sectorName: e.target.value })}
                   required
                   placeholder="Ej: Educación Primaria"
                 />
@@ -105,11 +105,11 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
             </div>
 
             <div>
-              <Label htmlFor="descripcion">Descripción *</Label>
+              <Label htmlFor="description">Descripción *</Label>
               <Textarea
-                id="descripcion"
-                value={formData.descripcion}
-                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
                 placeholder="Descripción detallada del programa..."
                 rows={4}
@@ -144,11 +144,11 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
             </div>
 
             <div>
-              <Label htmlFor="videoPresentacion">URL del Video de Presentación</Label>
+              <Label htmlFor="presentationVideo">URL del Video de Presentación</Label>
               <Input
-                id="videoPresentacion"
-                value={formData.videoPresentacion}
-                onChange={(e) => setFormData({ ...formData, videoPresentacion: e.target.value })}
+                id="presentationVideo"
+                value={formData.presentationVideo}
+                onChange={(e) => setFormData({ ...formData, presentationVideo: e.target.value })}
                 placeholder="https://youtube.com/watch?v=..."
               />
             </div>
@@ -159,22 +159,22 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
             <h3 className="text-lg font-semibold">Detalles del Programa</h3>
             
             <div>
-              <Label htmlFor="alineacionODS">Alineación a ODS</Label>
+              <Label htmlFor="odsAlignment">Alineación a ODS</Label>
               <Textarea
-                id="alineacionODS"
-                value={formData.alineacionODS}
-                onChange={(e) => setFormData({ ...formData, alineacionODS: e.target.value })}
+                id="odsAlignment"
+                value={formData.odsAlignment}
+                onChange={(e) => setFormData({ ...formData, odsAlignment: e.target.value })}
                 placeholder="Cómo se alinea con los Objetivos de Desarrollo Sostenible..."
                 rows={3}
               />
             </div>
 
             <div>
-              <Label htmlFor="subareasResultados">Subáreas de Resultados</Label>
+              <Label htmlFor="resultsAreas">Subáreas de Resultados</Label>
               <Textarea
-                id="subareasResultados"
-                value={formData.subareasResultados}
-                onChange={(e) => setFormData({ ...formData, subareasResultados: e.target.value })}
+                id="resultsAreas"
+                value={formData.resultsAreas}
+                onChange={(e) => setFormData({ ...formData, resultsAreas: e.target.value })}
                 placeholder="Subáreas específicas de resultados..."
                 rows={3}
               />
@@ -192,33 +192,33 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
             </div>
 
             <div>
-              <Label htmlFor="gruposAtencion">Grupos de Atención</Label>
+              <Label htmlFor="targetGroups">Grupos de Atención</Label>
               <Textarea
-                id="gruposAtencion"
-                value={formData.gruposAtencion}
-                onChange={(e) => setFormData({ ...formData, gruposAtencion: e.target.value })}
+                id="targetGroups"
+                value={formData.targetGroups}
+                onChange={(e) => setFormData({ ...formData, targetGroups: e.target.value })}
                 placeholder="Grupos objetivo del programa..."
                 rows={3}
               />
             </div>
 
             <div>
-              <Label htmlFor="contenidosTemas">Contenidos/Temas</Label>
+              <Label htmlFor="contentTopics">Contenidos/Temas</Label>
               <Textarea
-                id="contenidosTemas"
-                value={formData.contenidosTemas}
-                onChange={(e) => setFormData({ ...formData, contenidosTemas: e.target.value })}
+                id="contentTopics"
+                value={formData.contentTopics}
+                onChange={(e) => setFormData({ ...formData, contentTopics: e.target.value })}
                 placeholder="Contenidos y temas del programa..."
                 rows={3}
               />
             </div>
 
             <div>
-              <Label htmlFor="enlaceMasInformacion">Enlace para Más Información</Label>
+              <Label htmlFor="moreInfoLink">Enlace para Más Información</Label>
               <Input
-                id="enlaceMasInformacion"
-                value={formData.enlaceMasInformacion}
-                onChange={(e) => setFormData({ ...formData, enlaceMasInformacion: e.target.value })}
+                id="moreInfoLink"
+                value={formData.moreInfoLink}
+                onChange={(e) => setFormData({ ...formData, moreInfoLink: e.target.value })}
                 placeholder="https://ejemplo.com/mas-informacion"
               />
             </div>
@@ -244,3 +244,4 @@ export const CreateProgramaDialog: React.FC<CreateProgramaDialogProps> = ({ onSu
     </Dialog>
   );
 };
+

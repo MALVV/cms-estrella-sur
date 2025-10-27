@@ -10,15 +10,15 @@ export async function GET(
     const { id } = await params;
     
     // Verificar que el programa existe y está activo
-    const programa = await prisma.programas.findUnique({
+    const programa = await prisma.program.findUnique({
       where: { 
         id,
         isActive: true 
       },
       select: {
         id: true,
-        nombreSector: true,
-        descripcion: true,
+        sectorName: true,
+        description: true,
         imageUrl: true,
         imageAlt: true
       }
@@ -34,7 +34,7 @@ export async function GET(
     // Obtener todas las imágenes activas del programa
     const images = await prisma.imageLibrary.findMany({
       where: {
-        programaId: id,
+        programId: id,
         isActive: true
       },
       select: {

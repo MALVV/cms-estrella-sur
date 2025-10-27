@@ -93,13 +93,19 @@ export function AnalyticsCards() {
         const response = await fetch('/api/analytics')
         
         if (!response.ok) {
-          throw new Error('Error al obtener analíticas')
+          const errorData = await response.json().catch(() => ({}))
+          const errorMessage = errorData.error || `Error HTTP ${response.status}`
+          throw new Error(errorMessage)
         }
         
         const data = await response.json()
         setAnalytics(data)
       } catch (error) {
         console.error('Error fetching analytics:', error)
+        // Mostrar el error completo para depuración
+        if (error instanceof Error) {
+          console.error('Error details:', error.message)
+        }
         // En caso de error, mantener valores por defecto
       } finally {
         setLoading(false)

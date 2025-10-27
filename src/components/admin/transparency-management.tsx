@@ -36,7 +36,7 @@ interface TransparencyDocument {
   fileUrl: string;
   fileSize?: number;
   fileType?: string;
-  category: 'CENTRO_DOCUMENTOS' | 'RENDICION_CUENTAS' | 'FINANCIADORES_ALIADOS' | 'INFORMES_ANUALES';
+  category: 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS';
   year?: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -50,22 +50,22 @@ interface TransparencyDocument {
 }
 
 const categoryInfo = {
-  CENTRO_DOCUMENTOS: {
+  DOCUMENT_CENTER: {
     title: 'Centro de Documentos',
     icon: FolderOpen,
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
   },
-  RENDICION_CUENTAS: {
+  ACCOUNTABILITY: {
     title: 'Rendición de Cuentas',
     icon: BarChart3,
     color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
   },
-  FINANCIADORES_ALIADOS: {
+  FINANCIERS_AND_ALLIES: {
     title: 'Financiadores y Aliados',
     icon: Users,
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
   },
-  INFORMES_ANUALES: {
+  ANNUAL_REPORTS: {
     title: 'Informes Anuales',
     icon: FileText,
     color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
@@ -808,7 +808,7 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
 
       <div>
         <label className="block text-sm font-medium mb-2">Categoría *</label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'CENTRO_DOCUMENTOS' | 'RENDICION_CUENTAS' | 'FINANCIADORES_ALIADOS' | 'INFORMES_ANUALES' })}>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS' })}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar categoría" />
           </SelectTrigger>
@@ -968,7 +968,7 @@ const EditTransparencyDocumentForm: React.FC<{
 
       <div>
         <label className="block text-sm font-medium mb-2">Categoría *</label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'CENTRO_DOCUMENTOS' | 'RENDICION_CUENTAS' | 'FINANCIADORES_ALIADOS' | 'INFORMES_ANUALES' })}>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS' })}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar categoría" />
           </SelectTrigger>

@@ -13,7 +13,6 @@ interface EventItem {
   id: string;
   title: string;
   description: string;
-  content?: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -33,16 +32,26 @@ interface EditEventFormProps {
 export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpdated, children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // Calcular la fecha local desde el inicio
+  const getLocalDateTime = (dateString: string) => {
+    if (!dateString) return '';
+    const eventDate = new Date(dateString);
+    return new Date(eventDate.getTime() - eventDate.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+  };
+  
+  // Inicializar el estado con los valores del event desde el inicio
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    content: '',
-    imageUrl: '',
-    imageAlt: '',
-    eventDate: '',
-    location: '',
-    isActive: true,
-    isFeatured: false,
+    title: event?.title || '',
+    description: event?.description || '',
+    imageUrl: event?.imageUrl || '',
+    imageAlt: event?.imageAlt || '',
+    eventDate: event ? getLocalDateTime(event.eventDate) : '',
+    location: event?.location || '',
+    isActive: event?.isActive ?? true,
+    isFeatured: event?.isFeatured ?? false,
   });
   const { toast } = useToast();
   const { data: session } = useSession();
@@ -55,15 +64,14 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
         .slice(0, 16);
 
       setFormData({
-        title: event.title,
-        description: event.description,
-        content: event.content || '',
+        title: event.title || '',
+        description: event.description || '',
         imageUrl: event.imageUrl || '',
         imageAlt: event.imageAlt || '',
-        eventDate: localDateTime,
+        eventDate: localDateTime || '',
         location: event.location || '',
-        isActive: event.isActive,
-        isFeatured: event.isFeatured,
+        isActive: event.isActive ?? true,
+        isFeatured: event.isFeatured ?? false,
       });
     }
   }, [event]);
@@ -159,15 +167,6 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
             />
           </div>
 
-          <div>
-            <label className="text-sm font-medium">Contenido Detallado</label>
-            <Textarea
-              value={formData.content}
-              onChange={(e) => handleChange('content', e.target.value)}
-              placeholder="Contenido detallado del evento"
-              rows={4}
-            />
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

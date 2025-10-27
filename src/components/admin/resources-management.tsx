@@ -43,8 +43,8 @@ interface Resource {
   fileUrl: string;
   fileSize?: number;
   fileType?: string;
-  category: 'CENTRO_MULTIMEDIA' | 'PUBLICACIONES';
-  subcategory?: 'VIDEOS' | 'AUDIOS' | 'REPRODUCTOR_INTEGRADO' | 'BIBLIOTECA_DIGITAL' | 'GUIAS_DESCARGABLES' | 'MANUALES' | 'none';
+  category: 'MULTIMEDIA_CENTER' | 'PUBLICATIONS';
+  subcategory?: 'VIDEOS' | 'AUDIOS' | 'DIGITAL_LIBRARY' | 'DOWNLOADABLE_GUIDES' | 'MANUALS' | 'none';
   thumbnailUrl?: string;
   duration?: number;
   isActive: boolean;
@@ -60,7 +60,7 @@ interface Resource {
 }
 
 const categoryInfo = {
-  CENTRO_MULTIMEDIA: {
+  MULTIMEDIA_CENTER: {
     title: 'Centro Multimedia',
     icon: PlayCircle,
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
@@ -69,14 +69,14 @@ const categoryInfo = {
       AUDIOS: { title: 'Audios', icon: Music }
     }
   },
-  PUBLICACIONES: {
+  PUBLICATIONS: {
     title: 'Publicaciones',
     icon: BookOpen,
     color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
     subcategories: {
-      BIBLIOTECA_DIGITAL: { title: 'Biblioteca Digital', icon: Library },
-      GUIAS_DESCARGABLES: { title: 'Guías Descargables', icon: FileDown },
-      MANUALES: { title: 'Manuales', icon: Book }
+      DIGITAL_LIBRARY: { title: 'Biblioteca Digital', icon: Library },
+      DOWNLOADABLE_GUIDES: { title: 'Guías Descargables', icon: FileDown },
+      MANUALS: { title: 'Manuales', icon: Book }
     }
   }
 };
@@ -876,7 +876,7 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Categoría *</label>
-          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'CENTRO_MULTIMEDIA' | 'PUBLICACIONES', subcategory: 'none' })}>
+          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'MULTIMEDIA_CENTER' | 'PUBLICATIONS', subcategory: 'none' })}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>
@@ -1070,7 +1070,7 @@ const EditResourceForm: React.FC<{
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium mb-2">Categoría *</label>
-          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'CENTRO_MULTIMEDIA' | 'PUBLICACIONES', subcategory: 'none' })}>
+          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'MULTIMEDIA_CENTER' | 'PUBLICATIONS', subcategory: 'none' })}>
             <SelectTrigger>
               <SelectValue placeholder="Seleccionar categoría" />
             </SelectTrigger>

@@ -10,39 +10,67 @@ import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 
-interface Project {
+interface DonationProject {
   id: string;
   title: string;
+  description: string;
   context: string;
   objectives: string;
-  content: string;
   executionStart: string;
   executionEnd: string;
-  imageUrl?: string;
-  imageAlt?: string;
+  accountNumber: string;
+  recipientName: string;
+  qrImageUrl?: string;
+  qrImageAlt?: string;
+  referenceImageUrl?: string;
+  referenceImageAlt?: string;
+  targetAmount?: number;
+  currentAmount: number;
+  progressPercentage: number;
+  isCompleted: boolean;
+  isFeatured: boolean;
+  donationCount: number;
+}
+
+interface AnnualGoal {
+  id: string;
+  year: number;
+  targetAmount: number;
+  currentAmount: number;
+  description?: string;
+  isActive: boolean;
   isFeatured: boolean;
 }
 
 export default function DonarPage() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [donationProjects, setDonationProjects] = useState<DonationProject[]>([]);
+  const [annualGoal, setAnnualGoal] = useState<AnnualGoal | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch('/api/public/projects?featured=true&limit=3');
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
+        // Cargar proyectos de donación
+        const projectsResponse = await fetch('/api/public/donation-projects?limit=10');
+        if (projectsResponse.ok) {
+          const projectsData = await projectsResponse.json();
+          setDonationProjects(projectsData);
+        }
+
+        // Cargar meta anual
+        const goalResponse = await fetch('/api/annual-goals?currentYearOnly=true');
+        if (goalResponse.ok) {
+          const goalData = await goalResponse.json();
+          setAnnualGoal(goalData);
         }
       } catch (error) {
-        console.error('Error al cargar proyectos:', error);
+        console.error('Error al cargar datos:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProjects();
+    fetchData();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -51,8 +79,6 @@ export default function DonarPage() {
       month: 'long'
     });
   };
-
-  const donationAmounts = [50, 100, 200, 500, 1000];
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
@@ -118,7 +144,7 @@ export default function DonarPage() {
                   META DE RECAUDACIÓN
                 </span>
                 <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
-                  META ANUAL 2024
+                  META ANUAL {annualGoal?.year || new Date().getFullYear()}
                 </h1>
               </div>
               <div>
@@ -131,25 +157,50 @@ export default function DonarPage() {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-xl font-semibold text-text-light dark:text-text-dark">
-                  Recaudado: $45,250
+                  Recaudado: Bs. {annualGoal ? annualGoal.currentAmount.toLocaleString('es-BO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) : '0,00'}
                 </span>
                 <span className="text-xl font-semibold text-text-light dark:text-text-dark">
-                  Meta: $75,000
+                  Meta: Bs. {annualGoal ? annualGoal.targetAmount.toLocaleString('es-BO', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }) : '0,00'}
                 </span>
               </div>
               
               {/* Barra de progreso */}
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 mb-3">
+              <div className="relative w-full h-6 mb-3">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 absolute">
+                  <div 
+                    className="bg-gradient-to-r from-primary to-primary/80 h-6 rounded-full transition-all duration-1000 ease-out"
+                    style={{ width: `${annualGoal ? Math.min((annualGoal.currentAmount / annualGoal.targetAmount) * 100, 100) : 0}%` }}
+                  />
+                </div>
                 <div 
-                  className="bg-gradient-to-r from-primary to-primary/80 h-6 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-3"
-                  style={{ width: '60.3%' }}
+                  className="absolute top-0 h-6 flex items-center"
+                  style={{ left: `${annualGoal ? Math.min((annualGoal.currentAmount / annualGoal.targetAmount) * 100, 100) : 0}%` }}
                 >
-                  <span className="text-sm font-bold text-white">60.3%</span>
+                  <span className="ml-2 text-sm font-bold text-text-light dark:text-text-dark whitespace-nowrap">
+                    {annualGoal ? Math.round((annualGoal.currentAmount / annualGoal.targetAmount) * 100) : 0}%
+                  </span>
                 </div>
               </div>
               
               <div className="text-center text-base text-text-secondary-light dark:text-text-secondary-dark">
-                Faltan $29,750 para alcanzar la meta
+                {annualGoal ? (
+                  annualGoal.currentAmount >= annualGoal.targetAmount ? (
+                    '¡Meta alcanzada! Gracias por tu apoyo'
+                  ) : (
+                    `Faltan Bs. ${(annualGoal.targetAmount - annualGoal.currentAmount).toLocaleString('es-BO', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })} para alcanzar la meta`
+                  )
+                ) : (
+                  'Cargando meta...'
+                )}
               </div>
             </div>
             
@@ -182,7 +233,7 @@ export default function DonarPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-8">
               <div>
                 <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-                  PROYECTOS DESTACADOS
+                  PROYECTOS DE DONACIÓN
                 </span>
                 <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
                   PROYECTOS QUE NECESITAN TU APOYO
@@ -190,14 +241,14 @@ export default function DonarPage() {
               </div>
               <div>
                 <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Conoce nuestros proyectos destacados y elige cuál deseas apoyar directamente para generar un impacto específico en las comunidades.
+                  Conoce todos nuestros proyectos de donación y elige cuál deseas apoyar directamente para generar un impacto específico en las comunidades.
                 </p>
               </div>
           </div>
 
           {loading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
+              {[1, 2, 3, 4, 5, 6].map((i) => (
                 <Card key={i} className="animate-pulse">
                   <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-t-lg"></div>
                   <CardContent className="p-6">
@@ -212,35 +263,43 @@ export default function DonarPage() {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {projects.map((project) => (
-                <Card key={project.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  {project.imageUrl && (
+              {donationProjects.map((donationProject) => (
+                <Card key={donationProject.id} className={`overflow-hidden hover:shadow-lg transition-shadow duration-300 ${
+                  donationProject.isCompleted ? 'ring-1 ring-green-300/50 dark:ring-green-600/50' : ''
+                }`}>
+                  {(donationProject.referenceImageUrl) && (
                     <div className="relative h-48 overflow-hidden">
                       <Image
-                        src={project.imageUrl}
-                        alt={project.imageAlt || project.title}
+                        src={donationProject.referenceImageUrl || ''}
+                        alt={donationProject.referenceImageAlt || donationProject.title}
                         fill
                         className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      {donationProject.isCompleted ? (
+                        <Badge className="absolute top-4 right-4 bg-green-500/90 text-white text-xs">
+                          Meta Alcanzada
+                        </Badge>
+                      ) : donationProject.isFeatured ? (
                       <Badge className="absolute top-4 right-4 bg-primary text-white">
                         Destacado
                       </Badge>
+                      ) : null}
                     </div>
                   )}
                   
                   <CardContent className="p-6">
                     <CardTitle className="text-xl font-bold text-text-light dark:text-text-dark mb-3 line-clamp-2">
-                      {project.title}
+                      {donationProject.title}
                     </CardTitle>
                     
                     <p className="text-text-secondary-light dark:text-text-secondary-dark mb-4 line-clamp-3">
-                      {project.context.substring(0, 150)}...
+                      {donationProject.context.substring(0, 150)}...
                     </p>
                     
                     <div className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark mb-4">
                       <Calendar className="h-4 w-4" />
-                      <span>{formatDate(project.executionStart)} - {formatDate(project.executionEnd)}</span>
+                      <span>{formatDate(donationProject.executionStart)} - {formatDate(donationProject.executionEnd)}</span>
                     </div>
 
                     {/* Progreso individual del proyecto */}
@@ -253,35 +312,59 @@ export default function DonarPage() {
                       
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-sm font-bold text-text-light dark:text-text-dark">
-                          Recaudado: ${Math.floor(Math.random() * 15000) + 5000}
+                          Recaudado: Bs. {donationProject.currentAmount.toLocaleString('es-BO', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          })}
                         </span>
                         <span className="text-sm font-bold text-text-light dark:text-text-dark">
-                          Meta: ${Math.floor(Math.random() * 20000) + 20000}
+                          Meta: Bs. {donationProject.targetAmount ? donationProject.targetAmount.toLocaleString('es-BO', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                          }) : 'Sin meta'}
                         </span>
                       </div>
                       
                       {/* Barra de progreso del proyecto */}
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-2">
+                      <div className="relative mb-2 w-full h-3">
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 absolute">
+                          <div 
+                            className={`h-3 rounded-full transition-all duration-1000 ease-out ${
+                              donationProject.isCompleted 
+                                ? 'bg-gradient-to-r from-green-400 to-green-500' 
+                                : 'bg-gradient-to-r from-primary to-primary/80'
+                            }`}
+                            style={{ width: `${donationProject.progressPercentage}%` }}
+                          />
+                        </div>
                         <div 
-                          className="bg-gradient-to-r from-primary to-primary/80 h-3 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2"
-                          style={{ width: `${Math.floor(Math.random() * 60) + 20}%` }}
+                          className="absolute top-0 h-3 flex items-center"
+                          style={{ left: `${donationProject.progressPercentage}%` }}
                         >
-                          <span className="text-xs font-bold text-white">
-                            {Math.floor(Math.random() * 60) + 20}%
+                          <span className="ml-1 text-xs font-bold text-text-light dark:text-text-dark whitespace-nowrap">
+                            {Math.round(donationProject.progressPercentage)}%
                           </span>
                         </div>
                       </div>
                       
                       <div className="text-center text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                        Faltan ${Math.floor(Math.random() * 10000) + 5000} para completar la meta
+                        {donationProject.isCompleted 
+                          ? 'Meta alcanzada - Gracias por tu apoyo'
+                          : donationProject.targetAmount 
+                            ? `Faltan Bs. ${(donationProject.targetAmount - donationProject.currentAmount).toLocaleString('es-BO', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2
+                            })} para completar la meta`
+                            : `${donationProject.donationCount} donaciones recibidas`
+                        }
                       </div>
                     </div>
                     
                     <div className="flex flex-col gap-2">
                       <Button className="w-full bg-black text-white hover:bg-gray-800" asChild>
-                        <Link href={`/donar/${project.id}`}>
+                        <Link href={`/donar/${donationProject.id}`}>
                           <Heart className="mr-2 h-4 w-4 text-red-500" />
-                          Donar a este Proyecto
+                          {donationProject.isCompleted ? 'Ver Proyecto' : 'Donar a este Proyecto'}
                         </Link>
                       </Button>
                     </div>
@@ -290,180 +373,6 @@ export default function DonarPage() {
               ))}
             </div>
           )}
-          </div>
-        </section>
-
-        {/* Donación General */}
-        <section className="py-6 bg-background-light dark:bg-background-dark">
-          <div className="container mx-auto px-4 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-8">
-              <div>
-                <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-                  DONACIÓN GENERAL
-                </span>
-                <h1 className="text-4xl md:text-5xl font-bold text-text-light dark:text-text-dark leading-tight">
-                  APOYA NUESTRA MISIÓN
-                </h1>
-              </div>
-              <div>
-                <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Apoya nuestra misión general y permite que destinemos los fondos donde más se necesiten para maximizar el impacto social.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-card-light dark:bg-card-dark p-8 rounded-lg shadow-sm">
-               {/* Formulario de Donación General */}
-               <div>
-                 {/* Información importante */}
-                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                     <strong>Importante:</strong> Completa este formulario antes de proceder con el pago. 
-                     Una vez recibida la transferencia, te contactaremos para enviarte tu recibo digital.
-                   </p>
-                 </div>
-
-                 <div className="grid md:grid-cols-2 gap-6 mt-0">
-                   {/* Columna izquierda */}
-                   <div className="space-y-4">
-                     {/* Nombre Completo */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Nombre Completo *
-                       </label>
-                       <input
-                         type="text"
-                         placeholder="Tu nombre completo"
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                         required
-                       />
-                     </div>
-
-                     {/* Correo Electrónico */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Correo Electrónico *
-                       </label>
-                       <input
-                         type="email"
-                         placeholder="tu@email.com"
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                         required
-                       />
-                     </div>
-
-                     {/* Domicilio */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Domicilio *
-                       </label>
-                       <input
-                         type="text"
-                         placeholder="Tu dirección"
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                         required
-                       />
-                     </div>
-
-                     {/* Teléfono de Contacto */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Teléfono de Contacto *
-                       </label>
-                       <input
-                         type="tel"
-                         placeholder="+591 ..."
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                         required
-                       />
-                     </div>
-                   </div>
-
-                   {/* Columna derecha */}
-                   <div className="space-y-4">
-                     {/* Monto de Donación */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Monto de Donación (Bs.) *
-                       </label>
-                       <div className="relative">
-                         <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-secondary-light dark:text-text-secondary-dark" />
-                         <input
-                           type="number"
-                           placeholder="100"
-                           className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                           required
-                         />
-                       </div>
-                     </div>
-
-                     {/* Tipo de Donación */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Tipo de Donación *
-                       </label>
-                       <select
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                         required
-                       >
-                         <option value="">Selecciona el tipo</option>
-                         <option value="general">Donación General</option>
-                         <option value="emergencia">Fondo de Emergencia</option>
-                         <option value="especifico">Proyecto Específico</option>
-                         <option value="mensual">Donación Mensual</option>
-                       </select>
-                     </div>
-
-                     {/* Mensaje adicional */}
-                     <div>
-                       <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                         Mensaje (Opcional)
-                       </label>
-                       <textarea
-                         placeholder="Deja un mensaje de apoyo..."
-                         rows={3}
-                         className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
-                       />
-                     </div>
-                   </div>
-                 </div>
-
-                 {/* Montos Sugeridos al final */}
-                 <div className="mt-6">
-                   <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-3">
-                     Montos Sugeridos
-                   </label>
-                   <div className="grid grid-cols-5 gap-3">
-                     {donationAmounts.map((amount) => (
-                       <Button
-                         key={amount}
-                         variant="outline"
-                         size="sm"
-                         className="h-12"
-                         onClick={() => {
-                           const input = document.querySelector('input[type="number"]') as HTMLInputElement;
-                           if (input) input.value = amount.toString();
-                         }}
-                       >
-                         <DollarSign className="mr-1 h-4 w-4" />
-                         {amount}
-                       </Button>
-                     ))}
-                   </div>
-                 </div>
-               </div>
-              
-              <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <Button size="lg" className="w-full text-lg py-6">
-                  <Heart className="mr-2 h-5 w-5" />
-                  Proceder con la Donación
-                </Button>
-                
-                <p className="text-center text-sm text-text-secondary-light dark:text-text-secondary-dark mt-4">
-                  Procesamiento seguro • Recibo fiscal disponible • Transparencia total
-                </p>
-              </div>
-            </div>
           </div>
         </section>
 

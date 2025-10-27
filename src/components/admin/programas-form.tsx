@@ -14,17 +14,17 @@ import { useToast } from '@/components/ui/use-toast';
 
 interface Programa {
   id: string;
-  nombreSector: string;
-  descripcion: string;
+  sectorName: string;
+  description: string;
   imageUrl?: string;
   imageAlt?: string;
-  videoPresentacion?: string;
-  alineacionODS?: string;
-  subareasResultados?: string;
+  presentationVideo?: string;
+  odsAlignment?: string;
+  resultsAreas?: string;
   resultados?: string;
-  gruposAtencion?: string;
-  contenidosTemas?: string;
-  enlaceMasInformacion?: string;
+  targetGroups?: string;
+  contentTopics?: string;
+  moreInfoLink?: string;
   isActive: boolean;
   isFeatured: boolean;
 }
@@ -38,17 +38,17 @@ interface ProgramasFormProps {
 export function ProgramasForm({ programa, onClose, onProgramaCreated }: ProgramasFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    nombreSector: '',
-    descripcion: '',
+    sectorName: '',
+    description: '',
     imageUrl: '',
     imageAlt: '',
-    videoPresentacion: '',
-    alineacionODS: '',
-    subareasResultados: '',
+    presentationVideo: '',
+    odsAlignment: '',
+    resultsAreas: '',
     resultados: '',
-    gruposAtencion: '',
-    contenidosTemas: '',
-    enlaceMasInformacion: '',
+    targetGroups: '',
+    contentTopics: '',
+    moreInfoLink: '',
     isFeatured: false,
   });
   const [loading, setLoading] = useState(false);
@@ -58,17 +58,17 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
   useEffect(() => {
     if (programa) {
       setFormData({
-        nombreSector: programa.nombreSector,
-        descripcion: programa.descripcion,
+        sectorName: programa.sectorName,
+        description: programa.description,
         imageUrl: programa.imageUrl || '',
         imageAlt: programa.imageAlt || '',
-        videoPresentacion: programa.videoPresentacion || '',
-        alineacionODS: programa.alineacionODS || '',
-        subareasResultados: programa.subareasResultados || '',
+        presentationVideo: programa.presentationVideo || '',
+        odsAlignment: programa.odsAlignment || '',
+        resultsAreas: programa.resultsAreas || '',
         resultados: programa.resultados || '',
-        gruposAtencion: programa.gruposAtencion || '',
-        contenidosTemas: programa.contenidosTemas || '',
-        enlaceMasInformacion: programa.enlaceMasInformacion || '',
+        targetGroups: programa.targetGroups || '',
+        contentTopics: programa.contentTopics || '',
+        moreInfoLink: programa.moreInfoLink || '',
         isFeatured: programa.isFeatured,
       });
     }
@@ -109,17 +109,17 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
         onClose();
         setShowSuccessDialog(true);
         setFormData({ 
-          nombreSector: '', 
-          descripcion: '', 
+          sectorName: '', 
+          description: '', 
           imageUrl: '',
           imageAlt: '',
-          videoPresentacion: '', 
-          alineacionODS: '', 
-          subareasResultados: '', 
+          presentationVideo: '', 
+          odsAlignment: '', 
+          resultsAreas: '', 
           resultados: '', 
-          gruposAtencion: '', 
-          contenidosTemas: '', 
-          enlaceMasInformacion: '', 
+          targetGroups: '', 
+          contentTopics: '', 
+          moreInfoLink: '', 
           isFeatured: false 
         });
       } else {
@@ -145,17 +145,17 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
   const handleInputChange = (field: string, value: string | boolean) => {
     // Definir límites de caracteres para campos de texto
     const limits = {
-      nombreSector: 150,
-      descripcion: 2000,
+      sectorName: 150,
+      description: 2000,
       imageUrl: 200,
       imageAlt: 100,
-      videoPresentacion: 200,
-      alineacionODS: 1000,
-      subareasResultados: 1000,
+      presentationVideo: 200,
+      odsAlignment: 1000,
+      resultsAreas: 1000,
       resultados: 1000,
-      gruposAtencion: 1000,
-      contenidosTemas: 1000,
-      enlaceMasInformacion: 200
+      targetGroups: 1000,
+      contentTopics: 1000,
+      moreInfoLink: 200
     };
     
     // Verificar si el valor excede el límite (solo para strings)
@@ -203,13 +203,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="nombreSector">
-                    Nombre del Sector * <span className="text-xs text-gray-500">({formData.nombreSector.length}/150)</span>
+                  <Label htmlFor="sectorName">
+                    Nombre del Sector * <span className="text-xs text-gray-500">({formData.sectorName.length}/150)</span>
                   </Label>
                   <Input
-                    id="nombreSector"
-                    value={formData.nombreSector}
-                    onChange={(e) => handleInputChange('nombreSector', e.target.value)}
+                    id="sectorName"
+                    value={formData.sectorName}
+                    onChange={(e) => handleInputChange('sectorName', e.target.value)}
                     required
                     maxLength={150}
                     placeholder="Ej: Educación, Salud, Desarrollo Social"
@@ -217,13 +217,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="descripcion">
-                    Descripción * <span className="text-xs text-gray-500">({formData.descripcion.length}/2000)</span>
+                  <Label htmlFor="description">
+                    Descripción * <span className="text-xs text-gray-500">({formData.description.length}/2000)</span>
                   </Label>
                   <Textarea
-                    id="descripcion"
-                    value={formData.descripcion}
-                    onChange={(e) => handleInputChange('descripcion', e.target.value)}
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => handleInputChange('description', e.target.value)}
                     required
                     maxLength={2000}
                     rows={4}
@@ -261,26 +261,26 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="videoPresentacion">
-                      Video de Presentación (YouTube) <span className="text-xs text-gray-500">({formData.videoPresentacion.length}/200)</span>
+                    <Label htmlFor="presentationVideo">
+                      Video de Presentación (YouTube) <span className="text-xs text-gray-500">({formData.presentationVideo.length}/200)</span>
                     </Label>
                     <Input
-                      id="videoPresentacion"
-                      value={formData.videoPresentacion}
-                      onChange={(e) => handleInputChange('videoPresentacion', e.target.value)}
+                      id="presentationVideo"
+                      value={formData.presentationVideo}
+                      onChange={(e) => handleInputChange('presentationVideo', e.target.value)}
                       maxLength={200}
                       placeholder="https://www.youtube.com/watch?v=..."
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="enlaceMasInformacion">
-                      Enlace para Más Información <span className="text-xs text-gray-500">({formData.enlaceMasInformacion.length}/200)</span>
+                    <Label htmlFor="moreInfoLink">
+                      Enlace para Más Información <span className="text-xs text-gray-500">({formData.moreInfoLink.length}/200)</span>
                     </Label>
                     <Input
-                      id="enlaceMasInformacion"
-                      value={formData.enlaceMasInformacion}
-                      onChange={(e) => handleInputChange('enlaceMasInformacion', e.target.value)}
+                      id="moreInfoLink"
+                      value={formData.moreInfoLink}
+                      onChange={(e) => handleInputChange('moreInfoLink', e.target.value)}
                       maxLength={200}
                       placeholder="https://childfund.org/programa..."
                     />
@@ -308,13 +308,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="alineacionODS">
-                    Alineación a ODS <span className="text-xs text-gray-500">({formData.alineacionODS.length}/1000)</span>
+                  <Label htmlFor="odsAlignment">
+                    Alineación a ODS <span className="text-xs text-gray-500">({formData.odsAlignment.length}/1000)</span>
                   </Label>
                   <Textarea
-                    id="alineacionODS"
-                    value={formData.alineacionODS}
-                    onChange={(e) => handleInputChange('alineacionODS', e.target.value)}
+                    id="odsAlignment"
+                    value={formData.odsAlignment}
+                    onChange={(e) => handleInputChange('odsAlignment', e.target.value)}
                     maxLength={1000}
                     rows={3}
                     placeholder="Información sobre los Objetivos de Desarrollo Sostenible relacionados..."
@@ -322,13 +322,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="subareasResultados">
-                    Subáreas de Resultados / Subsectores <span className="text-xs text-gray-500">({formData.subareasResultados.length}/1000)</span>
+                  <Label htmlFor="resultsAreas">
+                    Subáreas de Resultados / Subsectores <span className="text-xs text-gray-500">({formData.resultsAreas.length}/1000)</span>
                   </Label>
                   <Textarea
-                    id="subareasResultados"
-                    value={formData.subareasResultados}
-                    onChange={(e) => handleInputChange('subareasResultados', e.target.value)}
+                    id="resultsAreas"
+                    value={formData.resultsAreas}
+                    onChange={(e) => handleInputChange('resultsAreas', e.target.value)}
                     maxLength={1000}
                     rows={3}
                     placeholder="Subáreas específicas del programa..."
@@ -350,13 +350,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="gruposAtencion">
-                    Grupos de Atención <span className="text-xs text-gray-500">({formData.gruposAtencion.length}/1000)</span>
+                  <Label htmlFor="targetGroups">
+                    Grupos de Atención <span className="text-xs text-gray-500">({formData.targetGroups.length}/1000)</span>
                   </Label>
                   <Textarea
-                    id="gruposAtencion"
-                    value={formData.gruposAtencion}
-                    onChange={(e) => handleInputChange('gruposAtencion', e.target.value)}
+                    id="targetGroups"
+                    value={formData.targetGroups}
+                    onChange={(e) => handleInputChange('targetGroups', e.target.value)}
                     maxLength={1000}
                     rows={3}
                     placeholder="Población objetivo del programa..."
@@ -364,13 +364,13 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="contenidosTemas">
-                    Contenidos/Temas <span className="text-xs text-gray-500">({formData.contenidosTemas.length}/1000)</span>
+                  <Label htmlFor="contentTopics">
+                    Contenidos/Temas <span className="text-xs text-gray-500">({formData.contentTopics.length}/1000)</span>
                   </Label>
                   <Textarea
-                    id="contenidosTemas"
-                    value={formData.contenidosTemas}
-                    onChange={(e) => handleInputChange('contenidosTemas', e.target.value)}
+                    id="contentTopics"
+                    value={formData.contentTopics}
+                    onChange={(e) => handleInputChange('contentTopics', e.target.value)}
                     maxLength={1000}
                     rows={3}
                     placeholder="Temas y contenidos abordados en el programa..."
@@ -424,7 +424,7 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                 )}
               </div>
               <div className="text-sm text-green-700">
-                <p><strong>Nombre:</strong> {createdPrograma?.nombreSector}</p>
+                <p><strong>Nombre:</strong> {createdPrograma?.sectorName}</p>
                 <p><strong>ID:</strong> {createdPrograma?.id}</p>
                 <p><strong>Estado:</strong> {createdPrograma?.isActive ? 'Activo' : 'Inactivo'}</p>
               </div>
@@ -441,3 +441,4 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
     </>
   );
 }
+

@@ -15,7 +15,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const programa = await prisma.programas.findUnique({
+    const programa = await prisma.program.findUnique({
       where: { id: id },
       include: {
         creator: {
@@ -75,34 +75,34 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     const {
-      nombreSector,
-      descripcion,
+      sectorName,
+      description,
       imageUrl,
       imageAlt,
-      videoPresentacion,
-      alineacionODS,
-      subareasResultados,
-      resultados,
-      gruposAtencion,
-      contenidosTemas,
-      enlaceMasInformacion,
+      presentationVideo,
+      odsAlignment,
+      resultsAreas,
+      results,
+      targetGroups,
+      contentTopics,
+      moreInfoLink,
       isActive
     } = body;
 
-    const programa = await prisma.programas.update({
+    const programa = await prisma.program.update({
       where: { id: id },
       data: {
-        nombreSector,
-        descripcion,
+        sectorName,
+        description,
         imageUrl,
         imageAlt,
-        videoPresentacion,
-        alineacionODS,
-        subareasResultados,
-        resultados,
-        gruposAtencion,
-        contenidosTemas,
-        enlaceMasInformacion,
+        presentationVideo,
+        odsAlignment,
+        resultsAreas,
+        results,
+        targetGroups,
+        contentTopics,
+        moreInfoLink,
         isActive
       },
       include: {
@@ -136,7 +136,7 @@ export async function DELETE(
     const { id } = await params;
     
     // Verificar si el programa existe
-    const programa = await prisma.programas.findUnique({
+    const programa = await prisma.program.findUnique({
       where: { id: id }
     });
 
@@ -145,7 +145,7 @@ export async function DELETE(
     }
 
     // Eliminar el programa de la base de datos
-    await prisma.programas.delete({
+    await prisma.program.delete({
       where: { id: id }
     });
 

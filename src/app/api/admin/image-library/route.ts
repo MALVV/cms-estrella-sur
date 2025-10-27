@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const search = searchParams.get('search') || '';
-    const programaId = searchParams.get('programaId');
+    const programId = searchParams.get('programId');
     const featured = searchParams.get('featured');
 
     const skip = (page - 1) * limit;
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         title?: { contains: string; mode: 'insensitive' };
         description?: { contains: string; mode: 'insensitive' };
       }>;
-      programaId?: string;
+      programId?: string;
       isFeatured?: boolean;
     } = {
       isActive: true,
@@ -39,8 +39,8 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (programaId) {
-      where.programaId = programaId;
+    if (programId) {
+      where.programId = programId;
     }
 
     if (featured === 'true') {
@@ -57,8 +57,8 @@ export async function GET(request: NextRequest) {
           creator: {
             select: { id: true, name: true, email: true }
           },
-          programa: {
-            select: { id: true, nombreSector: true }
+          program: {
+            select: { id: true, sectorName: true }
           }
         }
       }),
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
       fileName,
       fileSize,
       fileType,
-      programaId,
+      programId,
       isFeatured = false
     } = body;
 
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
         fileName,
         fileSize,
         fileType,
-        programaId,
+        programId,
         isFeatured,
         createdBy: session.user.id
       },
@@ -128,8 +128,8 @@ export async function POST(request: NextRequest) {
         creator: {
           select: { id: true, name: true, email: true }
         },
-        programa: {
-          select: { id: true, nombreSector: true }
+        program: {
+          select: { id: true, sectorName: true }
         }
       }
     });

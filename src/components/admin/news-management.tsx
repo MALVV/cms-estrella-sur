@@ -33,7 +33,7 @@ interface NewsItem {
   };
   programa?: {
     id: string;
-    nombreSector: string;
+    sectorName: string;
   };
   project?: {
     id: string;
@@ -510,3 +510,4 @@ function NewsList({
     </div>
   );
 }
+
