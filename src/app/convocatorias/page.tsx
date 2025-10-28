@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, FileText, Users, ArrowRight, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -28,67 +28,35 @@ export default function ConvocatoriasPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular carga de datos - en producción vendría de la API
-    console.log('Cargando convocatorias...', new Date().toISOString());
-    const mockConvocatorias: Convocatoria[] = [
-      {
-        id: '1',
-        title: 'Consultoría en Desarrollo de Capacidades Comunitarias',
-        description: 'Buscamos un/a consultor/a especializado/a en desarrollo de capacidades comunitarias para fortalecer las organizaciones locales en el área rural.',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        startDate: '2024-01-15',
-        endDate: '2024-12-31',
-        status: 'active',
-        requirements: [
-          'Experiencia mínima de 5 años en desarrollo comunitario',
-          'Título universitario en áreas afines',
-          'Experiencia en zonas rurales',
-          'Disponibilidad para viajar'
-        ],
-        documents: ['TDR_Consultoria_Desarrollo_Comunitario.pdf'],
-        createdAt: '2024-01-10'
-      },
-      {
-        id: '2',
-        title: 'Especialista en Monitoreo y Evaluación de Proyectos',
-        description: 'Convocatoria para especialista en sistemas de monitoreo y evaluación con enfoque en proyectos sociales y educativos.',
-        image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        startDate: '2024-02-01',
-        endDate: '2024-11-30',
-        status: 'upcoming',
-        requirements: [
-          'Maestría en Evaluación de Proyectos o afín',
-          'Experiencia en metodologías participativas',
-          'Manejo de herramientas digitales',
-          'Certificación en M&E'
-        ],
-        documents: ['TDR_Especialista_Monitoreo_Evaluacion.pdf'],
-        createdAt: '2024-01-20'
-      },
-      {
-        id: '3',
-        title: 'Coordinador/a de Proyectos Educativos',
-        description: 'Buscamos coordinador/a para proyectos educativos con enfoque en educación alternativa y desarrollo de competencias.',
-        image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        startDate: '2024-03-01',
-        endDate: '2024-10-31',
-        status: 'active',
-        requirements: [
-          'Licenciatura en Educación o afín',
-          'Experiencia en coordinación de proyectos',
-          'Conocimiento en educación alternativa',
-          'Habilidades de liderazgo'
-        ],
-        documents: ['TDR_Coordinador_Proyectos_Educativos.pdf'],
-        createdAt: '2023-11-25'
+    const fetchConvocatorias = async () => {
+      try {
+        const response = await fetch('/api/public/convocatorias?limit=10');
+        if (response.ok) {
+          const data = await response.json();
+          // Mapear los datos de la API al formato esperado por el frontend
+          const mappedData = data.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description,
+            image: item.imageUrl,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            status: item.status.toLowerCase() === 'active' ? 'active' : 
+                   item.status.toLowerCase() === 'upcoming' ? 'upcoming' : 'closed',
+            requirements: Array.isArray(item.requirements) ? item.requirements : [],
+            documents: Array.isArray(item.documents) ? item.documents : [],
+            createdAt: item.createdAt
+          }));
+          setConvocatorias(mappedData);
+        }
+      } catch (error) {
+        console.error('Error fetching convocatorias:', error);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    setTimeout(() => {
-      console.log('Convocatorias cargadas:', mockConvocatorias);
-      setConvocatorias(mockConvocatorias);
-      setLoading(false);
-    }, 1000);
+    fetchConvocatorias();
   }, []);
 
   const getStatusBadge = (status: string) => {
@@ -221,11 +189,6 @@ export default function ConvocatoriasPage() {
                       <div className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
                         <Clock className="h-4 w-4" />
                         <span>Publicado: {formatDate(convocatoria.createdAt)}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        <FileText className="h-4 w-4" />
-                        <span>{convocatoria.documents.length} documento(s)</span>
                       </div>
                     </div>
                     

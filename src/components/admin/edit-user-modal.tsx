@@ -26,7 +26,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'GESTOR' as 'ADMINISTRADOR' | 'GESTOR',
+    role: 'MANAGER' as 'ADMINISTRATOR' | 'MANAGER',
     isActive: true
   })
 
@@ -35,7 +35,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
       setFormData({
         name: user.name,
         email: user.email,
-        role: user.role as 'ADMINISTRADOR' | 'GESTOR',
+        role: user.role as 'ADMINISTRATOR' | 'MANAGER',
         isActive: user.status === 'ACTIVE'
       })
     }
@@ -94,8 +94,8 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
-                <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
+                <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
+                <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
               </SelectContent>
             </Select>
           </div>

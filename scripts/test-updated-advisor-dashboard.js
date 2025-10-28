@@ -1,5 +1,5 @@
-// Script para probar el dashboard actualizado del asesor
-console.log('🎯 Probando dashboard actualizado del asesor...');
+// Script para probar el dashboard actualizado del CONSULTANT
+console.log('🎯 Probando dashboard actualizado del CONSULTANT...');
 
 // Simular los datos reales que se mostrarán
 const mockData = {

@@ -53,10 +53,7 @@ const normalizeRole = (role: string): string => {
   const roleMap: Record<string, string> = {
     'ADMINISTRATOR': 'ADMINISTRATOR',
     'MANAGER': 'MANAGER',
-    'CONSULTANT': 'CONSULTANT',
-    'ADMINISTRADOR': 'ADMINISTRATOR',
-    'GESTOR': 'MANAGER',
-    'ASESOR': 'CONSULTANT'
+    'CONSULTANT': 'CONSULTANT'
   }
   return roleMap[role] || 'MANAGER'
 }
@@ -66,7 +63,7 @@ const getNavSections = (userRole: string) => {
   // Normalizar el rol
   const normalizedRole = normalizeRole(userRole)
   
-  // Si es CONSULTANT (Asesor), solo mostrar secciones de donaciones
+  // Si es CONSULTANT (CONSULTANT), solo mostrar secciones de donaciones
   if (normalizedRole === "CONSULTANT") {
     return [
       {
@@ -153,7 +150,7 @@ const getNavSections = (userRole: string) => {
       ]
     },
     {
-      title: "Comunicaciones",
+      title: "Difusión",
       icon: Megaphone,
       items: [
         {
@@ -265,16 +262,46 @@ const getNavSections = (userRole: string) => {
       icon: MessageSquare,
       items: [
         {
-          title: "Mensajes de Contacto",
-          url: "/dashboard/mensajes-contacto",
-          icon: MessageSquare,
-          showFor: ["ADMINISTRATOR", "MANAGER"]
+          title: "Convocatorias",
+          icon: Briefcase,
+          showFor: ["ADMINISTRATOR", "MANAGER"],
+          items: [
+            {
+              title: "Gestión de Convocatorias",
+              url: "/dashboard/convocatorias",
+            },
+            {
+              title: "Postulaciones",
+              url: "/dashboard/convocatorias/postulaciones",
+            },
+          ]
         },
         {
-          title: "Canal de Denuncias",
-          url: "/dashboard/denuncias",
-          icon: AlertTriangle,
-          showFor: ["ADMINISTRATOR"]
+          title: "Voluntariados",
+          icon: Users,
+          showFor: ["ADMINISTRATOR", "MANAGER"],
+          items: [
+            {
+              title: "Aplicaciones",
+              url: "/dashboard/voluntariados",
+              showFor: ["ADMINISTRATOR", "MANAGER"]
+            }
+          ]
+        },
+        {
+          title: "Mensajes de Contacto",
+          icon: MessageSquare,
+          showFor: ["ADMINISTRATOR", "MANAGER"],
+          items: [
+            {
+              title: "Mensajes",
+              url: "/dashboard/mensajes-contacto",
+            },
+            {
+              title: "Canal de Denuncias",
+              url: "/dashboard/denuncias",
+            },
+          ]
         },
       ]
     },
@@ -288,7 +315,7 @@ const getNavSections = (userRole: string) => {
       return item.showFor.includes(normalizedRole)
     }).map(item => ({
       ...item,
-      items: item.items?.filter(subItem => {
+      items: item.items?.filter((subItem: any) => {
         if (!subItem.showFor) return true
         return subItem.showFor.includes(normalizedRole)
       })
@@ -338,16 +365,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {section.items.map((item) => (
+                {section.items.map((item: any) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild tooltip={item.title}>
-                      <Link href={item.url}>
+                    {item.url && item.url !== "#" ? (
+                      <SidebarMenuButton asChild tooltip={item.title} className="hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                        <Link href={item.url}>
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    ) : (
+                      <SidebarMenuButton 
+                        tooltip={item.title}
+                        className="bg-sidebar-accent/40 text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground/70"
+                      >
                         <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                      </SidebarMenuButton>
+                    )}
                     {item.items?.length ? (
                       <SidebarMenuSub>
-                        {item.items.map((subItem) => (
+                        {item.items.map((subItem: any) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
                               <Link href={subItem.url}>

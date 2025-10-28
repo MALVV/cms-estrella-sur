@@ -8,11 +8,11 @@ async function seedProjects() {
 
     // Obtener un usuario para asignar como creador
     const user = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!user) {
-      console.error('❌ No se encontró un usuario administrador');
+      console.error('❌ No se encontró un usuario ADMINISTRATOR');
       return;
     }
 
@@ -62,7 +62,7 @@ async function seedProjects() {
         executionEnd: new Date('2022-02-28'),
         context: 'Las mujeres en zonas rurales enfrentan múltiples barreras para acceder a oportunidades económicas. Este proyecto busca empoderar económicamente a mujeres a través del desarrollo de microempresas sostenibles.',
         objectives: 'Capacitar a 120 mujeres en gestión empresarial, apoyar la creación de 60 microempresas femeninas, y establecer una red de comercialización para sus productos.',
-        content: 'El proyecto incluye talleres de capacitación empresarial, asesoría técnica especializada, acceso a microcréditos con tasas preferenciales, y la creación de una plataforma de comercialización digital.',
+        content: 'El proyecto incluye talleres de capacitación empresarial, CONSULTANTía técnica especializada, acceso a microcréditos con tasas preferenciales, y la creación de una plataforma de comercialización digital.',
         strategicAllies: 'Banco de Desarrollo Productivo\nFederación de Mujeres Campesinas\nCámara de Comercio',
         financing: 'Banco Interamericano de Desarrollo\nFondo de Microfinanzas\nEmpresas privadas',
         isActive: true,

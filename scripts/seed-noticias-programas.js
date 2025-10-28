@@ -90,13 +90,13 @@ async function crearNoticiasFicticias() {
   try {
     console.log('🚀 Iniciando creación de noticias ficticias...');
 
-    // Buscar un usuario administrador para asignar como autor
+    // Buscar un usuario ADMINISTRATOR para asignar como autor
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador.');
+      console.log('❌ No se encontró usuario ADMINISTRATOR.');
       return;
     }
 

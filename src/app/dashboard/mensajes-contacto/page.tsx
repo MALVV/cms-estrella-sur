@@ -4,12 +4,10 @@ import { ContactMessagesManagement } from '@/components/admin/contact-messages-m
 
 export default function MensajesContactoPage() {
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Mensajes de Contacto
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
+        <h1 className="text-3xl font-bold">Mensajes de Contacto</h1>
+        <p className="text-muted-foreground mt-2">
           Gestiona los mensajes recibidos desde el formulario de contacto
         </p>
       </div>

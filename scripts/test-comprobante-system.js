@@ -25,11 +25,11 @@ async function testComprobanteSystem() {
     // 2. Simular aprobación con comprobante
     console.log('\n2. Simulando aprobación con comprobante...');
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador');
+      console.log('❌ No se encontró usuario ADMINISTRATOR');
       return;
     }
 

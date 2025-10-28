@@ -111,7 +111,7 @@ async function testEditProjectWithNewFields() {
     // 6. Verificar API de actualización
     console.log('\n6. API de actualización (/api/donation-projects/[id]):');
     console.log('   ✅ Método PATCH para actualizar proyectos');
-    console.log('   ✅ Requiere autenticación de administrador');
+    console.log('   ✅ Requiere autenticación de ADMINISTRATOR');
     console.log('   ✅ Actualiza accountNumber, recipientName');
     console.log('   ✅ Actualiza qrImageUrl, qrImageAlt');
     console.log('   ✅ Actualiza referenceImageUrl, referenceImageAlt');

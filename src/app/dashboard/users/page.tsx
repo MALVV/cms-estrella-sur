@@ -91,9 +91,9 @@ export default function UsersPage() {
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'ADMINISTRADOR': return 'destructive'
-      case 'GESTOR': return 'secondary'
-      case 'ASESOR': return 'default'
+      case 'ADMINISTRATOR': return 'destructive'
+      case 'MANAGER': return 'secondary'
+      case 'CONSULTANT': return 'default'
       default: return 'outline'
     }
   }
@@ -368,9 +368,9 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Todos los roles</SelectItem>
-                  <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
-                  <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
-                  <SelectItem value="ASESOR">Asesor de Donaciones</SelectItem>
+                  <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
+                  <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
+                  <SelectItem value="CONSULTANT">CONSULTANT de Donaciones</SelectItem>
                 </SelectContent>
               </Select>
             </div>

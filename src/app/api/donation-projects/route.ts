@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    // Requerir autenticación de administrador
+    // Requerir autenticación de ADMINISTRATOR
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {

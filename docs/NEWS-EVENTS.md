@@ -116,7 +116,7 @@ Las operaciones de creación, edición y eliminación requieren autenticación:
 
 ## 🎯 Casos de Uso
 
-### Para Administradores
+### Para ADMINISTRATORes
 1. Crear noticias sobre actividades de la organización
 2. Publicar eventos y campañas
 3. Gestionar contenido destacado

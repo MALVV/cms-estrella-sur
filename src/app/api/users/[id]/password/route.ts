@@ -11,7 +11,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withSimpleRole([UserRole.ADMINISTRADOR], async (authenticatedRequest) => {
+  return withSimpleRole([UserRole.ADMINISTRATOR], async (authenticatedRequest) => {
     try {
       const { id: userId } = await params
       const { newPassword, currentPassword } = await authenticatedRequest.json()

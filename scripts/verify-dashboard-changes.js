@@ -1,5 +1,5 @@
-// Script para verificar los cambios en el dashboard del asesor
-console.log('🎯 Verificando cambios en el dashboard del asesor...');
+// Script para verificar los cambios en el dashboard del CONSULTANT
+console.log('🎯 Verificando cambios en el dashboard del CONSULTANT...');
 
 console.log('\n❌ Botones eliminados:');
 console.log('   - "Ver Todas las Donaciones" (botón principal)');

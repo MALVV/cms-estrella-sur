@@ -86,7 +86,7 @@ async function createTestDonationWithReferenceImage() {
     console.log('\n4. Instrucciones para verificar en el CMS:');
     console.log('   📋 Pasos:');
     console.log('   1. Ir a http://localhost:3000/dashboard/donaciones');
-    console.log('   2. Asegurarse de estar logueado como administrador');
+    console.log('   2. Asegurarse de estar logueado como ADMINISTRATOR');
     console.log('   3. Buscar la donación de "María González Test"');
     console.log('   4. Verificar que aparece la imagen de referencia junto al título del proyecto');
     console.log('   5. La imagen debe ser pequeña (32x32px) y redondeada');

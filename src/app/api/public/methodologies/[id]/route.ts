@@ -69,7 +69,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Metodología no encontrada' }, { status: 404 });
     }
 
-    if (user.role !== 'ADMINISTRADOR' && methodology.createdBy !== user.id) {
+    if (user.role !== 'ADMINISTRATOR' && methodology.createdBy !== user.id) {
       return NextResponse.json({ error: 'No tienes permisos para editar esta metodología' }, { status: 403 });
     }
 
@@ -151,7 +151,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Metodología no encontrada' }, { status: 404 });
     }
 
-    if (user.role !== 'ADMINISTRADOR') {
+    if (user.role !== 'ADMINISTRATOR') {
       return NextResponse.json({ error: 'No tienes permisos para eliminar metodologías' }, { status: 403 });
     }
 

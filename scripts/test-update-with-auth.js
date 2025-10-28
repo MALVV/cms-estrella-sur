@@ -50,7 +50,7 @@ async function testUpdateWithAuth() {
     console.log('1. Buscando usuario admin...');
     const adminUser = await prisma.user.findFirst({
       where: {
-        role: 'ADMINISTRADOR'
+        role: 'ADMINISTRATOR'
       }
     });
 

@@ -64,7 +64,7 @@ async function testGeneralDonationWithQR() {
     console.log('   ✅ Gestión en CMS');
 
     console.log('\n🔧 Para configurar el QR:');
-    console.log('   - El administrador puede cambiar la URL del QR en el código');
+    console.log('   - El ADMINISTRATOR puede cambiar la URL del QR en el código');
     console.log('   - Actualmente usa una imagen de ejemplo');
     console.log('   - Se puede reemplazar por una imagen QR real');
 

@@ -94,7 +94,7 @@ export async function PUT(
         isActive: isActive !== undefined ? isActive : existingStory.isActive
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -116,11 +116,11 @@ export async function PUT(
       createdAt: updatedStory.createdAt.toISOString().split('T')[0],
       updatedAt: updatedStory.updatedAt.toISOString().split('T')[0],
       createdBy: updatedStory.createdBy,
-      author: updatedStory.users ? {
-        id: updatedStory.users.id,
-        name: updatedStory.users.name,
-        email: updatedStory.users.email,
-        role: updatedStory.users.role
+      author: updatedStory.creator ? {
+        id: updatedStory.creator.id,
+        name: updatedStory.creator.name,
+        email: updatedStory.creator.email,
+        role: updatedStory.creator.role
       } : null
     }
 

@@ -103,7 +103,7 @@ async function testCompleteProjectWithExtraDonation() {
 
     // 3. Buscar usuario admin
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' },
+      where: { role: 'ADMINISTRATOR' },
       select: { id: true, name: true }
     });
 

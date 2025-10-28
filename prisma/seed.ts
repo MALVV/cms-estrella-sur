@@ -33,8 +33,8 @@ async function main() {
     // ==========================================
     console.log('👥 Creando usuarios...');
     const adminPassword = await bcrypt.hash('Admin123!', 12);
-    const gestorPassword = await bcrypt.hash('Gestor123!', 12);
-    const asesorPassword = await bcrypt.hash('Asesor123!', 12);
+    const MANAGERPassword = await bcrypt.hash('MANAGER123!', 12);
+    const CONSULTANTPassword = await bcrypt.hash('CONSULTANT123!', 12);
 
     const admin = await prisma.user.create({
       data: {
@@ -48,11 +48,11 @@ async function main() {
     },
     });
 
-    const gestor = await prisma.user.create({
+    const MANAGER = await prisma.user.create({
       data: {
-        email: 'gestor@estrellasur.org',
+        email: 'MANAGER@estrellasur.org',
         name: 'Carlos Mendoza',
-        password: gestorPassword,
+        password: MANAGERPassword,
         role: 'MANAGER',
       isActive: true,
         mustChangePassword: false,
@@ -60,11 +60,11 @@ async function main() {
       },
     });
 
-    const asesor = await prisma.user.create({
+    const CONSULTANT = await prisma.user.create({
       data: {
-        email: 'asesor@estrellasur.org',
+        email: 'CONSULTANT@estrellasur.org',
         name: 'Ana Patricia Quispe',
-        password: asesorPassword,
+        password: CONSULTANTPassword,
         role: 'CONSULTANT',
         isActive: true,
         mustChangePassword: false,
@@ -127,7 +127,7 @@ async function main() {
           imageAlt: 'Mujeres en taller de emprendimiento',
       isActive: true,
       isFeatured: true,
-        createdBy: gestor.id,
+        createdBy: MANAGER.id,
     },
         {
           sectorName: 'Seguridad Alimentaria y Nutrición',
@@ -143,7 +143,7 @@ async function main() {
           imageAlt: 'Huerto familiar comunitario',
       isActive: true,
       isFeatured: false,
-        createdBy: gestor.id,
+        createdBy: MANAGER.id,
       },
         {
           sectorName: 'Protección de la Niñez',
@@ -191,7 +191,7 @@ async function main() {
           isActive: true,
           isFeatured: true,
           programId: programasCreated[1].id,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Taller de emprendimiento',
@@ -201,7 +201,7 @@ async function main() {
           isActive: true,
           isFeatured: false,
           programId: programasCreated[2].id,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -245,7 +245,7 @@ async function main() {
           evaluation: 'Indicadores de salud, reportes mensuales',
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Programa de Empoderamiento Económico',
@@ -262,7 +262,7 @@ async function main() {
           evaluation: 'Seguimiento mensual, indicadores de ingresos',
           isActive: true,
           isFeatured: false,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -304,7 +304,7 @@ async function main() {
           imageAlt: 'Campaña de vacunación',
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Red de Huertos Comunitarios',
@@ -319,7 +319,7 @@ async function main() {
           imageAlt: 'Huerto comunitario',
           isActive: true,
           isFeatured: false,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
       ],
     });
@@ -354,7 +354,7 @@ async function main() {
           isActive: true,
           isFeatured: true,
           methodologyId: metodologiasCreated[2].id,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Escuela rural estrena nueva infraestructura educativa',
@@ -365,7 +365,7 @@ async function main() {
           isActive: true,
           isFeatured: false,
           projectId: proyectosCreated[0].id,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
         {
           title: 'Capacitación docente impacta a 150 profesionales',
@@ -409,7 +409,7 @@ async function main() {
           location: 'Centro Comunitario Los Olivos',
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Congreso de Educación Rural',
@@ -420,7 +420,7 @@ async function main() {
           location: 'Centro de Convenciones',
           isActive: true,
           isFeatured: false,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -463,7 +463,7 @@ async function main() {
           imageAlt: 'Logo AGRICOL',
           isActive: true,
           isFeatured: false,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           id: 'ally-4',
@@ -474,7 +474,7 @@ async function main() {
           imageAlt: 'Logo Gobierno Regional',
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
       ],
     });
@@ -494,7 +494,7 @@ async function main() {
           imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80',
           imageAlt: 'Ana en su taller',
           isActive: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           id: 'story-2',
@@ -514,7 +514,7 @@ async function main() {
           imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
           imageAlt: 'María Elena enseñando',
           isActive: true,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -533,7 +533,7 @@ async function main() {
           thumbnailUrl: 'https://images.unsplash.com/photo-1521521875411-21ea7c42a9fe',
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Testimonio: Comunidad beneficiada con salud',
@@ -551,7 +551,7 @@ async function main() {
           thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3',
           isActive: true,
           isFeatured: false,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -590,7 +590,7 @@ async function main() {
           duration: 1800,
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Podcast: Historias de Éxito',
@@ -605,7 +605,7 @@ async function main() {
           duration: 1200,
           isActive: true,
           isFeatured: false,
-          createdBy: asesor.id,
+          createdBy: CONSULTANT.id,
         },
       ],
     });
@@ -654,7 +654,7 @@ async function main() {
           year: 2024,
           isActive: true,
           isFeatured: false,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
         {
           title: 'Convenios de Cooperación',
@@ -667,7 +667,7 @@ async function main() {
           year: 2024,
           isActive: true,
           isFeatured: true,
-          createdBy: gestor.id,
+          createdBy: MANAGER.id,
         },
       ],
     });
@@ -835,8 +835,8 @@ async function main() {
     console.log('🖼️ Imágenes en galería: 3');
     console.log('\n🔑 Credenciales:');
     console.log('Admin: admin@estrellasur.org / Admin123!');
-    console.log('Gestor: gestor@estrellasur.org / Gestor123!');
-    console.log('Asesor: asesor@estrellasur.org / Asesor123!');
+    console.log('MANAGER: MANAGER@estrellasur.org / MANAGER123!');
+    console.log('CONSULTANT: CONSULTANT@estrellasur.org / CONSULTANT123!');
     console.log('\n✨ Base de datos completamente poblada con datos realistas para Estrella Sur');
 
   } catch (error) {

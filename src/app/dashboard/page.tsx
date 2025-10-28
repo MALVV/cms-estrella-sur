@@ -10,8 +10,8 @@ import { AdvisorDashboard } from '@/components/dashboard/advisor-dashboard'
 export default function DashboardPage() {
   const { data: session } = useSession()
 
-  // Si el usuario es ASESOR, mostrar el dashboard específico para asesores
-  if (session?.user?.role === 'ASESOR') {
+  // Si el usuario es CONSULTANT, mostrar el dashboard específico para CONSULTANTes
+  if (session?.user?.role === 'CONSULTANT') {
     return <AdvisorDashboard />
   }
 

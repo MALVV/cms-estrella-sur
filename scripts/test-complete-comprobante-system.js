@@ -26,13 +26,13 @@ async function testCompleteComprobanteSystem() {
     const comprobanteUrl = 'https://minio.ejemplo.com/donation-proofs/1703123456789-def456.jpg';
     const comprobanteAlt = 'comprobante-transferencia-500.jpg';
 
-    // 3. Obtener usuario administrador
+    // 3. Obtener usuario ADMINISTRATOR
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador');
+      console.log('❌ No se encontró usuario ADMINISTRATOR');
       return;
     }
 

@@ -23,9 +23,9 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ className }) => {
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
@@ -34,9 +34,9 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ className }) => {
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return '👑'
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return '📝'
       default:
         return '👤'

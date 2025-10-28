@@ -12,7 +12,7 @@ const realisticData = {
       email: 'admin@estrellasur.org',
       name: 'María González',
       password: 'admin123',
-      role: 'ADMINISTRADOR',
+      role: 'ADMINISTRATOR',
       isActive: true,
       emailVerified: new Date(),
     },
@@ -436,7 +436,7 @@ async function seedStories() {
   console.log('📖 Creando historias de impacto...');
   
   const users = await prisma.users.findMany();
-  const adminUser = users.find(u => u.role === 'ADMINISTRADOR');
+  const adminUser = users.find(u => u.role === 'ADMINISTRATOR');
   
   for (const storyData of realisticData.stories) {
     await prisma.stories.create({
@@ -508,7 +508,7 @@ async function seedProjects() {
   console.log('🏗️ Creando proyectos...');
   
   const users = await prisma.users.findMany();
-  const adminUser = users.find(u => u.role === 'ADMINISTRADOR');
+  const adminUser = users.find(u => u.role === 'ADMINISTRATOR');
   
   for (const projectData of realisticData.projects) {
     await prisma.projects.create({

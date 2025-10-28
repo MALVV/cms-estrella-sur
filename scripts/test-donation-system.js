@@ -97,10 +97,10 @@ async function testDonationSystem() {
     if (pendingDonationsToApprove.length > 0) {
       const donationToApprove = pendingDonationsToApprove[0];
       
-      // Obtener un usuario administrador para aprobar
+      // Obtener un usuario ADMINISTRATOR para aprobar
       const adminUser = await prisma.user.findFirst({
         where: {
-          role: 'ADMINISTRADOR'
+          role: 'ADMINISTRATOR'
         }
       });
 

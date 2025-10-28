@@ -70,14 +70,14 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
     email: '',
     password: '',
     name: '',
-    role: UserRole.GESTOR,
+    role: UserRole.MANAGER,
     isTemporaryPassword: false
   })
 
   const [editData, setEditData] = useState({
     name: '',
     email: '',
-    role: UserRole.GESTOR,
+    role: UserRole.MANAGER,
     isActive: true
   })
 
@@ -87,7 +87,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
   })
 
   useEffect(() => {
-    if (session?.user?.role === UserRole.ADMINISTRADOR) {
+    if (session?.user?.role === UserRole.ADMINISTRATOR) {
       fetchUsers()
     }
   }, [session])
@@ -148,7 +148,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
       if (response.ok) {
         await fetchUsers()
         setShowCreateForm(false)
-        setFormData({ email: '', password: '', name: '', role: UserRole.GESTOR, isTemporaryPassword: false })
+        setFormData({ email: '', password: '', name: '', role: UserRole.MANAGER, isTemporaryPassword: false })
       } else {
         const error = await response.json()
         alert(error.message)
@@ -173,7 +173,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
       if (response.ok) {
         await fetchUsers()
         setEditingUser(null)
-        setEditData({ name: '', email: '', role: UserRole.GESTOR, isActive: true })
+        setEditData({ name: '', email: '', role: UserRole.MANAGER, isActive: true })
       } else {
         const error = await response.json()
         alert(error.message)
@@ -252,11 +252,11 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return <Briefcase className="h-4 w-4 text-blue-500" />
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return <Wrench className="h-4 w-4 text-green-500" />
       default:
         return <Users className="h-4 w-4 text-gray-500" />
@@ -265,18 +265,18 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
 
-  if (!session?.user || session.user.role !== UserRole.ADMINISTRADOR) {
+  if (!session?.user || session.user.role !== UserRole.ADMINISTRATOR) {
     return (
       <Card className={className}>
         <CardContent className="p-6">
@@ -298,7 +298,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
               <Users className="h-5 w-5" />
               Gestión de Usuarios
             </div>
-            {session.user.role === UserRole.ADMINISTRADOR && (
+            {session.user.role === UserRole.ADMINISTRATOR && (
               <Button onClick={() => setShowCreateForm(true)}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Crear Usuario
@@ -329,9 +329,9 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="ALL">Todos los roles</option>
-                <option value={UserRole.ADMINISTRADOR}>Administrador</option>
-                <option value={UserRole.GESTOR}>Gestor de Contenido</option>
-                <option value={UserRole.GESTOR}>Gestor de Contenido</option>
+                <option value={UserRole.ADMINISTRATOR}>ADMINISTRATOR</option>
+                <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
+                <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
               </select>
 
               <select
@@ -402,9 +402,9 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                     onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
-                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
-                    <option value={UserRole.ADMINISTRADOR}>Administrador</option>
+                    <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
+                    <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
+                    <option value={UserRole.ADMINISTRATOR}>ADMINISTRATOR</option>
                   </select>
                 </div>
               </div>
@@ -501,7 +501,7 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                       
                       {/* Acciones */}
                       <div className="flex gap-1">
-                        {session.user.role === UserRole.ADMINISTRADOR && (
+                        {session.user.role === UserRole.ADMINISTRATOR && (
                           <>
                             <Button
                               variant="outline"
@@ -598,9 +598,9 @@ export const UserManagementSystem: React.FC<UserManagementSystemProps> = ({ clas
                     onChange={(e) => setEditData({ ...editData, role: e.target.value as UserRole })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                   >
-                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
-                    <option value={UserRole.GESTOR}>Gestor de Contenido</option>
-                    <option value={UserRole.ADMINISTRADOR}>Administrador</option>
+                    <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
+                    <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
+                    <option value={UserRole.ADMINISTRATOR}>ADMINISTRATOR</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-2">

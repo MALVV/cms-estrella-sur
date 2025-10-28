@@ -54,7 +54,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL')
 
   useEffect(() => {
-    if (session?.user?.role === UserRole.ADMINISTRADOR) {
+    if (session?.user?.role === UserRole.ADMINISTRATOR) {
       fetchUsers()
     }
   }, [session])
@@ -105,9 +105,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return <Briefcase className="h-4 w-4 text-green-500" />
       default:
         return <Users className="h-4 w-4 text-gray-500" />
@@ -116,9 +116,9 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR:
+      case UserRole.ADMINISTRATOR:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.GESTOR:
+      case UserRole.MANAGER:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
@@ -148,7 +148,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
     }
   }
 
-  if (!session?.user || session.user.role !== UserRole.ADMINISTRADOR) {
+  if (!session?.user || session.user.role !== UserRole.ADMINISTRATOR) {
     return (
       <Card className={className}>
         <CardContent className="p-6">
@@ -193,8 +193,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="ALL">Todos los roles</option>
-                <option value={UserRole.ADMINISTRADOR}>Administrador</option>
-                <option value={UserRole.GESTOR}>Gestor de Contenido</option>
+                <option value={UserRole.ADMINISTRATOR}>ADMINISTRATOR</option>
+                <option value={UserRole.MANAGER}>MANAGER de Contenido</option>
               </select>
 
               {/* Filtro por estado */}
@@ -288,7 +288,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
                       
                       {/* Acciones */}
                       <div className="flex gap-1">
-                        {session.user.role === UserRole.ADMINISTRADOR && (
+                        {session.user.role === UserRole.ADMINISTRATOR && (
                           <Button
                             variant="outline"
                             size="sm"

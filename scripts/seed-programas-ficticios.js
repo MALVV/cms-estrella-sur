@@ -106,27 +106,27 @@ async function crearProgramasFicticios() {
   try {
     console.log('🚀 Iniciando creación de programas ficticios...');
 
-    // Buscar un usuario administrador para asignar como creador
+    // Buscar un usuario ADMINISTRATOR para asignar como creador
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador. Creando usuario temporal...');
+      console.log('❌ No se encontró usuario ADMINISTRATOR. Creando usuario temporal...');
       
-      // Crear usuario administrador temporal
+      // Crear usuario ADMINISTRATOR temporal
       const hashedPassword = await bcrypt.hash('admin123', 10);
       const newAdmin = await prisma.user.create({
         data: {
           email: 'admin@childfund.org',
-          name: 'Administrador ChildFund',
+          name: 'ADMINISTRATOR ChildFund',
           password: hashedPassword,
-          role: 'ADMINISTRADOR',
+          role: 'ADMINISTRATOR',
           isActive: true
         }
       });
       
-      console.log('✅ Usuario administrador creado:', newAdmin.email);
+      console.log('✅ Usuario ADMINISTRATOR creado:', newAdmin.email);
     }
 
     const creatorId = adminUser?.id || (await prisma.user.findFirst({

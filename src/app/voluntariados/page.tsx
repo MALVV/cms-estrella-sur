@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, Send, Users, Heart, Calendar, Clock } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Upload, Send, Users, Heart, Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -141,6 +141,9 @@ export default function VoluntariadosPage() {
     acceptPolicies: false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [errorDialog, setErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -161,10 +164,41 @@ export default function VoluntariadosPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simular envío del formulario
-    setTimeout(() => {
-      alert('¡Solicitud de voluntariado enviada exitosamente! Te contactaremos pronto para coordinar tu participación.');
-      setIsSubmitting(false);
+    try {
+      const formDataToSend = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        age: formData.age,
+        occupation: formData.occupation,
+        areaOfInterest: formData.areaOfInterest,
+        availability: formData.availability,
+        motivation: formData.motivation,
+        experience: formData.experience,
+        driveLink: formData.driveLink,
+        documents: formData.documents ? Array.from(formData.documents).map(f => f.name).join(', ') : null
+      };
+
+      const response = await fetch('/api/public/volunteer-applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formDataToSend),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.error || 'Error al enviar la solicitud');
+        setErrorDialog(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Mostrar popup de éxito
+      setSuccessDialog(true);
+      
       // Resetear formulario
       setFormData({
         fullName: '',
@@ -180,7 +214,13 @@ export default function VoluntariadosPage() {
         driveLink: '',
         acceptPolicies: false
       });
-    }, 2000);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setErrorMessage('Error al enviar la solicitud. Por favor intenta de nuevo.');
+      setErrorDialog(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -591,7 +631,7 @@ export default function VoluntariadosPage() {
                         required
                       >
                         <option value="">Selecciona un área</option>
-                        {areasOfInterest.map((area, index) => (
+                        {interventionAreas.map((area, index) => (
                           <option key={index} value={area.name}>{area.name}</option>
                         ))}
                       </select>
@@ -776,6 +816,67 @@ export default function VoluntariadosPage() {
           </div>
         </section>
       </main>
+
+      {/* Dialog de Éxito */}
+      <Dialog open={successDialog} onOpenChange={setSuccessDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              </div>
+              <DialogTitle className="text-2xl">¡Solicitud Enviada!</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription className="text-base py-4">
+            <p className="mb-4">
+              Tu solicitud de voluntariado ha sido enviada exitosamente. Nuestro equipo la revisará y te contactaremos pronto por correo electrónico para coordinar tu participación.
+            </p>
+            <p className="font-semibold text-primary">
+              ¡Gracias por tu interés en ser parte de nuestro equipo!
+            </p>
+          </DialogDescription>
+          <DialogFooter>
+            <Button 
+              onClick={() => setSuccessDialog(false)}
+              className="w-full"
+            >
+              Entendido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Error */}
+      <Dialog open={errorDialog} onOpenChange={setErrorDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
+                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <DialogTitle className="text-2xl">Error al Enviar</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription className="text-base py-4">
+            <p className="mb-4">
+              {errorMessage}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Por favor, intenta de nuevo. Si el problema persiste, contacta con nosotros.
+            </p>
+          </DialogDescription>
+          <DialogFooter>
+            <Button 
+              onClick={() => setErrorDialog(false)}
+              variant="destructive"
+              className="w-full"
+            >
+              Cerrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       <SiteFooter />
     </div>

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function createAdminUser() {
   try {
-    console.log('👤 Creando usuario administrador...\n');
+    console.log('👤 Creando usuario ADMINISTRATOR...\n');
 
     // Verificar si ya existe un usuario
     const existingUser = await prisma.user.findFirst();
@@ -16,21 +16,21 @@ async function createAdminUser() {
       return;
     }
 
-    // Crear usuario administrador
+    // Crear usuario ADMINISTRATOR
     const hashedPassword = await bcrypt.hash('admin123', 10);
     
     const adminUser = await prisma.user.create({
       data: {
         email: 'admin@estrellasur.com',
-        name: 'Administrador',
+        name: 'ADMINISTRATOR',
         password: hashedPassword,
-        role: 'ADMINISTRADOR',
+        role: 'ADMINISTRATOR',
         isActive: true,
         mustChangePassword: false
       }
     });
 
-    console.log('✅ Usuario administrador creado exitosamente:');
+    console.log('✅ Usuario ADMINISTRATOR creado exitosamente:');
     console.log(`   ID: ${adminUser.id}`);
     console.log(`   Email: ${adminUser.email}`);
     console.log(`   Nombre: ${adminUser.name}`);

@@ -50,9 +50,9 @@ async function testUsersAPI() {
     // Probar consulta con filtros
     console.log('\n🔍 Probando filtros...');
     
-    // Filtro por rol ASESOR
-    const asesorUsers = await prisma.user.findMany({
-      where: { role: 'ASESOR' },
+    // Filtro por rol CONSULTANT
+    const CONSULTANTUsers = await prisma.user.findMany({
+      where: { role: 'CONSULTANT' },
       select: {
         id: true,
         name: true,
@@ -62,8 +62,8 @@ async function testUsersAPI() {
       }
     });
     
-    console.log(`   - Usuarios ASESOR: ${asesorUsers.length}`);
-    asesorUsers.forEach(user => {
+    console.log(`   - Usuarios CONSULTANT: ${CONSULTANTUsers.length}`);
+    CONSULTANTUsers.forEach(user => {
       console.log(`     * ${user.name || 'Sin nombre'} (${user.email})`);
     });
 
@@ -85,8 +85,8 @@ async function testUsersAPI() {
     const searchUsers = await prisma.user.findMany({
       where: {
         OR: [
-          { name: { contains: 'asesor', mode: 'insensitive' } },
-          { email: { contains: 'asesor', mode: 'insensitive' } }
+          { name: { contains: 'CONSULTANT', mode: 'insensitive' } },
+          { email: { contains: 'CONSULTANT', mode: 'insensitive' } }
         ]
       },
       select: {
@@ -98,7 +98,7 @@ async function testUsersAPI() {
       }
     });
     
-    console.log(`   - Búsqueda "asesor": ${searchUsers.length}`);
+    console.log(`   - Búsqueda "CONSULTANT": ${searchUsers.length}`);
     searchUsers.forEach(user => {
       console.log(`     * ${user.name || 'Sin nombre'} (${user.email})`);
     });

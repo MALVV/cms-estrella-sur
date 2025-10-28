@@ -39,12 +39,12 @@ async function seedStories() {
     // Obtener un usuario para usar como creador
     const user = await prisma.user.findFirst({
       where: {
-        role: 'ADMINISTRADOR'
+        role: 'ADMINISTRATOR'
       }
     })
     
     if (!user) {
-      console.error('❌ No se encontró ningún usuario administrador')
+      console.error('❌ No se encontró ningún usuario ADMINISTRATOR')
       return
     }
     

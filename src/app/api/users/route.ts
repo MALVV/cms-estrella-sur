@@ -141,13 +141,13 @@ export async function POST(request: NextRequest) {
       creatorId = currentUser.id
     } else {
       console.log('⚠️ Usuario de sesión no encontrado, usando usuario por defecto')
-      // Buscar cualquier administrador como fallback
+      // Buscar cualquier ADMINISTRATOR como fallback
       const fallbackUser = await prisma.user.findFirst({
-        where: { role: 'ADMINISTRADOR' }
+        where: { role: 'ADMINISTRATOR' }
       })
       if (fallbackUser) {
         creatorId = fallbackUser.id
-        console.log('✅ Usando administrador por defecto:', fallbackUser.email)
+        console.log('✅ Usando ADMINISTRATOR por defecto:', fallbackUser.email)
       }
     }
 
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         email,
-        role: role || UserRole.GESTOR,
+        role: role || UserRole.MANAGER,
         password: hashedPassword,
         createdBy: creatorId,
         mustChangePassword: true

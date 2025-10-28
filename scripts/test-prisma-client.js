@@ -11,9 +11,9 @@ async function testPrismaClient() {
     console.log(`✅ Cliente de Prisma funcionando correctamente`);
     console.log(`📊 Total de usuarios: ${userCount}`);
     
-    // Probar consulta con filtro por rol ASESOR
-    const asesorUsers = await prisma.user.findMany({
-      where: { role: 'ASESOR' },
+    // Probar consulta con filtro por rol CONSULTANT
+    const CONSULTANTUsers = await prisma.user.findMany({
+      where: { role: 'CONSULTANT' },
       select: {
         id: true,
         name: true,
@@ -22,14 +22,14 @@ async function testPrismaClient() {
       }
     });
     
-    console.log(`🎭 Usuarios con rol ASESOR: ${asesorUsers.length}`);
-    asesorUsers.forEach(user => {
+    console.log(`🎭 Usuarios con rol CONSULTANT: ${CONSULTANTUsers.length}`);
+    CONSULTANTUsers.forEach(user => {
       console.log(`   - ${user.name} (${user.email})`);
     });
     
-    // Probar consulta con filtro por rol ADMINISTRADOR
+    // Probar consulta con filtro por rol ADMINISTRATOR
     const adminUsers = await prisma.user.findMany({
-      where: { role: 'ADMINISTRADOR' },
+      where: { role: 'ADMINISTRATOR' },
       select: {
         id: true,
         name: true,
@@ -38,7 +38,7 @@ async function testPrismaClient() {
       }
     });
     
-    console.log(`👑 Usuarios con rol ADMINISTRADOR: ${adminUsers.length}`);
+    console.log(`👑 Usuarios con rol ADMINISTRATOR: ${adminUsers.length}`);
     adminUsers.forEach(user => {
       console.log(`   - ${user.name} (${user.email})`);
     });

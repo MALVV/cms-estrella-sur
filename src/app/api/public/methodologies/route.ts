@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = authResult.user;
-    if (user.role !== 'ADMINISTRADOR') {
+    if (user.role !== 'ADMINISTRATOR') {
       return NextResponse.json({ error: 'No tienes permisos para crear metodologías' }, { status: 403 });
     }
 

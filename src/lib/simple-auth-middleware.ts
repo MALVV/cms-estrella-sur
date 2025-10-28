@@ -36,7 +36,7 @@ export async function verifyAuth(request: NextRequest): Promise<{
         id: session.user.id || '',
         email: session.user.email || '',
         name: session.user.name || '',
-        role: session.user.role || 'GESTOR'
+        role: session.user.role || 'MANAGER'
       }
     }
 

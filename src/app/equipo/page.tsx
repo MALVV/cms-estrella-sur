@@ -62,7 +62,7 @@ export default function EquipoPage() {
                 className="w-64 h-80 object-cover mx-auto" 
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp0ry9_ZP9ivcpzNKaQqyjzd2w18W_aUhPuaHtQUpld7iT14q6c6wJYPG20Q2BIzDkeUSvgOAzb8qlLafbIcKcwO_UJwV8W4I0Rj33PMebZX7GiHB9zI_6nlVOPr5nhbslHgzCXt_VfCQFBSfgZZ834uYPrYUDGr-rqaFsESDNUkIo1yvj0-zLpfGDOKpc5x72CHIbXpHWw-2Z9U1fMknrm1ZAJsBaB-D0qHdPR5gJ2WgLoqAmvrf74kG0zrrwkKp_9hMcPDX7xrjE"
               />
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-4">Administradora Financiera</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-4">ADMINISTRATORa Financiera</p>
               <h3 className="text-lg font-bold text-text-light dark:text-text-dark">LIC. LUPE ROSARIO LOPEZ GUTIERREZ</h3>
               <div className="mt-1 space-y-1">
                 <div className="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-500">

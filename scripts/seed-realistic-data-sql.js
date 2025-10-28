@@ -10,7 +10,7 @@ const realisticData = {
       email: 'admin@estrellasur.org',
       name: 'María González',
       password: 'admin123',
-      role: 'ADMINISTRADOR',
+      role: 'ADMINISTRATOR',
       isActive: true,
       emailVerified: new Date(),
     },
@@ -431,7 +431,7 @@ async function seedUsers() {
 async function seedStories() {
   console.log('📖 Creando historias de impacto...');
   
-  const users = await prisma.$queryRaw`SELECT id FROM users WHERE role = 'ADMINISTRADOR' LIMIT 1`;
+  const users = await prisma.$queryRaw`SELECT id FROM users WHERE role = 'ADMINISTRATOR' LIMIT 1`;
   const adminUserId = users[0]?.id;
   
   for (const storyData of realisticData.stories) {
@@ -495,7 +495,7 @@ async function seedEvents() {
 async function seedProjects() {
   console.log('🏗️ Creando proyectos...');
   
-  const users = await prisma.$queryRaw`SELECT id FROM users WHERE role = 'ADMINISTRADOR' LIMIT 1`;
+  const users = await prisma.$queryRaw`SELECT id FROM users WHERE role = 'ADMINISTRATOR' LIMIT 1`;
   const adminUserId = users[0]?.id;
   
   for (const projectData of realisticData.projects) {

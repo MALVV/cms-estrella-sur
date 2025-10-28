@@ -33,7 +33,7 @@ interface TransparencyDocument {
   fileUrl: string;
   fileSize?: number;
   fileType?: string;
-  category: 'CENTRO_DOCUMENTOS' | 'RENDICION_CUENTAS' | 'FINANCIADORES_ALIADOS' | 'INFORMES_ANUALES';
+  category: 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS';
   year?: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -47,28 +47,28 @@ interface TransparencyDocument {
 }
 
 const categoryInfo = {
-  CENTRO_DOCUMENTOS: {
+  DOCUMENT_CENTER: {
     title: 'Centro de Documentos',
     description: 'Documentos institucionales, políticas, procedimientos y normativas',
     icon: FolderOpen,
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
     bgColor: 'bg-blue-50 dark:bg-blue-950'
   },
-  RENDICION_CUENTAS: {
+  ACCOUNTABILITY: {
     title: 'Rendición de Cuentas',
     description: 'Informes financieros, auditorías y reportes de gestión',
     icon: BarChart3,
     color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
     bgColor: 'bg-green-50 dark:bg-green-950'
   },
-  FINANCIADORES_ALIADOS: {
+  FINANCIERS_AND_ALLIES: {
     title: 'Financiadores y Aliados',
     description: 'Información sobre nuestros socios estratégicos y financiadores',
     icon: Users,
     color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
     bgColor: 'bg-purple-50 dark:bg-purple-950'
   },
-  INFORMES_ANUALES: {
+  ANNUAL_REPORTS: {
     title: 'Informes Anuales',
     description: 'Reportes anuales de actividades, logros y resultados',
     icon: FileText,

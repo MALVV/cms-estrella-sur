@@ -52,8 +52,8 @@ export function AdvancedUserManagementSystem() {
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 1 })
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid')
 
-  const isAdmin = session?.user?.role === UserRole.ADMINISTRADOR
-  const isContentManager = session?.user?.role === UserRole.GESTOR
+  const isAdmin = session?.user?.role === UserRole.ADMINISTRATOR
+  const isContentManager = session?.user?.role === UserRole.MANAGER
 
   const fetchUsers = useCallback(async (page = 1) => {
     setIsLoading(true)
@@ -238,16 +238,16 @@ export function AdvancedUserManagementSystem() {
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR: return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
-      case UserRole.GESTOR: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case UserRole.ADMINISTRATOR: return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
+      case UserRole.MANAGER: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case UserRole.ADMINISTRADOR: return <Crown className="h-4 w-4 text-red-500" />
-      case UserRole.GESTOR: return <Briefcase className="h-4 w-4 text-green-500" />
+      case UserRole.ADMINISTRATOR: return <Crown className="h-4 w-4 text-red-500" />
+      case UserRole.MANAGER: return <Briefcase className="h-4 w-4 text-green-500" />
       default: return <Users className="h-4 w-4 text-gray-500" />
     }
   }

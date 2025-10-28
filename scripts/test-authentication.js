@@ -7,17 +7,17 @@ async function testAuthentication() {
   try {
     console.log('🔐 Probando autenticación...');
     
-    // Buscar usuario administrador
+    // Buscar usuario ADMINISTRATOR
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador');
+      console.log('❌ No se encontró usuario ADMINISTRATOR');
       return;
     }
 
-    console.log(`✅ Usuario administrador encontrado: ${adminUser.email}`);
+    console.log(`✅ Usuario ADMINISTRATOR encontrado: ${adminUser.email}`);
     console.log(`   - ID: ${adminUser.id}`);
     console.log(`   - Nombre: ${adminUser.name}`);
     console.log(`   - Rol: ${adminUser.role}`);
@@ -40,7 +40,7 @@ async function testAuthentication() {
     // Verificar permisos del usuario
     console.log(`\n🎭 Verificando permisos:`);
     console.log(`   - Rol: ${adminUser.role}`);
-    console.log(`   - Puede gestionar usuarios: ${adminUser.role === 'ADMINISTRADOR' ? 'Sí' : 'No'}`);
+    console.log(`   - Puede gestionar usuarios: ${adminUser.role === 'ADMINISTRATOR' ? 'Sí' : 'No'}`);
 
     // Simular consulta de usuarios como lo haría la API
     console.log(`\n📋 Simulando consulta de usuarios:`);
@@ -62,7 +62,7 @@ async function testAuthentication() {
     });
 
     // Verificar si el usuario tiene permisos para ver usuarios
-    const canManageUsers = adminUser.role === 'ADMINISTRADOR' || adminUser.role === 'GESTOR';
+    const canManageUsers = adminUser.role === 'ADMINISTRATOR' || adminUser.role === 'MANAGER';
     console.log(`\n✅ El usuario ${adminUser.email} puede gestionar usuarios: ${canManageUsers ? 'Sí' : 'No'}`);
 
     console.log('\n🎯 Prueba de autenticación completada');

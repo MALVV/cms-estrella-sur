@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Requerir autenticación de administrador
+    // Requerir autenticación de ADMINISTRATOR
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    // Requerir autenticación de administrador
+    // Requerir autenticación de ADMINISTRATOR
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {
@@ -182,7 +182,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    // Requerir autenticación de administrador
+    // Requerir autenticación de ADMINISTRATOR
     const session = await getServerSession(authOptions);
     
     if (!session?.user) {

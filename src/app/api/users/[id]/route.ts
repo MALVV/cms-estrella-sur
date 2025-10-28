@@ -11,7 +11,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withSimpleRole([UserRole.ADMINISTRADOR], async (authenticatedRequest) => {
+  return withSimpleRole([UserRole.ADMINISTRATOR], async (authenticatedRequest) => {
     try {
       const resolvedParams = await params;
       const userId = resolvedParams.id
@@ -65,7 +65,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  return withSimpleRole([UserRole.ADMINISTRADOR], async (authenticatedRequest) => {
+  return withSimpleRole([UserRole.ADMINISTRATOR], async (authenticatedRequest) => {
     try {
       const resolvedParams = await params;
       const userId = resolvedParams.id

@@ -59,7 +59,7 @@ export function usePermissions() {
     return hasPermission('users', 'delete')
   }
 
-  const canManageStories = (): boolean => {
+  const canManaMANAGERies = (): boolean => {
     return hasPermission('content', 'create') || hasPermission('content', 'update')
   }
 
@@ -143,15 +143,15 @@ export function usePermissions() {
   }
 
   const isAdmin = (): boolean => {
-    return userRole === UserRole.ADMINISTRADOR
+    return userRole === UserRole.ADMINISTRATOR
   }
 
   const isContentManager = (): boolean => {
-    return userRole === UserRole.GESTOR
+    return userRole === UserRole.MANAGER
   }
 
   const isDonationAdvisor = (): boolean => {
-    return userRole === UserRole.ASESOR
+    return userRole === UserRole.CONSULTANT
   }
 
   // Funciones específicas para gestión de donaciones
@@ -206,7 +206,7 @@ export function usePermissions() {
     canEditUsers,
     canDeleteUsers,
     canManageContent,
-    canManageStories,
+    canManaMANAGERies,
     canCreateStories,
     canEditStories,
     canDeleteStories,

@@ -14,7 +14,7 @@ export interface RegisterData {
   password: string
   name?: string
   role?: UserRole
-  createdBy?: string // ID del administrador que crea el usuario
+  createdBy?: string // ID del ADMINISTRATOR que crea el usuario
   isTemporaryPassword?: boolean // Si es una contraseña temporal
 }
 

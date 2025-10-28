@@ -187,7 +187,7 @@ async function seedNewsAndEvents() {
           name: 'Admin Estrella Sur',
           email: 'admin@estrellasur.org',
           password: 'password123',
-          role: 'ADMINISTRADOR',
+          role: 'ADMINISTRATOR',
           isActive: true,
         },
       });

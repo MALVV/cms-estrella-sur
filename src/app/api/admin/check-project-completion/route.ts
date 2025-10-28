@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Solo administradores pueden ejecutar esta verificación
+    // Solo ADMINISTRATORes pueden ejecutar esta verificación
     if (session.user.role !== 'ADMINISTRATOR') {
       return NextResponse.json(
-        { error: 'Solo administradores pueden ejecutar esta acción' },
+        { error: 'Solo ADMINISTRATORes pueden ejecutar esta acción' },
         { status: 403 }
       );
     }

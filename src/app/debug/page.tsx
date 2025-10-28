@@ -36,7 +36,7 @@ export default function DebugPage() {
         <div className="p-4 border rounded-lg">
           <h2 className="text-xl font-semibold mb-4">Permisos</h2>
           <div className="space-y-2 text-sm">
-            <p><strong>Es Administrador:</strong> {isAdmin() ? 'Sí' : 'No'}</p>
+            <p><strong>Es ADMINISTRATOR:</strong> {isAdmin() ? 'Sí' : 'No'}</p>
           </div>
         </div>
 

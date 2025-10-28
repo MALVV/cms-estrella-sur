@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         [sortBy]: sortOrder,
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -61,11 +61,11 @@ export async function GET(request: NextRequest) {
       createdAt: story.createdAt.toISOString().split('T')[0],
       updatedAt: story.updatedAt.toISOString().split('T')[0],
       createdBy: story.createdBy,
-      author: story.users ? {
-        id: story.users.id,
-        name: story.users.name,
-        email: story.users.email,
-        role: story.users.role
+      author: story.creator ? {
+        id: story.creator.id,
+        name: story.creator.name,
+        email: story.creator.email,
+        role: story.creator.role
       } : null
     }))
 
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
         createdBy: createdBy
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -155,11 +155,11 @@ export async function POST(request: NextRequest) {
       createdAt: newStory.createdAt.toISOString().split('T')[0],
       updatedAt: newStory.updatedAt.toISOString().split('T')[0],
       createdBy: newStory.createdBy,
-      author: newStory.users ? {
-        id: newStory.users.id,
-        name: newStory.users.name,
-        email: newStory.users.email,
-        role: newStory.users.role
+      author: newStory.creator ? {
+        id: newStory.creator.id,
+        name: newStory.creator.name,
+        email: newStory.creator.email,
+        role: newStory.creator.role
       } : null
     }
 

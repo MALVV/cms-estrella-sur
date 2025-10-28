@@ -37,7 +37,7 @@ interface Story {
 }
 
 export default function StoriesPage() {
-  const { canManageStories, canCreateStories, canEditStories, canDeleteStories } = usePermissions()
+  const { canManaMANAGERies, canCreateStories, canEditStories, canDeleteStories } = usePermissions()
   const [stories, setStories] = useState<Story[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -176,7 +176,7 @@ export default function StoriesPage() {
     return status === 'ACTIVE' ? 'default' : 'secondary'
   }
 
-  if (!canManageStories()) {
+  if (!canManaMANAGERies()) {
     return (
       <div className="space-y-6">
         <div>

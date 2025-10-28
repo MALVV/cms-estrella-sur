@@ -28,10 +28,10 @@ async function diagnoseUpdateIssue() {
     });
 
     // 2. Verificar usuarios admin
-    console.log('2. Verificando usuarios administradores...');
+    console.log('2. Verificando usuarios ADMINISTRATORes...');
     const admins = await prisma.user.findMany({
       where: {
-        role: 'ADMINISTRADOR'
+        role: 'ADMINISTRATOR'
       },
       select: {
         id: true,
@@ -43,7 +43,7 @@ async function diagnoseUpdateIssue() {
       }
     });
 
-    console.log(`✅ Encontrados ${admins.length} administradores:`);
+    console.log(`✅ Encontrados ${admins.length} ADMINISTRATORes:`);
     admins.forEach((admin, index) => {
       console.log(`   ${index + 1}. ${admin.name || admin.email}`);
       console.log(`      Email: ${admin.email}`);

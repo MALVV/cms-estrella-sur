@@ -4,11 +4,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, FileText, Download, ArrowLeft, Upload, Link as LinkIcon, Send } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, Upload, Link as LinkIcon, Send } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
+import { toast } from 'sonner';
 
 interface Convocatoria {
   id: string;
@@ -18,7 +19,7 @@ interface Convocatoria {
   startDate: string;
   endDate: string;
   status: 'active' | 'upcoming' | 'closed';
-  requirements: string[];
+  requirements: any; // JSON field
   documents: string[];
   createdAt: string;
   fullDescription: string;
@@ -38,9 +39,10 @@ interface FormData {
   acceptPolicies: boolean;
 }
 
-export default function ConvocatoriaDetailPage({ params }: { params: { id: string } }) {
+export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [convocatoria, setConvocatoria] = useState<Convocatoria | null>(null);
   const [loading, setLoading] = useState(true);
+  const [convocatoriaId, setConvocatoriaId] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
@@ -53,59 +55,52 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Simular carga de datos - en producción vendría de la API
-    const mockConvocatorias: Convocatoria[] = [
-      {
-        id: '1',
-        title: 'Consultoría en Desarrollo de Capacidades Comunitarias',
-        description: 'Buscamos un/a consultor/a especializado/a en desarrollo de capacidades comunitarias para fortalecer las organizaciones locales en el área rural.',
-        image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-        startDate: '2024-01-15',
-        endDate: '2024-12-31',
-        status: 'active',
-        requirements: [
-          'Experiencia mínima de 5 años en desarrollo comunitario',
-          'Título universitario en áreas afines',
-          'Experiencia en zonas rurales',
-          'Disponibilidad para viajar'
-        ],
-        documents: ['TDR_Consultoria_Desarrollo_Comunitario.pdf'],
-        createdAt: '2024-01-10',
-        fullDescription: 'Esta consultoría tiene como objetivo principal fortalecer las capacidades de las organizaciones comunitarias en el área rural, mediante la implementación de metodologías participativas y el desarrollo de herramientas de gestión. El/la consultor/a trabajará directamente con las comunidades para identificar sus necesidades y desarrollar estrategias de fortalecimiento institucional.',
-        objectives: [
-          'Fortalecer las capacidades organizacionales de las comunidades',
-          'Desarrollar herramientas de gestión participativa',
-          'Implementar metodologías de desarrollo comunitario',
-          'Capacitar a líderes locales en gestión de proyectos'
-        ],
-        responsibilities: [
-          'Realizar diagnóstico participativo de las organizaciones',
-          'Diseñar e implementar planes de fortalecimiento',
-          'Capacitar a líderes comunitarios',
-          'Elaborar informes de seguimiento y evaluación'
-        ],
-        qualifications: [
-          'Título universitario en Desarrollo Rural, Sociología, Antropología o afín',
-          'Experiencia mínima de 5 años en desarrollo comunitario',
-          'Conocimiento en metodologías participativas',
-          'Experiencia en zonas rurales de Bolivia',
-          'Disponibilidad para viajar al interior del país'
-        ],
-        benefits: [
-          'Remuneración competitiva según experiencia',
-          'Cobertura de gastos de transporte y estadía',
-          'Seguro de salud durante la consultoría',
-          'Acceso a materiales y recursos de trabajo'
-        ]
-      }
-    ];
+    const getParams = async () => {
+      const resolvedParams = await params;
+      setConvocatoriaId(resolvedParams.id);
+    };
+    getParams();
+  }, [params]);
 
-    setTimeout(() => {
-      const found = mockConvocatorias.find(c => c.id === params.id);
-      setConvocatoria(found || null);
-      setLoading(false);
-    }, 1000);
-  }, [params.id]);
+  useEffect(() => {
+    if (!convocatoriaId) return;
+    
+    const fetchConvocatoria = async () => {
+      try {
+        const response = await fetch(`/api/public/convocatorias/${convocatoriaId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setConvocatoria({
+            id: data.id,
+            title: data.title,
+            description: data.description,
+            image: data.imageUrl,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            status: data.status.toLowerCase() === 'active' ? 'active' : 
+                   data.status.toLowerCase() === 'upcoming' ? 'upcoming' : 'closed',
+            requirements: Array.isArray(data.requirements) ? data.requirements : [],
+            documents: Array.isArray(data.documents) ? data.documents : [],
+            createdAt: data.createdAt,
+            fullDescription: data.fullDescription,
+            objectives: Array.isArray(data.objectives) ? data.objectives : [],
+            responsibilities: Array.isArray(data.responsibilities) ? data.responsibilities : [],
+            qualifications: Array.isArray(data.qualifications) ? data.qualifications : [],
+            benefits: Array.isArray(data.benefits) ? data.benefits : []
+          });
+        } else {
+          setConvocatoria(null);
+        }
+      } catch (error) {
+        console.error('Error fetching convocatoria:', error);
+        setConvocatoria(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConvocatoria();
+  }, [convocatoriaId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -147,11 +142,50 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simular envío del formulario
-    setTimeout(() => {
-      alert('¡Postulación enviada exitosamente! Te contactaremos pronto.');
+    try {
+      const response = await fetch(`/api/public/convocatorias/${convocatoriaId}/apply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          experience: formData.experience,
+          driveLink: formData.driveLink,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('¡Postulación enviada exitosamente!', {
+          description: 'Te contactaremos pronto para continuar con el proceso.'
+        });
+        // Reset form
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          experience: '',
+          documents: null,
+          driveLink: '',
+          acceptPolicies: false
+        });
+      } else {
+        toast.error('Error al enviar la postulación', {
+          description: data.error || 'Por favor intenta nuevamente'
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast.error('Error al enviar la postulación', {
+        description: 'Por favor, intenta nuevamente.'
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   if (loading) {
@@ -265,110 +299,30 @@ export default function ConvocatoriaDetailPage({ params }: { params: { id: strin
               </CardContent>
             </Card>
 
-            {/* Objetivos */}
+            {/* Requisitos del Voluntariado */}
+            {Array.isArray(convocatoria.requirements) && convocatoria.requirements.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Objetivos</CardTitle>
+                  <CardTitle>Requisitos del Voluntariado</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {convocatoria.objectives.map((objective, index) => (
+                    {convocatoria.requirements.map((requirement: any, index: number) => (
                     <li key={index} className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                       <span className="text-text-secondary-light dark:text-text-secondary-dark">
-                        {objective}
+                          {typeof requirement === 'object' ? requirement.text : requirement}
                       </span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
             </Card>
-
-            {/* Responsabilidades */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Responsabilidades</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {convocatoria.responsibilities.map((responsibility, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark">
-                        {responsibility}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Requisitos */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Requisitos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {convocatoria.qualifications.map((requirement, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark">
-                        {requirement}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            {/* Beneficios */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Beneficios</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {convocatoria.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                      <span className="text-text-secondary-light dark:text-text-secondary-dark">
-                        {benefit}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Documentos */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Documentos
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {convocatoria.documents.map((doc, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <FileText className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">{doc}</span>
-                      </div>
-                      <Button size="sm" variant="outline">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Formulario de Postulación */}
             <Card>
               <CardHeader>

@@ -122,7 +122,7 @@ async function testReferenceImageInPublicPage() {
     console.log('');
     console.log('   📋 CMS /dashboard/donaciones:');
     console.log('   1. Ir a http://localhost:3000/dashboard/donaciones');
-    console.log('   2. Asegurarse de estar logueado como administrador');
+    console.log('   2. Asegurarse de estar logueado como ADMINISTRATOR');
     console.log('   3. Buscar donaciones de proyectos');
     console.log('   4. Verificar que aparece la imagen de referencia junto al título del proyecto');
     console.log('   5. La imagen debe ser de 32x32px (w-8 h-8)');

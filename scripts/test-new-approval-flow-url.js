@@ -22,17 +22,17 @@ async function testNewApprovalFlowWithUrl() {
     });
     console.log(`✅ Donación creada: ${testDonation.id}`);
 
-    // 2. Simular URL manual ingresada por el administrador
+    // 2. Simular URL manual ingresada por el ADMINISTRATOR
     const manualComprobanteUrl = 'https://drive.google.com/file/d/1ABC123XYZ/view?usp=sharing';
     const manualComprobanteAlt = 'Comprobante de transferencia';
 
-    // 3. Obtener usuario administrador
+    // 3. Obtener usuario ADMINISTRATOR
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     });
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador');
+      console.log('❌ No se encontró usuario ADMINISTRATOR');
       return;
     }
 

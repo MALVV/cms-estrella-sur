@@ -75,11 +75,11 @@ async function seedVideoTestimonials() {
 
     // Obtener el primer usuario admin para asignar como creador
     const adminUser = await prisma.user.findFirst({
-      where: { role: 'ADMINISTRADOR' }
+      where: { role: 'ADMINISTRATOR' }
     })
 
     if (!adminUser) {
-      console.log('❌ No se encontró usuario administrador. Creando videos sin creador asignado.')
+      console.log('❌ No se encontró usuario ADMINISTRATOR. Creando videos sin creador asignado.')
     }
 
     // Crear videos testimoniales

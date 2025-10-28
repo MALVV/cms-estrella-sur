@@ -73,7 +73,7 @@ async function testCompletedDonationProjects() {
     console.log('\n3. Buscando usuario admin...');
     const adminUser = await prisma.user.findFirst({
       where: {
-        role: 'ADMINISTRADOR'
+        role: 'ADMINISTRATOR'
       },
       select: {
         id: true,
@@ -89,7 +89,7 @@ async function testCompletedDonationProjects() {
           name: 'Admin Temporal',
           email: 'admin-temp@test.com',
           password: 'temp-password',
-          role: 'ADMINISTRADOR'
+          role: 'ADMINISTRATOR'
         }
       });
       adminUser = tempAdmin;

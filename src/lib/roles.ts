@@ -7,12 +7,9 @@ export enum UserRole {
 // Función para convertir el rol de la base de datos al formato mostrado en la UI
 export function getRoleDisplayName(role: string): string {
   const roleNames: Record<string, string> = {
-    'ADMINISTRATOR': 'Administrador',
-    'MANAGER': 'Gestor',
-    'CONSULTANT': 'Asesor',
-    'ADMINISTRADOR': 'Administrador',
-    'GESTOR': 'Gestor',
-    'ASESOR': 'Asesor'
+    'ADMINISTRATOR': 'ADMINISTRATOR',
+    'MANAGER': 'MANAGER',
+    'CONSULTANT': 'CONSULTANT'
   }
   return roleNames[role] || role
 }

@@ -30,6 +30,6 @@ console.log('   4. Intenta acceder a /dashboard/users');
 console.log('\n📊 Verificar datos:');
 console.log('   - Ejecuta: node scripts/test-users-api.js');
 console.log('   - Ejecuta: node scripts/test-authentication.js');
-console.log('   - Ejecuta: node scripts/assign-asesor-role.js list');
+console.log('   - Ejecuta: node scripts/assign-CONSULTANT-role.js list');
 
 console.log('\n✅ Script de verificación completado');

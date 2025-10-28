@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function testAdvisorDashboardAPIs() {
   try {
-    console.log('🔍 Probando APIs del dashboard de asesor...');
+    console.log('🔍 Probando APIs del dashboard de CONSULTANT...');
     
     // Simular datos de prueba si no existen
     console.log('\n📊 Verificando datos existentes...');

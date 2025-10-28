@@ -21,7 +21,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'GESTOR'
+    role: 'MANAGER'
   })
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -111,7 +111,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
       })
 
       // Resetear formulario
-      setFormData({ name: '', email: '', role: 'GESTOR' })
+      setFormData({ name: '', email: '', role: 'MANAGER' })
       
     } catch (error) {
       toast({
@@ -143,7 +143,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', email: '', role: 'GESTOR' })
+    setFormData({ name: '', email: '', role: 'MANAGER' })
     setGeneratedPassword('')
     setShowPassword(false)
     setPasswordCopied(false)
@@ -205,8 +205,8 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="GESTOR">Gestor de Contenido</SelectItem>
-                  <SelectItem value="ADMINISTRADOR">Administrador</SelectItem>
+                  <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
+                  <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -50,7 +50,7 @@ const navigationItems: NavItem[] = [
     label: 'Configuración',
     href: '/dashboard/settings',
     icon: '⚙️',
-    requiredRole: UserRole.ADMINISTRADOR
+    requiredRole: UserRole.ADMINISTRATOR
   }
 ]
 

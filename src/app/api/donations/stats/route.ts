@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar que el usuario tenga permisos para ver estadísticas de donaciones
-    if (!['ADMINISTRADOR', 'ASESOR'].includes(session.user.role)) {
+    if (!['ADMINISTRATOR', 'CONSULTANT'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 })
     }
 

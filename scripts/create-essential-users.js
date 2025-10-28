@@ -15,9 +15,9 @@ async function createEssentialUsers() {
     const users = [
       {
         email: 'admin@estrellasur.com',
-        name: 'Administrador Principal',
+        name: 'ADMINISTRATOR Principal',
         password: 'Admin123!',
-        role: 'ADMINISTRADOR',
+        role: 'ADMINISTRATOR',
         mustChangePassword: true
       },
       {
@@ -69,7 +69,7 @@ async function createEssentialUsers() {
     console.log('🎯 Usuarios esenciales creados exitosamente!')
     console.log('\n📋 Credenciales de acceso:')
     console.log('┌─────────────────────────────────────────────────────────┐')
-    console.log('│ ADMINISTRADOR                                           │')
+    console.log('│ ADMINISTRATOR                                           │')
     console.log('│ Email: admin@estrellasur.com                           │')
     console.log('│ Contraseña: Admin123!                                  │')
     console.log('│                                                         │')

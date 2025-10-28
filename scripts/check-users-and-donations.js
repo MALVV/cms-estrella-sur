@@ -20,7 +20,7 @@ async function checkUsers() {
 
     if (users.length === 0) {
       console.log('⚠️ No hay usuarios en la base de datos');
-      console.log('💡 Necesitas crear al menos un usuario administrador');
+      console.log('💡 Necesitas crear al menos un usuario ADMINISTRATOR');
     } else {
       users.forEach((user, index) => {
         console.log(`${index + 1}. ID: ${user.id}`);
