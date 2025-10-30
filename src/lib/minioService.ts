@@ -1,35 +1,18 @@
-import { Client } from 'minio'
+// Re-exportar tipos y mantener compatibilidad hacia atrás
+import { StorageService, UploadOptions, FileUploadResult } from './storage-service'
 
-const minioClient = new Client({
-  endPoint: process.env.MINIO_ENDPOINT || 'localhost',
-  port: parseInt(process.env.MINIO_PORT || '9000'),
-  useSSL: process.env.MINIO_USE_SSL === 'true',
-  accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
-  secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
-})
-
-export interface UploadOptions {
-  bucket?: string
-  isPublic?: boolean
-  contentType?: string
-}
-
-export interface FileUploadResult {
-  filename: string
-  originalName: string
-  mimeType: string
-  size: number
-  url: string
-  bucket: string
-  path: string
-}
-
+/**
+ * MinIOService - Mantiene compatibilidad hacia atrás
+ * Ahora usa internamente StorageService que soporta tanto MinIO como AWS S3
+ * 
+ * @deprecated Considera usar StorageService directamente para mejor claridad
+ */
 export class MinIOService {
   private static instance: MinIOService
-  private client: Client
+  private storageService: StorageService
 
   constructor() {
-    this.client = minioClient
+    this.storageService = StorageService.getInstance()
   }
 
   static getInstance(): MinIOService {
@@ -44,90 +27,23 @@ export class MinIOService {
     filename: string,
     options: UploadOptions = {}
   ): Promise<FileUploadResult> {
-    const {
-      bucket = 'default',
-      isPublic = false,
-      contentType = 'application/octet-stream'
-    } = options
-
-    try {
-      // Ensure bucket exists
-      await this.ensureBucketExists(bucket)
-
-      // Generate unique filename
-      const timestamp = Date.now()
-      const randomString = Math.random().toString(36).substring(2, 15)
-      const fileExtension = filename.split('.').pop()
-      const uniqueFilename = `${timestamp}-${randomString}.${fileExtension}`
-      const path = `${bucket}/${uniqueFilename}`
-
-      // Upload file
-      await this.client.putObject(
-        bucket,
-        uniqueFilename,
-        file
-      )
-
-      // Generate URL
-      const url = isPublic
-        ? `${process.env.MINIO_PUBLIC_URL}/${bucket}/${uniqueFilename}`
-        : await this.getPresignedUrl(bucket, uniqueFilename)
-
-      return {
-        filename: uniqueFilename,
-        originalName: filename,
-        mimeType: contentType,
-        size: Buffer.isBuffer(file) ? file.length : Buffer.byteLength(file),
-        url,
-        bucket,
-        path,
-      }
-    } catch (error) {
-      throw new Error(`Failed to upload file: ${error}`)
-    }
+    return this.storageService.uploadFile(file, filename, options)
   }
 
   async deleteFile(bucket: string, filename: string): Promise<void> {
-    try {
-      await this.client.removeObject(bucket, filename)
-    } catch (error) {
-      throw new Error(`Failed to delete file: ${error}`)
-    }
+    return this.storageService.deleteFile(bucket, filename)
   }
 
   async getPresignedUrl(bucket: string, filename: string, expiry: number = 3600): Promise<string> {
-    try {
-      return await this.client.presignedGetObject(bucket, filename, expiry)
-    } catch (error) {
-      throw new Error(`Failed to generate presigned URL: ${error}`)
-    }
+    return this.storageService.getPresignedUrl(bucket, filename, expiry)
   }
 
   async listFiles(bucket: string, prefix?: string): Promise<any[]> {
-    try {
-      const objectsList: any[] = []
-      const stream = this.client.listObjects(bucket, prefix, true)
-      
-      return new Promise((resolve, reject) => {
-        stream.on('data', (obj) => objectsList.push(obj))
-        stream.on('error', reject)
-        stream.on('end', () => resolve(objectsList))
-      })
-    } catch (error) {
-      throw new Error(`Failed to list files: ${error}`)
-    }
-  }
-
-  private async ensureBucketExists(bucket: string): Promise<void> {
-    try {
-      const exists = await this.client.bucketExists(bucket)
-      if (!exists) {
-        await this.client.makeBucket(bucket, 'us-east-1')
-      }
-    } catch (error) {
-      throw new Error(`Failed to ensure bucket exists: ${error}`)
-    }
+    return this.storageService.listFiles(bucket, prefix)
   }
 }
+
+// Re-exportar tipos para compatibilidad
+export type { UploadOptions, FileUploadResult }
 
 export const minioService = MinIOService.getInstance()

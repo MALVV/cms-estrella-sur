@@ -66,7 +66,22 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    return NextResponse.json(events);
+    // Función helper para normalizar imageUrl
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-event.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
+    // Normalizar imageUrl en todos los eventos
+    const normalizedEvents = events.map((item: any) => ({
+      ...item,
+      imageUrl: normalizeImageUrl(item.imageUrl),
+      imageAlt: item.imageAlt || null,
+    }));
+
+    return NextResponse.json(normalizedEvents);
   } catch (error) {
     console.error('Error fetching events:', error);
     return NextResponse.json(
@@ -105,12 +120,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Función helper para normalizar imageUrl antes de guardar
+    const normalizeImageUrlForSave = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-event.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
     const event = await prisma.event.create({
       data: {
         title,
         description,
-        imageUrl,
-        imageAlt,
+        imageUrl: normalizeImageUrlForSave(imageUrl),
+        imageAlt: imageAlt || null,
         eventDate: new Date(eventDate),
         location,
         isFeatured,
@@ -126,7 +149,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(event, { status: 201 });
+    // Normalizar imageUrl antes de devolver
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-event.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
+    const normalizedEvent = {
+      ...event,
+      imageUrl: normalizeImageUrl(event.imageUrl),
+      imageAlt: event.imageAlt || null,
+    };
+
+    return NextResponse.json(normalizedEvent, { status: 201 });
   } catch (error) {
     console.error('Error creating event:', error);
     return NextResponse.json(

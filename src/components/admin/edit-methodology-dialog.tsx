@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { Edit } from 'lucide-react';
+import { Edit, Upload, ImageIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 
 interface Methodology {
@@ -66,6 +66,8 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
     evaluation: methodology?.evaluation || ''
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
 
   // Inicializar el formulario con los datos de la iniciativa
   useEffect(() => {
@@ -93,6 +95,41 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/public/methodologies/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: fd,
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.error || 'Error al subir imagen');
+      }
+      const data = await res.json();
+      setFormData(prev => ({ ...prev, imageUrl: data.url, imageAlt: data.alt || file.name }));
+      setImageMarkedForDeletion(false); // Si se sube una nueva imagen, ya no está marcada para eliminar
+      toast({ title: 'Éxito', description: 'Imagen subida correctamente' });
+    } catch (error) {
+      toast({ title: 'Error', description: error instanceof Error ? error.message : 'Error al subir la imagen', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSectorChange = (sector: 'SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS', checked: boolean) => {
     setFormData(prev => ({
       ...prev,
@@ -118,7 +155,7 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
     }
 
     try {
-      const response = await fetch(`/api/methodologies/${methodology.id}`, {
+      const response = await fetch(`/api/public/methodologies/${methodology.id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -343,29 +380,103 @@ export function EditMethodologyDialog({ methodology, onMethodologyUpdated, child
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="imageUrl" className="text-sm font-medium">
-                  URL de Imagen
-                </label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label htmlFor="imageAlt" className="text-sm font-medium">
-                  Texto Alternativo de Imagen
-                </label>
-                <Input
-                  id="imageAlt"
-                  placeholder="Descripción de la imagen"
-                  value={formData.imageAlt}
-                  onChange={(e) => handleInputChange('imageAlt', e.target.value)}
-                />
+            <div className="space-y-4">
+              <label className="text-sm font-medium">Imagen</label>
+              {!formData.imageUrl ? (
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                  <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                  <div className="mt-4">
+                    <label htmlFor="file-upload-methodology" className="cursor-pointer">
+                      <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                        {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                      </span>
+                      <input
+                        id="file-upload-methodology"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleFileUpload(f);
+                        }}
+                        disabled={uploading}
+                      />
+                    </label>
+                    <p className="mt-2 text-sm text-gray-500">
+                      PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img src={formData.imageUrl} alt={formData.imageAlt || 'Vista previa'} className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={async () => {
+                        try {
+                          if (formData.imageUrl) {
+                            const controller = new AbortController();
+                            const timer = setTimeout(() => controller.abort(), 15000);
+                            const res = await fetch('/api/spaces/delete', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ url: formData.imageUrl }),
+                              signal: controller.signal,
+                            });
+                            clearTimeout(timer);
+                            if (!res.ok) {
+                              const e = await res.json().catch(() => ({}));
+                              throw new Error(e.error || 'No se pudo eliminar del bucket');
+                            }
+                          }
+                          setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                          try {
+                            const saveRes = await fetch(`/api/public/methodologies/${methodology.id}`, {
+                              method: 'PUT',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ ...formData, imageUrl: null, imageAlt: null }),
+                            });
+                            if (!saveRes.ok) {
+                              console.warn('No se pudo persistir imageUrl=null para iniciativa');
+                            }
+                          } catch {}
+                          toast({ title: 'Imagen eliminada', description: 'Se eliminó del bucket y se actualizó la iniciativa' });
+                        } catch (err) {
+                          toast({ title: 'Error', description: err instanceof Error ? err.message : 'No se pudo eliminar la imagen', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                  <label htmlFor="file-upload-methodology-replace" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                    </Button>
+                    <input
+                      id="file-upload-methodology-replace"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) handleFileUpload(f);
+                      }}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
+              <div>
+                <label htmlFor="imageAlt" className="text-sm font-medium">Texto Alternativo (alt)</label>
+                <Input id="imageAlt" placeholder="Descripción de la imagen" value={formData.imageAlt} onChange={(e) => handleInputChange('imageAlt', e.target.value)} />
               </div>
             </div>
           </div>

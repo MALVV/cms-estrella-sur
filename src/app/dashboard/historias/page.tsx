@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { FileText, Search, MoreHorizontal, Edit, Trash2, Eye, EyeOff, Download, RefreshCw, Calendar, User } from 'lucide-react'
+import { isValidImageUrl, getImagePlaceholderData } from '@/lib/image-utils'
 import { CreateStoryForm } from '@/components/admin/create-story-form'
 import { ToggleStoryStatusDialog } from '@/components/admin/toggle-story-status-dialog'
 import { DeleteStoryDialog } from '@/components/admin/delete-story-dialog'
@@ -22,8 +23,8 @@ interface Story {
   title: string
   content?: string
   summary?: string
-  imageUrl: string
-  imageAlt: string
+  imageUrl: string | null
+  imageAlt: string | null
   status: 'ACTIVE' | 'INACTIVE'
   createdAt: string
   updatedAt: string
@@ -403,17 +404,43 @@ function StoryList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {stories.map((story) => (
           <Card key={story.id} className="overflow-hidden">
-            <div className="relative h-48">
-                  <Image
-                    src={story.imageUrl}
-                    alt={story.imageAlt}
-                    fill
-                className="object-cover"
-              />
+            <div className="relative h-48 flex-shrink-0">
+              {(() => {
+                const hasValidImage = story.imageUrl 
+                  && typeof story.imageUrl === 'string' 
+                  && story.imageUrl.trim() !== '' 
+                  && story.imageUrl !== '/placeholder-story.jpg' 
+                  && isValidImageUrl(story.imageUrl);
+                
+                if (hasValidImage) {
+                  return (
+                    <Image
+                      src={story.imageUrl!}
+                      alt={story.imageAlt || story.title}
+                      fill
+                      className="object-cover"
+                    />
+                  );
+                }
+                
+                return (
+                  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                    <div className="text-center">
+                      <span className="material-symbols-outlined text-4xl text-gray-400 mb-2 block">
+                        auto_stories
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Sin imagen
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
               <div className="absolute top-2 right-2">
                 <Checkbox
                   checked={selectedStories.includes(story.id)}
                   onCheckedChange={() => onSelectStory(story.id)}
+                  className="bg-white/90 backdrop-blur-sm"
                 />
               </div>
             </div>
@@ -512,12 +539,32 @@ function StoryList({
           <CardContent className="p-4">
             <div className="flex items-start space-x-4">
               <div className="relative w-20 h-16 flex-shrink-0">
-                <Image
-                  src={story.imageUrl}
-                  alt={story.imageAlt}
-                  fill
-                  className="object-cover rounded"
-                />
+                {(() => {
+                  const hasValidImage = story.imageUrl 
+                    && typeof story.imageUrl === 'string' 
+                    && story.imageUrl.trim() !== '' 
+                    && story.imageUrl !== '/placeholder-story.jpg' 
+                    && isValidImageUrl(story.imageUrl);
+                  
+                  if (hasValidImage) {
+                    return (
+                      <Image
+                        src={story.imageUrl!}
+                        alt={story.imageAlt || story.title}
+                        fill
+                        className="object-cover rounded"
+                      />
+                    );
+                  }
+                  
+                  return (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center rounded">
+                      <span className="material-symbols-outlined text-xl text-gray-400">
+                        auto_stories
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">

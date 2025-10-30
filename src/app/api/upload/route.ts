@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { MinIOService } from '@/lib/minioService';
+import { storageService } from '@/lib/storage-service';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,11 +29,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar tamaño del archivo (máximo 10MB)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validar tamaño del archivo (configurable por ENV, por defecto 20MB)
+    const maxMb = Number(process.env.MAX_UPLOAD_MB || 20);
+    const maxSize = maxMb * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'El archivo es demasiado grande. Máximo 10MB' },
+        { error: `El archivo es demasiado grande. Máximo ${maxMb}MB` },
         { status: 400 }
       );
     }
@@ -42,15 +43,15 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Subir archivo usando MinIO
-    const minioService = MinIOService.getInstance();
-    const uploadResult = await minioService.uploadFile(
+    // Subir archivo usando S3/Spaces
+    const uploadResult = await storageService.uploadFile(
       buffer,
       file.name,
       {
-        bucket: 'donation-proofs',
+        bucket: process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET,
         isPublic: true,
-        contentType: file.type
+        contentType: file.type,
+        prefix: 'donation-proofs/'
       }
     );
 

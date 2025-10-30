@@ -1,30 +1,37 @@
-"use client"
+'use client'
 
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { useToast } from '@/components/ui/use-toast'
-import { useSession } from 'next-auth/react'
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
+import { useSession } from 'next-auth/react';
 
 interface DeleteStoryDialogProps {
   story: {
-    id: string
-    title: string
-    description: string
-  }
-  onStoryDeleted: (storyId: string) => void
-  children: React.ReactNode
+    id: string;
+    title: string;
+    description: string;
+  };
+  onStoryDeleted: (storyId: string) => void;
+  children: React.ReactNode;
 }
 
 export function DeleteStoryDialog({ story, onStoryDeleted, children }: DeleteStoryDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const { toast } = useToast()
-  const { data: session } = useSession()
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const { data: session } = useSession();
 
   const handleDelete = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
+      
+      console.log('🗑️ Eliminando historia:', {
+        storyId: story.id,
+        storyTitle: story.title,
+        sessionExists: !!session,
+        customTokenExists: !!session?.customToken
+      });
 
       const response = await fetch(`/api/stories/${story.id}`, {
         method: 'DELETE',
@@ -32,32 +39,43 @@ export function DeleteStoryDialog({ story, onStoryDeleted, children }: DeleteSto
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.customToken}`,
         },
-      })
+      });
+
+      console.log('📡 Respuesta del servidor:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al eliminar la historia')
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Error ${response.status}: ${response.statusText}`;
+        console.error('❌ Error del servidor:', errorMessage);
+        throw new Error(errorMessage);
       }
 
+      console.log('✅ Historia eliminada exitosamente');
+
       // Llamar callback para actualizar el estado local
-      onStoryDeleted(story.id)
+      onStoryDeleted(story.id);
 
       toast({
         title: "Historia eliminada exitosamente",
         description: `"${story.title}" ha sido eliminada permanentemente.`,
-      })
+      });
 
-      setOpen(false)
+      setOpen(false);
     } catch (error) {
+      console.error('❌ Error en handleDelete:', error);
       toast({
         title: "Error al eliminar historia",
         description: error instanceof Error ? error.message : "Hubo un problema al eliminar la historia.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -89,5 +107,5 @@ export function DeleteStoryDialog({ story, onStoryDeleted, children }: DeleteSto
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

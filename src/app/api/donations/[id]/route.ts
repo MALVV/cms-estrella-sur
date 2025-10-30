@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { checkAndUpdateProjectCompletion } from '@/lib/donation-utils';
 import { updateAnnualGoalAmount } from '@/lib/annual-goal-utils';
-import { MinIOService } from '@/lib/minioService';
+import { storageService } from '@/lib/storage-service';
 
 const prisma = new PrismaClient();
 
@@ -64,14 +64,14 @@ export async function PATCH(request: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
         
-        const minioService = MinIOService.getInstance();
-        const uploadResult = await minioService.uploadFile(
+        const uploadResult = await storageService.uploadFile(
           buffer,
           file.name,
           {
-            bucket: 'donation-proofs',
+            bucket: process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET,
             isPublic: true,
-            contentType: file.type
+            contentType: file.type,
+            prefix: 'donation-proofs/'
           }
         );
         

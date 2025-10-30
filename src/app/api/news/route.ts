@@ -85,7 +85,22 @@ export async function GET(request: NextRequest) {
       take: limit,
     });
 
-    return NextResponse.json(news);
+    // Función helper para normalizar imageUrl
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-news.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
+    // Normalizar imageUrl en todas las noticias
+    const normalizedNews = news.map((item: any) => ({
+      ...item,
+      imageUrl: normalizeImageUrl(item.imageUrl),
+      imageAlt: item.imageAlt || null,
+    }));
+
+    return NextResponse.json(normalizedNews);
   } catch (error) {
     console.error('Error fetching news:', error);
     return NextResponse.json(
@@ -126,13 +141,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Función helper para normalizar imageUrl antes de guardar
+    const normalizeImageUrlForSave = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-news.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
     const news = await prisma.news.create({
       data: {
         title,
         content,
         excerpt,
-        imageUrl,
-        imageAlt,
+        imageUrl: normalizeImageUrlForSave(imageUrl),
+        imageAlt: imageAlt || null,
         isFeatured,
         programId,
         projectId,
@@ -167,7 +190,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(news, { status: 201 });
+    // Normalizar imageUrl antes de devolver
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-news.jpg' || (typeof url === 'string' && url.trim() === '')) {
+        return null;
+      }
+      return url;
+    };
+
+    const normalizedNews = {
+      ...news,
+      imageUrl: normalizeImageUrl(news.imageUrl),
+      imageAlt: news.imageAlt || null,
+    };
+
+    return NextResponse.json(normalizedNews, { status: 201 });
   } catch (error) {
     console.error('Error creating news:', error);
     return NextResponse.json(

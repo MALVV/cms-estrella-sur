@@ -38,7 +38,7 @@ export function DeleteMethodologyDialog({
         throw new Error('No hay token de autenticación disponible. Por favor, inicia sesión nuevamente.');
       }
 
-      const response = await fetch(`/api/methodologies/${methodology.id}`, {
+      const response = await fetch(`/api/public/methodologies/${methodology.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -47,8 +47,10 @@ export function DeleteMethodologyDialog({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Error al eliminar iniciativa: ${response.status} ${response.statusText}`);
+        if (response.status !== 404) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`Error al eliminar iniciativa: ${response.status} ${response.statusText}`);
+        }
       }
 
       toast({

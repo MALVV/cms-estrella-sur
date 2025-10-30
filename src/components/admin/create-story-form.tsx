@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Plus, FileText, Calendar } from 'lucide-react'
-import { useToast } from '@/components/ui/use-toast'
+import { Plus, FileText, Calendar, Upload, ImageIcon } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Story {
   id: string;
@@ -24,7 +24,6 @@ interface CreateStoryFormProps {
 }
 
 export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
-  const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [formData, setFormData] = useState({
@@ -35,6 +34,9 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
     imageAlt: ''
   })
   const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('')
   const [createdStory, setCreatedStory] = useState<Story | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +44,53 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
     setLoading(true)
 
     try {
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl = formData.imageUrl;
+      let finalImageAlt = formData.imageAlt;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/stories/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          const errorMessage = error instanceof Error ? error.message : 'Error al subir la imagen';
+          toast(errorMessage, { type: 'error' });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
       const response = await fetch('/api/stories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,8 +98,8 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
           title: formData.title,
           content: formData.content,
           summary: formData.summary,
-          imageUrl: formData.imageUrl || '/placeholder-story.jpg',
-          imageAlt: formData.imageAlt || formData.title
+          imageUrl: finalImageUrl || null,
+          imageAlt: finalImageAlt || formData.title
         }),
       })
 
@@ -70,13 +119,12 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       setIsOpen(false)
       setShowSuccessDialog(true)
       setFormData({ title: '', content: '', summary: '', imageUrl: '', imageAlt: '' })
+      setSelectedImageFile(null)
+      setImagePreviewUrl('')
       
     } catch (error) {
-      toast({
-        title: "Error al crear historia",
-        description: error instanceof Error ? error.message : "Hubo un problema al crear la historia. Inténtalo de nuevo.",
-        variant: "destructive",
-      })
+      const errorMessage = error instanceof Error ? error.message : "Hubo un problema al crear la historia. Inténtalo de nuevo.";
+      toast(errorMessage, { type: 'error' });
     } finally {
       setLoading(false)
     }
@@ -100,15 +148,59 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const handleFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!allowed.includes(file.type)) {
+        toast('Formato no permitido. Usa JPG, PNG, WEBP o GIF', { type: 'error' });
+        return;
+      }
+      if (file.size > maxBytes) {
+        toast(`El archivo es demasiado grande. Máximo ${maxMb}MB`, { type: 'error' });
+        return;
+      }
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+      };
+      reader.readAsDataURL(file);
+
+      toast.success('Imagen seleccionada', {
+        description: 'La imagen se subirá al bucket al crear la historia'
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al procesar la imagen';
+      toast(errorMessage, { type: 'error' });
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        // Si se cierra sin guardar, resetear el estado
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
+        setFormData({ title: '', content: '', summary: '', imageUrl: '', imageAlt: '' });
+      }
+    }}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
           Crear Historia
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Crear Nueva Historia</DialogTitle>
           <DialogDescription>
@@ -162,20 +254,76 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="imageUrl" className="text-sm font-medium">
-                  URL de Imagen <span className="text-xs text-gray-500">({formData.imageUrl.length}/200)</span>
-                </label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => handleInputChange('imageUrl', e.target.value)}
-                  maxLength={200}
-                />
-              </div>
-
+            <div className="space-y-4">
+              <label className="text-sm font-medium">Imagen</label>
+              {!imagePreviewUrl && !formData.imageUrl ? (
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                  <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                  <div className="mt-4">
+                    <label htmlFor="file-upload-story-create" className="cursor-pointer">
+                      <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                        {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                      </span>
+                      <input
+                        id="file-upload-story-create"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        disabled={uploading || loading}
+                      />
+                    </label>
+                    <p className="mt-2 text-sm text-gray-500">
+                      PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img src={imagePreviewUrl || formData.imageUrl} alt={formData.imageAlt || 'Vista previa'} className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        // Solo limpiar el estado local, no eliminar del bucket (aún no se ha subido)
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl('');
+                        setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                        toast.success('Imagen eliminada', {
+                          description: 'La imagen fue removida del formulario'
+                        });
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                  <label htmlFor="file-upload-story-replace-create" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                    </Button>
+                    <input
+                      id="file-upload-story-replace-create"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                      disabled={uploading || loading}
+                    />
+                  </label>
+                </div>
+              )}
               <div className="space-y-2">
                 <label htmlFor="imageAlt" className="text-sm font-medium">
                   Texto Alternativo <span className="text-xs text-gray-500">({formData.imageAlt.length}/100)</span>
@@ -201,8 +349,8 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Historia'}
+            <Button type="submit" disabled={loading || uploading}>
+              {loading || uploading ? 'Procesando...' : 'Crear Historia'}
             </Button>
           </div>
         </form>

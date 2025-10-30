@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/auth-middleware';
+import { storageService } from '@/lib/storage-service';
 
 // GET - Obtener proyecto por ID
 export async function GET(
@@ -148,29 +149,54 @@ export async function DELETE(
     const resolvedParams = await params;
     const { id } = resolvedParams;
 
-    // Intentar eliminar el proyecto directamente
-    // Si no existe, considerarlo como ya eliminado
-    try {
-      await prisma.project.delete({
-        where: { id },
-      });
-
+    // Buscar para obtener imageUrl
+    const existingProject = await prisma.project.findUnique({ where: { id } });
+    if (!existingProject) {
       return NextResponse.json(
         { message: 'Proyecto eliminado exitosamente' },
         { status: 200 }
       );
-    } catch (deleteError: any) {
-      // Si el error es porque el proyecto no existe, considerarlo como eliminado exitosamente
-      if (deleteError.code === 'P2025' || deleteError.message?.includes('Record to delete does not exist')) {
-        return NextResponse.json(
-          { message: 'Proyecto eliminado exitosamente' },
-          { status: 200 }
-        );
-      }
-      
-      // Si es otro error, lanzarlo
-      throw deleteError;
     }
+
+    // Intentar eliminar imagen asociada
+    if (existingProject.imageUrl) {
+      const extractBucketAndKey = (u: string): { bucket: string | null; key: string | null } => {
+        try {
+          const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+          const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+          const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+          const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+          if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+          const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+          if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+          if (endpoint && u.startsWith(endpoint + '/')) {
+            const rest = u.substring((endpoint + '/').length);
+            const idx = rest.indexOf('/');
+            if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+          }
+          if (publicBase && u.startsWith(publicBase + '/')) {
+            return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
+          }
+          return { bucket: envBucket || null, key: null };
+        } catch {
+          return { bucket: null, key: null };
+        }
+      };
+      const { bucket, key } = extractBucketAndKey(existingProject.imageUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('No se pudo eliminar imagen de proyecto al borrar:', e);
+        }
+      }
+    }
+
+    await prisma.project.delete({ where: { id } });
+    return NextResponse.json(
+      { message: 'Proyecto eliminado exitosamente' },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('Error deleting project:', error);
     return NextResponse.json(

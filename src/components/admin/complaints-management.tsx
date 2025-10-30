@@ -646,9 +646,9 @@ export function ComplaintsManagement() {
                 ¿Estás seguro de que quieres cambiar el estado de la denuncia de tipo 
                 <strong> "{getComplaintTypeText(changingStatus.complaint.complaintType)}"</strong>?
               </p>
-              <p className="text-sm text-gray-500 mt-2">
+              <div className="text-sm text-gray-500 mt-2">
                 Estado actual: <strong>{getStatusBadge(changingStatus.complaint.status)}</strong>
-              </p>
+              </div>
               <p className="text-sm text-gray-500">
                 Nuevo estado: <strong>{changingStatus.newStatus}</strong>
               </p>

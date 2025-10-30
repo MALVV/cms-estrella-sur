@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
-import { Plus } from 'lucide-react';
+import { Plus, Upload, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface CreateNewsFormProps {
   onNewsCreated: () => void;
@@ -32,6 +33,9 @@ interface Methodology {
 export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [programas, setProgramas] = useState<Programa[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [methodologies, setMethodologies] = useState<Methodology[]>([]);
@@ -108,6 +112,57 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
     try {
       setLoading(true);
       
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl = formData.imageUrl;
+      let finalImageAlt = formData.imageAlt;
+      
+      if (selectedImageFile) {
+        console.log('[CreateNewsForm] handleSubmit - Iniciando subida de imagen al bucket (usuario presionó "Crear")');
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/news/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+      
       const response = await fetch('/api/news', {
         method: 'POST',
         headers: {
@@ -116,6 +171,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         },
         body: JSON.stringify({
           ...formData,
+          imageUrl: finalImageUrl || null,
+          imageAlt: finalImageAlt || null,
           publishedAt: new Date().toISOString(),
           programId: formData.programId === 'none' ? null : formData.programId,
           projectId: formData.projectId === 'none' ? null : formData.projectId,
@@ -145,6 +202,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         projectId: 'none',
         methodologyId: 'none',
       });
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
 
       setIsOpen(false);
       onNewsCreated();
@@ -167,8 +226,69 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
     }));
   };
 
+  const handleFileUpload = async (file: File) => {
+    console.log('[CreateNewsForm] handleFileUpload llamado - Solo creando preview local, NO subiendo al bucket');
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+      setFormData(prev => ({
+        ...prev,
+          imageAlt: file.name,
+      }));
+        console.log('[CreateNewsForm] Preview local creado - Archivo guardado para subir después');
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al crear la noticia',
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        // Si se cierra sin guardar, resetear el estado
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
+        setFormData({
+          title: '',
+          content: '',
+          excerpt: '',
+          imageUrl: '',
+          imageAlt: '',
+          isActive: true,
+          isFeatured: false,
+          programId: 'none',
+          projectId: 'none',
+          methodologyId: 'none',
+        });
+      }
+    }}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -212,21 +332,92 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">URL de Imagen</label>
-              <Input
-                value={formData.imageUrl}
-                onChange={(e) => handleChange('imageUrl', e.target.value)}
-                placeholder="https://ejemplo.com/imagen.jpg"
-              />
+              <label className="text-sm font-medium">Imagen</label>
+              {!imagePreviewUrl && !formData.imageUrl ? (
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2">
+                  <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                  <div className="mt-4">
+                    <label htmlFor="file-upload-news" className="cursor-pointer">
+                      <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                        {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                      </span>
+                      <input
+                        id="file-upload-news"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        disabled={uploading || loading}
+                      />
+                    </label>
+                    <p className="mt-2 text-sm text-gray-500">
+                      PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 mt-2">
+                  <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <Image
+                      src={imagePreviewUrl || formData.imageUrl}
+                      alt={formData.imageAlt || 'Vista previa'}
+                      fill
+                      className="object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        // Solo limpiar el estado local, no eliminar del bucket (aún no se ha subido)
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl('');
+                        handleChange('imageUrl', '');
+                        handleChange('imageAlt', '');
+                        toast({ 
+                          title: 'Imagen eliminada', 
+                          description: 'La imagen fue removida del formulario' 
+                        });
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                  <label htmlFor="file-upload-news-replace" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                    </Button>
+                    <input
+                      id="file-upload-news-replace"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                      disabled={uploading || loading}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
+
             <div>
-              <label className="text-sm font-medium">Texto Alternativo</label>
+              <label className="text-sm font-medium">Texto alternativo (alt)</label>
               <Input
                 value={formData.imageAlt}
                 onChange={(e) => handleChange('imageAlt', e.target.value)}
-                placeholder="Descripción de la imagen"
+                placeholder="Descripción de la imagen para accesibilidad"
               />
             </div>
           </div>
@@ -313,8 +504,8 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Noticia'}
+            <Button type="submit" disabled={loading || uploading}>
+              {loading || uploading ? 'Procesando...' : 'Crear Noticia'}
             </Button>
           </div>
         </form>

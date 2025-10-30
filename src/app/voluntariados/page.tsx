@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Upload, Send, Users, Heart, Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -828,14 +828,14 @@ export default function VoluntariadosPage() {
               <DialogTitle className="text-2xl">¡Solicitud Enviada!</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-base py-4">
+          <div className="text-muted-foreground text-base py-4">
             <p className="mb-4">
               Tu solicitud de voluntariado ha sido enviada exitosamente. Nuestro equipo la revisará y te contactaremos pronto por correo electrónico para coordinar tu participación.
             </p>
             <p className="font-semibold text-primary">
               ¡Gracias por tu interés en ser parte de nuestro equipo!
             </p>
-          </DialogDescription>
+          </div>
           <DialogFooter>
             <Button 
               onClick={() => setSuccessDialog(false)}
@@ -858,14 +858,14 @@ export default function VoluntariadosPage() {
               <DialogTitle className="text-2xl">Error al Enviar</DialogTitle>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-base py-4">
+          <div className="text-muted-foreground text-base py-4">
             <p className="mb-4">
               {errorMessage}
             </p>
             <p className="text-sm text-muted-foreground">
               Por favor, intenta de nuevo. Si el problema persiste, contacta con nosotros.
             </p>
-          </DialogDescription>
+          </div>
           <DialogFooter>
             <Button 
               onClick={() => setErrorDialog(false)}

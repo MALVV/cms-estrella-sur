@@ -32,6 +32,50 @@ async function initializeMinIO() {
       console.log(`ℹ️  Bucket '${publicBucketName}' already exists`)
     }
 
+    // Create news-images bucket
+    const newsBucketName = 'news-images'
+    const newsExists = await minioClient.bucketExists(newsBucketName)
+    
+    if (!newsExists) {
+      await minioClient.makeBucket(newsBucketName, 'us-east-1')
+      console.log(`✅ Bucket '${newsBucketName}' created successfully`)
+    } else {
+      console.log(`ℹ️  Bucket '${newsBucketName}' already exists`)
+    }
+
+    // Create events-images bucket
+    const eventsBucketName = 'events-images'
+    const eventsExists = await minioClient.bucketExists(eventsBucketName)
+    
+    if (!eventsExists) {
+      await minioClient.makeBucket(eventsBucketName, 'us-east-1')
+      console.log(`✅ Bucket '${eventsBucketName}' created successfully`)
+    } else {
+      console.log(`ℹ️  Bucket '${eventsBucketName}' already exists`)
+    }
+
+    // Create donation-proofs bucket (if not exists)
+    const donationBucketName = 'donation-proofs'
+    const donationExists = await minioClient.bucketExists(donationBucketName)
+    
+    if (!donationExists) {
+      await minioClient.makeBucket(donationBucketName, 'us-east-1')
+      console.log(`✅ Bucket '${donationBucketName}' created successfully`)
+    } else {
+      console.log(`ℹ️  Bucket '${donationBucketName}' already exists`)
+    }
+
+    // Create projects-images bucket
+    const projectsBucketName = 'projects-images'
+    const projectsExists = await minioClient.bucketExists(projectsBucketName)
+    
+    if (!projectsExists) {
+      await minioClient.makeBucket(projectsBucketName, 'us-east-1')
+      console.log(`✅ Bucket '${projectsBucketName}' created successfully`)
+    } else {
+      console.log(`ℹ️  Bucket '${projectsBucketName}' already exists`)
+    }
+
     console.log('🎉 MinIO initialization completed successfully!')
   } catch (error) {
     console.error('❌ Error initializing MinIO:', error.message)

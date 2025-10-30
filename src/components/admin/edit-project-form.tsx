@@ -7,8 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
-import { isValidImageUrl } from '@/lib/utils';
-import { Edit } from 'lucide-react';
+import { Edit, Upload, ImageIcon } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -46,6 +45,7 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     executionStart: '',
@@ -95,15 +95,6 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
       return;
     }
 
-    // Validar URL de imagen si se proporciona
-    if (formData.imageUrl?.trim() && !isValidImageUrl(formData.imageUrl.trim())) {
-      toast({
-        title: 'Error',
-        description: 'La URL de la imagen no es válida. Por favor, ingresa una URL válida de imagen.',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     try {
       setLoading(true);
@@ -151,6 +142,49 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/projects/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al subir imagen');
+      }
+
+      const data = await response.json();
+      console.log('Imagen subida exitosamente:', data);
+      console.log('URL de la imagen:', data.url);
+      
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: data.url,
+        imageAlt: data.alt || file.name,
+      }));
+
+      toast({
+        title: 'Éxito',
+        description: 'Imagen subida correctamente',
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al subir la imagen',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -248,21 +282,144 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium">URL de Imagen</label>
-              <Input
-                value={formData.imageUrl}
-                onChange={(e) => handleChange('imageUrl', e.target.value)}
-                placeholder="https://ejemplo.com/imagen.jpg"
-              />
+              <label className="text-sm font-medium">Imagen</label>
+              {!formData.imageUrl ? (
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2">
+                  <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                  <div className="mt-4">
+                    <label htmlFor="file-upload-edit-project" className="cursor-pointer">
+                      <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                        {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                      </span>
+                      <input
+                        id="file-upload-edit-project"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        disabled={uploading}
+                      />
+                    </label>
+                    <p className="mt-2 text-sm text-gray-500">
+                      PNG, JPG, GIF hasta 10MB
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 mt-2">
+                  <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <img
+                      src={formData.imageUrl}
+                      alt={formData.imageAlt || 'Vista previa'}
+                      className="w-full h-full object-cover"
+                      onLoad={() => console.log('Imagen cargada exitosamente:', formData.imageUrl)}
+                      onError={(e) => {
+                        console.error('Error cargando imagen. URL:', formData.imageUrl);
+                        // Intentar cargar la imagen directamente
+                        const img = e.currentTarget;
+                        img.style.display = 'none';
+                        // Mostrar mensaje de error visual
+                        const container = img.parentElement;
+                        if (container) {
+                          const errorDiv = document.createElement('div');
+                          errorDiv.className = 'absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700';
+                          errorDiv.innerHTML = '<p class="text-red-500 text-sm">Error al cargar imagen</p>';
+                          container.appendChild(errorDiv);
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={async () => {
+                        try {
+                          if (formData.imageUrl) {
+                            const controller = new AbortController();
+                            const timer = setTimeout(() => controller.abort(), 15000);
+                            const res = await fetch('/api/spaces/delete', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ url: formData.imageUrl }),
+                              signal: controller.signal,
+                            });
+                            clearTimeout(timer);
+                            if (!res.ok) {
+                              const e = await res.json().catch(() => ({}));
+                              throw new Error(e.error || 'No se pudo eliminar del bucket');
+                            }
+                          }
+                          // Limpiar en UI
+                          handleChange('imageUrl', '');
+                          handleChange('imageAlt', '');
+
+                          // Persistir en BD inmediatamente
+                          try {
+                            const saveRes = await fetch(`/api/projects/${project.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${session?.customToken}`,
+                              },
+                              body: JSON.stringify({
+                                ...formData,
+                                imageUrl: null,
+                                imageAlt: null,
+                                executionStart: formData.executionStart ? new Date(formData.executionStart).toISOString() : undefined,
+                                executionEnd: formData.executionEnd ? new Date(formData.executionEnd).toISOString() : undefined,
+                              }),
+                            });
+                            if (!saveRes.ok) {
+                              console.warn('No se pudo persistir imageUrl=null para proyecto');
+                            }
+                          } catch (persistErr) {
+                            console.warn('Error persistiendo imageUrl=null en proyecto:', persistErr);
+                          }
+
+                          toast({ title: 'Imagen eliminada', description: 'Se eliminó del bucket y se actualizó el proyecto' });
+                        } catch (err) {
+                          toast({ title: 'Error', description: err instanceof Error ? err.message : 'No se pudo eliminar la imagen', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                  <label htmlFor="file-upload-edit-project-replace" className="cursor-pointer">
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                    </Button>
+                    <input
+                      id="file-upload-edit-project-replace"
+                      name="file-upload"
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
+
             <div>
-              <label className="text-sm font-medium">Texto Alternativo</label>
+              <label className="text-sm font-medium">Texto alternativo (alt)</label>
               <Input
                 value={formData.imageAlt}
                 onChange={(e) => handleChange('imageAlt', e.target.value)}
-                placeholder="Descripción de la imagen"
+                placeholder="Descripción de la imagen para accesibilidad"
               />
             </div>
           </div>

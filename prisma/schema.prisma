@@ -58,8 +58,8 @@ model Post {
 model Story {
   id        String   @id
   title     String
-  imageUrl  String
-  imageAlt  String
+  imageUrl  String?
+  imageAlt  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
 import { usePermissions } from '@/hooks/use-permissions';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2, Eye, EyeOff, Calendar, User } from 'lucide-react';
+import { Edit, Trash2, Eye, EyeOff, Calendar, User, Upload, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 
 interface NewsItem {
@@ -63,6 +63,7 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
   const [editingItem, setEditingItem] = useState<NewsItem | EventItem | null>(null);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
   const { data: session } = useSession();
   const { isAdmin, canManageContent } = usePermissions();
@@ -127,6 +128,47 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
       eventDate: '',
       location: '',
     });
+  };
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const uploadEndpoint = activeTab === 'news' ? '/api/news/upload' : '/api/events/upload';
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(uploadEndpoint, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al subir imagen');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({
+        ...prev,
+        imageUrl: data.url,
+        imageAlt: data.alt || file.name,
+      }));
+
+      toast({
+        title: 'Éxito',
+        description: 'Imagen subida correctamente',
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al subir la imagen',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleCreate = async () => {
@@ -464,21 +506,82 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                 </>
               )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">URL de imagen</label>
-                  <Input
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="URL de la imagen"
-                  />
+                  <label className="block text-sm font-medium mb-2">Imagen</label>
+                  {!formData.imageUrl ? (
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                      <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                      <div className="mt-4">
+                        <label htmlFor={`file-upload-create-${activeTab}`} className="cursor-pointer">
+                          <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                            {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                          </span>
+                          <input
+                            id={`file-upload-create-${activeTab}`}
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFileUpload(file);
+                            }}
+                            disabled={uploading}
+                          />
+                        </label>
+                        <p className="mt-2 text-sm text-gray-500">
+                          PNG, JPG, GIF hasta 10MB
+                        </p>
                 </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <Image
+                          src={formData.imageUrl}
+                          alt={formData.imageAlt || 'Vista previa'}
+                          fill
+                          className="object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={() => setFormData({ ...formData, imageUrl: '', imageAlt: '' })}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
+                      <label htmlFor={`file-upload-replace-create-${activeTab}`} className="cursor-pointer">
+                        <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                          <Upload className="mr-2 h-4 w-4" />
+                          {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                        </Button>
+                        <input
+                          id={`file-upload-replace-create-${activeTab}`}
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file);
+                          }}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-2">Texto alternativo</label>
+                  <label className="block text-sm font-medium mb-2">Texto alternativo (alt)</label>
                   <Input
                     value={formData.imageAlt}
                     onChange={(e) => setFormData({ ...formData, imageAlt: e.target.value })}
-                    placeholder="Texto alternativo"
+                    placeholder="Descripción de la imagen para accesibilidad"
                   />
                 </div>
               </div>
@@ -727,21 +830,82 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
               </>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">URL de imagen</label>
-                <Input
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="URL de la imagen"
-                />
+                <label className="block text-sm font-medium mb-2">Imagen</label>
+                {!formData.imageUrl ? (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                    <div className="mt-4">
+                      <label htmlFor={`file-upload-edit-${activeTab}`} className="cursor-pointer">
+                        <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                          {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
+                        </span>
+                        <input
+                          id={`file-upload-edit-${activeTab}`}
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file);
+                          }}
+                          disabled={uploading}
+                        />
+                      </label>
+                      <p className="mt-2 text-sm text-gray-500">
+                        PNG, JPG, GIF hasta 10MB
+                      </p>
               </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <Image
+                        src={formData.imageUrl}
+                        alt={formData.imageAlt || 'Vista previa'}
+                        fill
+                        className="object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => setFormData({ ...formData, imageUrl: '', imageAlt: '' })}
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                    <label htmlFor={`file-upload-replace-edit-${activeTab}`} className="cursor-pointer">
+                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploading ? 'Subiendo...' : 'Cambiar imagen'}
+                      </Button>
+                      <input
+                        id={`file-upload-replace-edit-${activeTab}`}
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+
               <div>
-                <label className="block text-sm font-medium mb-2">Texto alternativo</label>
+                <label className="block text-sm font-medium mb-2">Texto alternativo (alt)</label>
                 <Input
                   value={formData.imageAlt}
                   onChange={(e) => setFormData({ ...formData, imageAlt: e.target.value })}
-                  placeholder="Texto alternativo"
+                  placeholder="Descripción de la imagen para accesibilidad"
                 />
               </div>
             </div>

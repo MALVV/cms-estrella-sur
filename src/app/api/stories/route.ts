@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener stories con información del creador
-    const stories = await (prisma as any).stories.findMany({
+    const stories = await prisma.story.findMany({
       where,
       orderBy: {
         [sortBy]: sortOrder,
@@ -50,13 +50,21 @@ export async function GET(request: NextRequest) {
       }
     })
 
+    // Función helper para normalizar imageUrl
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-story.jpg' || url.trim() === '') {
+        return null;
+      }
+      return url;
+    };
+
     const formattedStories = stories.map((story: any) => ({
       id: story.id,
       title: story.title,
       content: story.content,
       summary: story.summary,
-      imageUrl: story.imageUrl,
-      imageAlt: story.imageAlt,
+      imageUrl: normalizeImageUrl(story.imageUrl),
+      imageAlt: story.imageAlt || null,
       status: story.isActive ? 'ACTIVE' : 'INACTIVE',
       createdAt: story.createdAt.toISOString().split('T')[0],
       updatedAt: story.updatedAt.toISOString().split('T')[0],
@@ -121,14 +129,14 @@ export async function POST(request: NextRequest) {
       name: session.user.name
     })
 
-    const newStory = await (prisma as any).stories.create({
+    const newStory = await prisma.story.create({
       data: {
         id: storyId,
         title,
         content,
         summary,
-        imageUrl: imageUrl || '/placeholder-story.jpg',
-        imageAlt: imageAlt || title,
+        imageUrl: imageUrl || null,
+        imageAlt: imageAlt || null,
         isActive: true,
         createdBy: createdBy
       },
@@ -144,13 +152,21 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Función helper para normalizar imageUrl
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url === '/placeholder-story.jpg' || url.trim() === '') {
+        return null;
+      }
+      return url;
+    };
+
     const formattedStory = {
       id: newStory.id,
       title: newStory.title,
       content: newStory.content,
       summary: newStory.summary,
-      imageUrl: newStory.imageUrl,
-      imageAlt: newStory.imageAlt,
+      imageUrl: normalizeImageUrl(newStory.imageUrl),
+      imageAlt: newStory.imageAlt || null,
       status: newStory.isActive ? 'ACTIVE' : 'INACTIVE',
       createdAt: newStory.createdAt.toISOString().split('T')[0],
       updatedAt: newStory.updatedAt.toISOString().split('T')[0],

@@ -156,8 +156,16 @@ export const EventsManagement: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Error al eliminar evento: ${response.status} ${response.statusText}`);
+        // Tratar 404 como éxito (ya no existe); otros códigos muestran toast y salen sin lanzar excepción
+        if (response.status !== 404) {
+          const errorText = await response.text().catch(() => '');
+          toast({
+            title: 'Error',
+            description: `Error al eliminar evento: ${response.status} ${response.statusText}`,
+            variant: 'destructive',
+          });
+          return;
+        }
       }
 
       setEvents(prev => prev.filter(item => item.id !== id));
@@ -166,12 +174,8 @@ export const EventsManagement: React.FC = () => {
         description: 'Evento eliminado exitosamente',
       });
     } catch (error) {
-      console.error('Error al eliminar evento:', error);
-      toast({
-        title: 'Error',
-        description: 'Error al eliminar el evento',
-        variant: 'destructive',
-      });
+      // Evitar lanzar excepción al usuario; ya gestionamos el toast arriba
+      console.warn('Error al eliminar evento (gestionado):', error);
     }
   };
 
