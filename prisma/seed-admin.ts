@@ -7,10 +7,26 @@ async function main() {
   console.log('🌱 Iniciando seed de administradores para Estrella Sur...');
 
   try {
-    // Limpiar solo usuarios existentes
-    console.log('🧹 Limpiando usuarios existentes...');
-    await prisma.user.deleteMany();
-    console.log('✅ Usuarios existentes eliminados');
+    // Verificar si la tabla existe antes de limpiar
+    console.log('🔍 Verificando conexión con la base de datos...');
+    
+    // Intentar limpiar usuarios existentes (solo si la tabla existe)
+    try {
+      console.log('🧹 Limpiando usuarios existentes...');
+      await prisma.user.deleteMany();
+      console.log('✅ Usuarios existentes eliminados');
+    } catch (error: any) {
+      // Si el error es que la tabla no existe, informar al usuario
+      if (error.code === 'P2021') {
+        console.error('❌ Error: Las tablas no existen en la base de datos.');
+        console.error('💡 Por favor, ejecuta primero las migraciones:');
+        console.error('   npx prisma migrate deploy');
+        console.error('   o');
+        console.error('   npx prisma db push');
+        throw new Error('Las migraciones no se han ejecutado. Ejecuta las migraciones primero.');
+      }
+      throw error;
+    }
 
     // ==========================================
     // USUARIOS ADMINISTRADORES
