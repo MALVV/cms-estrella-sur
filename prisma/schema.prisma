@@ -31,6 +31,8 @@ model User {
   events               Event[]                @relation("EventOrganizer")
   imageLibrary         ImageLibrary[]         @relation("ImageLibraryCreator")
   methodologies        Methodology[]          @relation("MethodologyCreator")
+  albums               Album[]                @relation("AlbumCreator")
+  galleryImages        GalleryImage[]         @relation("GalleryImageCreator")
   news                 News[]                 @relation("NewsAuthor")
   programs             Program[]              @relation("ProgramCreator")
   projects             Project[]              @relation("ProjectCreator")
@@ -188,10 +190,7 @@ model TransparencyDocument {
   description String?
   fileName    String
   fileUrl     String
-  fileSize    Int?
-  fileType    String?
   category    TransparencyCategory
-  year        Int?
   isActive    Boolean              @default(true)
   isFeatured  Boolean              @default(false)
   createdAt   DateTime             @default(now())
@@ -208,12 +207,10 @@ model Resource {
   description   String?
   fileName      String
   fileUrl       String
-  fileSize      Int?
   fileType      String?
   category      ResourceCategory
   subcategory   ResourceSubcategory?
   thumbnailUrl  String?
-  duration      Int?
   isActive      Boolean              @default(true)
   isFeatured    Boolean              @default(false)
   downloadCount Int                  @default(0)
@@ -290,6 +287,36 @@ model ImageLibrary {
   project       Project?     @relation("ImageLibraryProject", fields: [projectId], references: [id])
 
   @@map("image_library")
+}
+
+model Album {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  isActive    Boolean        @default(true)
+  isFeatured  Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   String?
+  creator     User?          @relation("AlbumCreator", fields: [createdBy], references: [id])
+  images      GalleryImage[]
+
+  @@map("albums")
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  imageUrl    String
+  caption     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  albumId     String
+  creator     User?    @relation("GalleryImageCreator", fields: [createdBy], references: [id])
+  album       Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@map("gallery_images")
 }
 
 model DonationProject {
@@ -399,10 +426,6 @@ model Convocatoria {
   imageAlt         String?
   startDate        DateTime
   endDate          DateTime
-  objectives       Json
-  responsibilities Json
-  qualifications   Json
-  benefits         Json
   requirements     Json
   documents        Json
   status           ConvocatoriaStatus        @default(DRAFT)
@@ -434,21 +457,21 @@ model ConvocatoriaApplication {
 }
 
 model VolunteerApplication {
-  id                String            @id @default(cuid())
-  fullName          String
-  email             String
-  phone             String
-  age               String
-  occupation        String
-  areaOfInterest    String
-  availability      String
-  motivation        String
-  experience        String?
-  driveLink         String?
-  documents         String?
-  status            ApplicationStatus @default(PENDING)
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id             String            @id @default(cuid())
+  fullName       String
+  email          String
+  phone          String
+  age            String
+  occupation     String
+  areaOfInterest String
+  availability   String
+  motivation     String
+  experience     String?
+  driveLink      String?
+  documents      String?
+  status         ApplicationStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 
   @@map("volunteer_applications")
 }
