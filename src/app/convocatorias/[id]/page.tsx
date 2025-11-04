@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, ArrowLeft, Upload, Link as LinkIcon, Send } from 'lucide-react';
+import { Calendar, Clock, ArrowLeft, Upload, Link as LinkIcon, Send, X, File, ImageIcon, Download, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -20,13 +20,9 @@ interface Convocatoria {
   endDate: string;
   status: 'active' | 'upcoming' | 'closed';
   requirements: any; // JSON field
-  documents: string[];
+  documents: Array<string | { url: string; originalName: string }>; // Puede ser string (formato antiguo) o objeto (formato nuevo)
   createdAt: string;
   fullDescription: string;
-  objectives: string[];
-  responsibilities: string[];
-  qualifications: string[];
-  benefits: string[];
 }
 
 interface FormData {
@@ -37,6 +33,12 @@ interface FormData {
   documents: FileList | null;
   driveLink: string;
   acceptPolicies: boolean;
+}
+
+interface SelectedFile {
+  file: File;
+  previewUrl?: string;
+  uploadUrl?: string;
 }
 
 export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -52,6 +54,8 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
     driveLink: '',
     acceptPolicies: false
   });
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -82,11 +86,7 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
             requirements: Array.isArray(data.requirements) ? data.requirements : [],
             documents: Array.isArray(data.documents) ? data.documents : [],
             createdAt: data.createdAt,
-            fullDescription: data.fullDescription,
-            objectives: Array.isArray(data.objectives) ? data.objectives : [],
-            responsibilities: Array.isArray(data.responsibilities) ? data.responsibilities : [],
-            qualifications: Array.isArray(data.qualifications) ? data.qualifications : [],
-            benefits: Array.isArray(data.benefits) ? data.benefits : []
+            fullDescription: data.fullDescription
           });
         } else {
           setConvocatoria(null);
@@ -132,10 +132,42 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newFiles: SelectedFile[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100);
+      const maxBytes = maxMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        toast.error(`El archivo ${file.name} es demasiado grande. Máximo ${maxMb}MB`);
+        continue;
+      }
+
+      newFiles.push({
+        file,
+        previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+      });
+    }
+
+    setSelectedFiles(prev => [...prev, ...newFiles]);
     setFormData(prev => ({
       ...prev,
-      documents: e.target.files
+      documents: files
     }));
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const newFiles = [...prev];
+      if (newFiles[index].previewUrl) {
+        URL.revokeObjectURL(newFiles[index].previewUrl);
+      }
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,6 +175,47 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
     setIsSubmitting(true);
     
     try {
+      // Si hay archivos seleccionados, subirlos primero
+      const uploadedDocumentUrls: string[] = [];
+      
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        try {
+          for (const selectedFile of selectedFiles) {
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('file', selectedFile.file);
+
+            const uploadResponse = await fetch('/api/public/convocatorias/upload-document', {
+              method: 'POST',
+              body: formDataToUpload,
+            });
+
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Error al subir documento');
+            }
+
+            const uploadData = await uploadResponse.json();
+            uploadedDocumentUrls.push(uploadData.url);
+          }
+        } catch (error) {
+          console.error('Error uploading documents:', error);
+          toast.error('Error al subir documentos', {
+            description: error instanceof Error ? error.message : 'Por favor intenta nuevamente'
+          });
+          setUploading(false);
+          setIsSubmitting(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Determinar qué usar: documentos subidos o driveLink
+      const finalDriveLink = uploadedDocumentUrls.length > 0 
+        ? uploadedDocumentUrls.join(',') 
+        : (formData.driveLink || null);
+
       const response = await fetch(`/api/public/convocatorias/${convocatoriaId}/apply`, {
         method: 'POST',
         headers: {
@@ -153,7 +226,8 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
           email: formData.email,
           phone: formData.phone,
           experience: formData.experience,
-          driveLink: formData.driveLink,
+          driveLink: finalDriveLink,
+          documentUrls: uploadedDocumentUrls.length > 0 ? uploadedDocumentUrls : undefined,
         }),
       });
 
@@ -173,6 +247,13 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
           driveLink: '',
           acceptPolicies: false
         });
+        // Limpiar previews de archivos
+        selectedFiles.forEach(file => {
+          if (file.previewUrl) {
+            URL.revokeObjectURL(file.previewUrl);
+          }
+        });
+        setSelectedFiles([]);
       } else {
         toast.error('Error al enviar la postulación', {
           description: data.error || 'Por favor intenta nuevamente'
@@ -319,6 +400,79 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
               </CardContent>
             </Card>
             )}
+
+            {/* Documentos Disponibles */}
+            {Array.isArray(convocatoria.documents) && convocatoria.documents.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Documentos Relacionados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {convocatoria.documents.map((doc: any, index: number) => {
+                    // Manejar tanto formato antiguo (string) como nuevo (objeto)
+                    const docUrl = typeof doc === 'string' ? doc : (doc.url || doc);
+                    const fileName = typeof doc === 'object' && doc.originalName 
+                      ? doc.originalName 
+                      : (typeof doc === 'string' ? doc.split('/').pop() : docUrl.split('/').pop() || `Documento ${index + 1}`);
+                    const isPdf = docUrl.toLowerCase().includes('.pdf');
+                    const isImage = docUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
+                    
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <File className="h-5 w-5 text-primary flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-text-light dark:text-text-dark truncate">
+                              {fileName}
+                            </p>
+                            <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
+                              {isPdf ? 'PDF' : isImage ? 'Imagen' : 'Documento'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            asChild
+                            className="flex-shrink-0"
+                          >
+                            <a
+                              href={docUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              Ver
+                            </a>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            className="flex-shrink-0"
+                          >
+                            <a
+                              href={docUrl}
+                              download={fileName}
+                              className="flex items-center gap-2"
+                            >
+                              <Download className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -394,26 +548,86 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
                     <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
                       Adjuntar Documentos
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center">
-                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <input
-                        type="file"
-                        name="documents"
-                        onChange={handleFileChange}
-                        multiple
-                        accept=".xlsx,.docx,.pdf,.rar"
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                          Haz clic para subir archivos
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">
-                          .xlsx, .docx, .pdf, .rar
-                        </p>
-                      </label>
-                    </div>
+                    {selectedFiles.length === 0 ? (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                        <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                        <div className="mt-4">
+                          <label htmlFor="file-upload" className="cursor-pointer">
+                            <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                              {uploading ? 'Subiendo documentos...' : 'Haz clic para subir archivos'}
+                            </span>
+                            <input
+                              type="file"
+                              name="documents"
+                              onChange={handleFileChange}
+                              multiple
+                              accept=".xlsx,.docx,.pdf,.rar,.zip,.jpg,.jpeg,.png"
+                              className="hidden"
+                              id="file-upload"
+                              disabled={uploading || isSubmitting}
+                            />
+                          </label>
+                          <p className="mt-2 text-sm text-gray-500">
+                            PDF, DOC, DOCX, XLS, XLSX, RAR, ZIP, JPG, PNG hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100))}MB
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-3">
+                          {selectedFiles.map((selectedFile, index) => (
+                            <div key={index} className="relative border rounded-lg p-3 bg-gray-50 dark:bg-gray-800 flex items-center gap-3">
+                              {selectedFile.previewUrl ? (
+                                <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
+                                  <Image
+                                    src={selectedFile.previewUrl}
+                                    alt={selectedFile.file.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <File className="h-16 w-16 text-gray-400 flex-shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {selectedFile.file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(selectedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700 p-2"
+                                disabled={uploading || isSubmitting}
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <label htmlFor="file-upload-add" className="cursor-pointer">
+                          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                            <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                            <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                              Agregar más archivos
+                            </span>
+                            <input
+                              type="file"
+                              name="documents"
+                              onChange={handleFileChange}
+                              multiple
+                              accept=".xlsx,.docx,.pdf,.rar,.zip,.jpg,.jpeg,.png"
+                              className="hidden"
+                              id="file-upload-add"
+                              disabled={uploading || isSubmitting}
+                            />
+                          </div>
+                        </label>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -453,12 +667,12 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
                   <Button 
                     type="submit" 
                     className="w-full" 
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || uploading}
                   >
-                    {isSubmitting ? (
+                    {isSubmitting || uploading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Enviando...
+                        {uploading ? 'Subiendo documentos...' : 'Enviando...'}
                       </>
                     ) : (
                       <>

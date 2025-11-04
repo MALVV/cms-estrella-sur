@@ -23,10 +23,6 @@ interface Convocatoria {
   imageAlt?: string;
   startDate: string;
   endDate: string;
-  objectives: any[];
-  responsibilities: any[];
-  qualifications: any[];
-  benefits: any[];
   requirements: any[];
   documents: any[];
   status: 'DRAFT' | 'ACTIVE' | 'UPCOMING' | 'CLOSED';

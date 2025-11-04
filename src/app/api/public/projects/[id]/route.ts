@@ -21,6 +21,18 @@ export async function GET(
             email: true,
           },
         },
+        imageLibrary: {
+          where: { isActive: true },
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            imageAlt: true,
+            createdAt: true
+          }
+        }
       },
     });
 

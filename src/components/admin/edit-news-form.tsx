@@ -148,8 +148,8 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
       setLoading(true);
       
       // Si hay una imagen seleccionada, subirla al bucket primero
-      let finalImageUrl = formData.imageUrl;
-      let finalImageAlt = formData.imageAlt;
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
       
       if (selectedImageFile) {
         console.log('[EditNewsForm] handleSubmit - Iniciando subida de imagen al bucket (usuario presionó "Actualizar")');

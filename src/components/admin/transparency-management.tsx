@@ -25,8 +25,12 @@ import {
   File,
   FolderOpen,
   BarChart3,
-  Users
+  Users,
+  Upload,
+  X,
+  ImageIcon
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface TransparencyDocument {
   id: string;
@@ -34,10 +38,7 @@ interface TransparencyDocument {
   description?: string;
   fileName: string;
   fileUrl: string;
-  fileSize?: number;
-  fileType?: string;
   category: 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS';
-  year?: number;
   isActive: boolean;
   isFeatured: boolean;
   createdAt: string;
@@ -79,7 +80,7 @@ export const TransparencyManagement: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'title' | 'category' | 'year' | 'createdAt'>('createdAt');
+  const [sortBy, setSortBy] = useState<'title' | 'category' | 'createdAt'>('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingDocument, setEditingDocument] = useState<TransparencyDocument | null>(null);
@@ -260,12 +261,6 @@ export const TransparencyManagement: React.FC = () => {
     }
   };
 
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -307,7 +302,7 @@ export const TransparencyManagement: React.FC = () => {
               Nuevo Documento
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
             <DialogHeader>
               <DialogTitle>Crear Nuevo Documento</DialogTitle>
             </DialogHeader>
@@ -427,14 +422,13 @@ export const TransparencyManagement: React.FC = () => {
               </SelectContent>
             </Select>
 
-            <Select value={sortBy} onValueChange={(value: 'title' | 'category' | 'year' | 'createdAt') => setSortBy(value)}>
+            <Select value={sortBy} onValueChange={(value: 'title' | 'category' | 'createdAt') => setSortBy(value)}>
               <SelectTrigger className="w-full lg:w-48">
                 <SelectValue placeholder="Ordenar por" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="title">Título</SelectItem>
                 <SelectItem value="category">Categoría</SelectItem>
-                <SelectItem value="year">Año</SelectItem>
                 <SelectItem value="createdAt">Fecha de creación</SelectItem>
               </SelectContent>
             </Select>
@@ -519,9 +513,6 @@ export const TransparencyManagement: React.FC = () => {
                       Categoría
                     </th>
                     <th className="p-4 text-left text-sm font-medium text-text-light dark:text-text-dark">
-                      Año
-                    </th>
-                    <th className="p-4 text-left text-sm font-medium text-text-light dark:text-text-dark">
                       Estado
                     </th>
                     <th className="p-4 text-left text-sm font-medium text-text-light dark:text-text-dark">
@@ -557,11 +548,6 @@ export const TransparencyManagement: React.FC = () => {
                             <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                               {document.fileName}
                             </div>
-                            {document.fileSize && (
-                              <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                                {formatFileSize(document.fileSize)}
-                              </div>
-                            )}
                           </div>
                         </div>
                       </td>
@@ -569,9 +555,6 @@ export const TransparencyManagement: React.FC = () => {
                         <Badge className={categoryInfo[document.category].color}>
                           {categoryInfo[document.category].title}
                         </Badge>
-                      </td>
-                      <td className="p-4 text-text-light dark:text-text-dark">
-                        {document.year || '-'}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
@@ -638,7 +621,7 @@ export const TransparencyManagement: React.FC = () => {
       {/* Edit Dialog */}
       {editingDocument && (
         <Dialog open={!!editingDocument} onOpenChange={() => setEditingDocument(null)}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
             <DialogHeader>
               <DialogTitle>Editar Documento</DialogTitle>
             </DialogHeader>
@@ -690,30 +673,120 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
     title: '',
     description: '',
     fileName: '',
-    fileUrl: '',
-    fileSize: '',
-    fileType: '',
     category: '',
-    year: '',
     isFeatured: false,
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
   const { toast } = useToast();
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 100);
+      const maxBytes = maxMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setFormData(prev => ({ ...prev, fileName: file.name }));
+      toast({
+        title: 'Archivo seleccionado',
+        description: 'El archivo se subirá al bucket al crear el documento',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar el archivo',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!selectedFile) {
+      toast({
+        title: 'Error',
+        description: 'Debes subir un archivo',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      let finalFileUrl = '';
+      let finalFileName = '';
+
+      // Si hay un archivo seleccionado, subirlo al bucket primero
+      if (selectedFile) {
+        setUploading(true);
+        const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+        
+        // Mostrar mensaje informativo para archivos grandes
+        if (selectedFile.size > 10 * 1024 * 1024) { // > 10MB
+          toast({
+            title: 'Subiendo archivo grande',
+            description: `Archivo de ${fileSizeMB}MB. Esto puede tardar varios minutos, por favor espera...`,
+            duration: 5000,
+          });
+        }
+        
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedFile);
+
+          const uploadResponse = await fetch('/api/transparency/upload', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir archivo');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalFileUrl = uploadData.url;
+          finalFileName = uploadData.originalName || selectedFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir el archivo',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
       const response = await fetch('/api/transparency', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          fileSize: formData.fileSize ? parseInt(formData.fileSize) : undefined,
-          year: formData.year ? parseInt(formData.year) : undefined,
+          title: formData.title,
+          description: formData.description || null,
+          fileName: finalFileName,
+          fileUrl: finalFileUrl,
+          category: formData.category,
+          isFeatured: formData.isFeatured,
         }),
       });
 
@@ -726,6 +799,15 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
         description: 'Documento creado exitosamente',
       });
 
+      setFormData({
+        title: '',
+        description: '',
+        fileName: '',
+        category: '',
+        isFeatured: false,
+      });
+      setSelectedFile(null);
+      setFilePreviewUrl('');
       onSuccess();
     } catch (error) {
       console.error('Error al crear documento:', error);
@@ -740,7 +822,7 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 w-full min-w-0">
       <div>
         <label className="block text-sm font-medium mb-2">Título *</label>
         <Input
@@ -758,52 +840,94 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Nombre del archivo *</label>
-          <Input
-            value={formData.fileName}
-            onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">URL del archivo *</label>
-          <Input
-            value={formData.fileUrl}
-            onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Tamaño (bytes)</label>
-          <Input
-            type="number"
-            value={formData.fileSize}
-            onChange={(e) => setFormData({ ...formData, fileSize: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Tipo MIME</label>
-          <Input
-            value={formData.fileType}
-            onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Año</label>
-          <Input
-            type="number"
-            value={formData.year}
-            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Archivo *</label>
+        {!filePreviewUrl ? (
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+            <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <div className="mt-4">
+              <label htmlFor="document-file-input" className="cursor-pointer">
+                <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                  {uploading ? 'Subiendo archivo al servidor...' : 'Haz clic para subir documento'}
+                </span>
+                <Input
+                  id="document-file-input"
+                  name="file-upload"
+                  type="file"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file);
+                  }}
+                  disabled={uploading || loading}
+                />
+              </label>
+              <p className="mt-2 text-sm text-gray-500">
+                PDF, DOC, DOCX, XLS, XLSX, etc. hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 100))}MB
+              </p>
+              {uploading && (
+                <div className="mt-4 space-y-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '60%' }} />
+                  </div>
+                  <p className="text-xs text-center text-gray-600 dark:text-gray-400">
+                    Por favor espera, esto puede tardar unos minutos para archivos grandes...
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 mt-2">
+            <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <div className="text-center p-4">
+                <File className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {formData.fileName || 'Documento seleccionado'}
+                </p>
+                {selectedFile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setSelectedFile(null);
+                  setFilePreviewUrl('');
+                  setFormData(prev => ({ ...prev, fileName: '' }));
+                  toast({
+                    title: 'Archivo eliminado',
+                    description: 'El archivo fue removido del formulario'
+                  });
+                }}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <label htmlFor="document-file-input-replace" className="cursor-pointer">
+              <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
+                <Upload className="mr-2 h-4 w-4" />
+                {uploading ? 'Subiendo...' : 'Cambiar archivo'}
+              </Button>
+              <Input
+                id="document-file-input-replace"
+                name="file-upload"
+                type="file"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileUpload(file);
+                }}
+                disabled={uploading || loading}
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       <div>
@@ -832,8 +956,8 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Creando...' : 'Crear Documento'}
+        <Button type="submit" disabled={loading || uploading}>
+          {loading || uploading ? 'Creando...' : 'Crear Documento'}
         </Button>
       </div>
     </form>
@@ -850,30 +974,142 @@ const EditTransparencyDocumentForm: React.FC<{
     description: document.description || '',
     fileName: document.fileName,
     fileUrl: document.fileUrl,
-    fileSize: document.fileSize?.toString() || '',
-    fileType: document.fileType || '',
     category: document.category,
-    year: document.year?.toString() || '',
     isActive: document.isActive,
     isFeatured: document.isFeatured,
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string>('');
+  const [fileMarkedForDeletion, setFileMarkedForDeletion] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setFormData({
+      title: document.title,
+      description: document.description || '',
+      fileName: document.fileName,
+      fileUrl: document.fileUrl,
+      category: document.category,
+      isActive: document.isActive,
+      isFeatured: document.isFeatured,
+    });
+    setSelectedFile(null);
+    setFilePreviewUrl('');
+    setFileMarkedForDeletion(false);
+  }, [document]);
+
+  const handleFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 100);
+      const maxBytes = maxMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file);
+      setFormData(prev => ({ ...prev, fileName: file.name }));
+      setFileMarkedForDeletion(false);
+      toast({
+        title: 'Archivo seleccionado',
+        description: 'El archivo se subirá al bucket al actualizar el documento',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar el archivo',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (fileMarkedForDeletion && !selectedFile) {
+      toast({
+        title: 'Error',
+        description: 'Debes subir un archivo nuevo para reemplazar el archivo eliminado',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
+      let finalFileUrl = '';
+      let finalFileName = '';
+
+      // Si hay un archivo seleccionado, subirlo al bucket primero
+      if (selectedFile) {
+        setUploading(true);
+        const fileSizeMB = (selectedFile.size / (1024 * 1024)).toFixed(2);
+        
+        // Mostrar mensaje informativo para archivos grandes
+        if (selectedFile.size > 10 * 1024 * 1024) { // > 10MB
+          toast({
+            title: 'Subiendo archivo grande',
+            description: `Archivo de ${fileSizeMB}MB. Esto puede tardar varios minutos, por favor espera...`,
+            duration: 5000,
+          });
+        }
+        
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedFile);
+
+          const uploadResponse = await fetch('/api/transparency/upload', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir archivo');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalFileUrl = uploadData.url;
+          finalFileName = uploadData.originalName || selectedFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir el archivo',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (fileMarkedForDeletion) {
+        finalFileUrl = null as any;
+        finalFileName = '';
+      }
+
       const response = await fetch(`/api/transparency/${document.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          fileSize: formData.fileSize ? parseInt(formData.fileSize) : undefined,
-          year: formData.year ? parseInt(formData.year) : undefined,
+          title: formData.title,
+          description: formData.description || null,
+          fileName: finalFileName || formData.fileName,
+          fileUrl: finalFileUrl || document.fileUrl,
+          category: formData.category,
+          isActive: formData.isActive,
+          isFeatured: formData.isFeatured,
         }),
       });
 
@@ -886,6 +1122,9 @@ const EditTransparencyDocumentForm: React.FC<{
         description: 'Documento actualizado exitosamente',
       });
 
+      setSelectedFile(null);
+      setFilePreviewUrl('');
+      setFileMarkedForDeletion(false);
       onSuccess();
     } catch (error) {
       console.error('Error al actualizar documento:', error);
@@ -900,7 +1139,7 @@ const EditTransparencyDocumentForm: React.FC<{
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 w-full min-w-0">
       <div>
         <label className="block text-sm font-medium mb-2">Título *</label>
         <Input
@@ -918,52 +1157,119 @@ const EditTransparencyDocumentForm: React.FC<{
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Nombre del archivo *</label>
-          <Input
-            value={formData.fileName}
-            onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">URL del archivo *</label>
-          <Input
-            value={formData.fileUrl}
-            onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Tamaño (bytes)</label>
-          <Input
-            type="number"
-            value={formData.fileSize}
-            onChange={(e) => setFormData({ ...formData, fileSize: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Tipo MIME</label>
-          <Input
-            value={formData.fileType}
-            onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Año</label>
-          <Input
-            type="number"
-            value={formData.year}
-            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium mb-2">Archivo *</label>
+        {!filePreviewUrl ? (
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+            <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <div className="mt-4">
+              <label htmlFor="edit-document-file-input" className="cursor-pointer">
+                <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                  {uploading ? 'Subiendo archivo al servidor...' : 'Haz clic para subir documento'}
+                </span>
+                <Input
+                  id="edit-document-file-input"
+                  name="file-upload"
+                  type="file"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleFileUpload(file);
+                      setFileMarkedForDeletion(false);
+                    }
+                  }}
+                  disabled={uploading || loading}
+                />
+              </label>
+              <p className="mt-2 text-sm text-gray-500">
+                PDF, DOC, DOCX, XLS, XLSX, etc. hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 100))}MB
+              </p>
+              {uploading && (
+                <div className="mt-4 space-y-2">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full animate-pulse" style={{ width: '60%' }} />
+                  </div>
+                  <p className="text-xs text-center text-gray-600 dark:text-gray-400">
+                    Por favor espera, esto puede tardar unos minutos para archivos grandes...
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 mt-2">
+            <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+              <div className="text-center p-4">
+                <File className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {formData.fileName || 'Documento seleccionado'}
+                </p>
+                {selectedFile && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                )}
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setFileMarkedForDeletion(true);
+                  setSelectedFile(null);
+                  setFilePreviewUrl('');
+                  setFormData(prev => ({ ...prev, fileName: '' }));
+                  toast({
+                    title: 'Archivo marcado para eliminar',
+                    description: 'Se eliminará del bucket al guardar los cambios',
+                  });
+                }}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+              {fileMarkedForDeletion && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  <p className="text-white font-semibold">Se eliminará al guardar</p>
+                </div>
+              )}
+            </div>
+            {fileMarkedForDeletion && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setFileMarkedForDeletion(false);
+                  setFormData(prev => ({ ...prev, fileName: document.fileName }));
+                }}
+              >
+                Cancelar eliminación
+              </Button>
+            )}
+            <label htmlFor="edit-document-file-input-replace" className="cursor-pointer">
+              <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
+                <Upload className="mr-2 h-4 w-4" />
+                {uploading ? 'Subiendo...' : 'Cambiar archivo'}
+              </Button>
+              <Input
+                id="edit-document-file-input-replace"
+                name="file-upload"
+                type="file"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(file);
+                    setFileMarkedForDeletion(false);
+                  }
+                }}
+                disabled={uploading || loading}
+              />
+            </label>
+          </div>
+        )}
       </div>
 
       <div>
@@ -1005,8 +1311,8 @@ const EditTransparencyDocumentForm: React.FC<{
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button type="submit" disabled={loading}>
-          {loading ? 'Actualizando...' : 'Actualizar Documento'}
+        <Button type="submit" disabled={loading || uploading}>
+          {loading || uploading ? 'Actualizando...' : 'Actualizar Documento'}
         </Button>
       </div>
     </form>

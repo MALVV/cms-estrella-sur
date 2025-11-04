@@ -6,9 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Loader2, Upload, ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
+import Image from 'next/image';
+import { EntityImagesGallery } from './entity-images-gallery';
 
 interface Programa {
   id: string;
@@ -44,9 +47,13 @@ interface EditProgramaDialogProps {
 }
 
 export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa, onSuccess, children }) => {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   
   // Inicializar el estado con los valores del programa desde el inicio
   const [formData, setFormData] = useState({
@@ -78,6 +85,9 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
         contentTopics: programa.contentTopics || '',
         moreInfoLink: programa.moreInfoLink || '',
       });
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
     }
   }, [programa]);
 
@@ -86,11 +96,104 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
     setIsLoading(true);
 
     try {
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          // Eliminar la imagen anterior del bucket si existe
+          const originalImageUrl = programa.imageUrl;
+          if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 15000);
+              await fetch('/api/spaces/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: originalImageUrl }),
+                signal: controller.signal,
+              });
+              clearTimeout(timer);
+            } catch (err) {
+              console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+            }
+          }
+
+          // Subir la nueva imagen
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/admin/programas/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setIsLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (imageMarkedForDeletion) {
+        // Si se marcó para eliminar, eliminar del bucket antes de actualizar
+        const originalImageUrl = programa.imageUrl;
+        if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+          try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            await fetch('/api/spaces/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: originalImageUrl }),
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+          } catch (err) {
+            console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+          }
+        }
+        finalImageUrl = null;
+        finalImageAlt = null;
+      }
+
       const response = await fetch(`/api/admin/programas/${programa.id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          imageUrl: finalImageUrl || null,
+          imageAlt: finalImageAlt || null,
+        })
       });
 
       if (!response.ok) {
@@ -98,54 +201,99 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
         throw new Error(errorData.error || 'Error al actualizar programa');
       }
 
-      toast.success('Programa actualizado exitosamente');
+      toast({
+        title: 'Éxito',
+        description: 'Programa actualizado exitosamente',
+      });
       setIsOpen(false);
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
       onSuccess?.();
     } catch (error) {
       console.error('Error updating programa:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al actualizar programa');
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al actualizar programa',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     try {
       const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
       const maxBytes = maxMb * 1024 * 1024;
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       if (!allowed.includes(file.type)) {
-        toast.error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+        toast({
+          title: 'Error',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
         return;
       }
       if (file.size > maxBytes) {
-        toast.error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
+          variant: 'destructive',
+        });
         return;
       }
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/programas/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+        setImageMarkedForDeletion(false); // Si se selecciona una nueva imagen, ya no está marcada para eliminar
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al guardar los cambios',
       });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error || 'Error al subir imagen');
-      }
-      const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: data.url, imageAlt: data.alt || file.name }));
-      toast.success('Imagen subida correctamente');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al subir la imagen');
-    } finally {
-      setUploading(false);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        // Si se cierra sin guardar, resetear el estado
+        setImageMarkedForDeletion(false);
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
+        setFormData({
+          sectorName: programa.sectorName || '',
+          description: programa.description || '',
+          imageUrl: programa.imageUrl || '',
+          imageAlt: programa.imageAlt || '',
+          presentationVideo: programa.presentationVideo || '',
+          odsAlignment: programa.odsAlignment || '',
+          resultsAreas: programa.resultsAreas || '',
+          resultados: programa.resultados || '',
+          targetGroups: programa.targetGroups || '',
+          contentTopics: programa.contentTopics || '',
+          moreInfoLink: programa.moreInfoLink || '',
+        });
+      }
+    }}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -154,6 +302,13 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
           <DialogTitle>Editar Programa</DialogTitle>
         </DialogHeader>
         
+        <Tabs defaultValue="info" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="info">Información</TabsTrigger>
+            <TabsTrigger value="gallery">Galería de Imágenes</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="info" className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información Básica */}
           <div className="space-y-4">
@@ -191,7 +346,7 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
             
             <div className="space-y-4">
               <Label>Imagen Principal</Label>
-              {!formData.imageUrl ? (
+              {!imagePreviewUrl && !formData.imageUrl ? (
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
                   <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                   <div className="mt-4">
@@ -209,7 +364,7 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(file);
                         }}
-                        disabled={uploading}
+                        disabled={uploading || isLoading}
                       />
                     </label>
                     <p className="mt-2 text-sm text-gray-500">
@@ -220,51 +375,34 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
               ) : (
                 <div className="space-y-4">
                   <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img src={formData.imageUrl} alt={formData.imageAlt || 'Vista previa'} className="w-full h-full object-cover" />
+                    <Image
+                      src={imagePreviewUrl || formData.imageUrl || ''}
+                      alt={formData.imageAlt || 'Vista previa'}
+                      fill
+                      className="object-cover"
+                    />
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={async () => {
-                        try {
-                          if (formData.imageUrl) {
-                            const controller = new AbortController();
-                            const timer = setTimeout(() => controller.abort(), 15000);
-                            const res = await fetch('/api/spaces/delete', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ url: formData.imageUrl }),
-                              signal: controller.signal,
-                            });
-                            clearTimeout(timer);
-                            if (!res.ok) {
-                              const e = await res.json().catch(() => ({}));
-                              throw new Error(e.error || 'No se pudo eliminar del bucket');
-                            }
-                          }
-                          setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
-                          // Persistir null inmediatamente
-                          try {
-                            await fetch(`/api/admin/programas/${programa.id}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ ...formData, imageUrl: null, imageAlt: null }),
-                            });
-                          } catch {}
-                          toast.success('Imagen eliminada', {
-                            description: 'Se eliminó del bucket y se actualizó el programa'
-                          });
-                        } catch (err) {
-                          toast.error(err instanceof Error ? err.message : 'No se pudo eliminar la imagen');
-                        }
+                      onClick={() => {
+                        // Solo marcar para eliminar, no eliminar del bucket todavía
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl('');
+                        setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                        setImageMarkedForDeletion(true);
+                        toast({
+                          title: 'Imagen marcada para eliminar',
+                          description: 'Se eliminará del bucket al guardar los cambios',
+                        });
                       }}
                     >
                       Eliminar
                     </Button>
                   </div>
                   <label htmlFor="file-upload-program-replace-edit" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading || isLoading}>
                       <Upload className="mr-2 h-4 w-4" />
                       {uploading ? 'Subiendo...' : 'Cambiar imagen'}
                     </Button>
@@ -278,7 +416,7 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
                         const file = e.target.files?.[0];
                         if (file) handleFileUpload(file);
                       }}
-                      disabled={uploading}
+                      disabled={uploading || isLoading}
                     />
                   </label>
                 </div>
@@ -379,11 +517,11 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isLoading || uploading}>
+              {isLoading || uploading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Guardando...
+                  Procesando...
                 </>
               ) : (
                 'Guardar Cambios'
@@ -391,6 +529,16 @@ export const EditProgramaDialog: React.FC<EditProgramaDialogProps> = ({ programa
             </Button>
           </div>
         </form>
+          </TabsContent>
+          
+          <TabsContent value="gallery" className="space-y-4">
+            <EntityImagesGallery
+              entityType="program"
+              entityId={programa.id}
+              entityName={programa.sectorName}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

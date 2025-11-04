@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Edit, Save, X, Upload, ImageIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/use-toast'
 import Image from 'next/image'
 
 interface EditStoryFormProps {
@@ -31,6 +31,7 @@ interface EditStoryFormProps {
 }
 
 export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryFormProps) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -94,11 +95,19 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
       const maxBytes = maxMb * 1024 * 1024;
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       if (!allowed.includes(file.type)) {
-        toast('Formato no permitido. Usa JPG, PNG, WEBP o GIF', { type: 'error' });
+        toast({
+          title: 'Error',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
         return;
       }
       if (file.size > maxBytes) {
-        toast(`El archivo es demasiado grande. Máximo ${maxMb}MB`, { type: 'error' });
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -117,12 +126,16 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
       };
       reader.readAsDataURL(file);
 
-      toast.success('Imagen seleccionada', {
-        description: 'La imagen se subirá al bucket al guardar los cambios'
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al guardar los cambios',
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al procesar la imagen';
-      toast(errorMessage, { type: 'error' });
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -132,8 +145,8 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
 
     try {
       // Si hay una imagen seleccionada, subirla al bucket primero
-      let finalImageUrl = formData.imageUrl;
-      let finalImageAlt = formData.imageAlt;
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
       
       if (selectedImageFile) {
         console.log('[EditStoryForm] handleSubmit - Iniciando subida de imagen al bucket (usuario presionó "Guardar")');
@@ -188,7 +201,11 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
           finalImageAlt = uploadData.alt || selectedImageFile.name;
         } catch (error) {
           console.error('Error uploading file:', error);
-          toast(error instanceof Error ? error.message : 'Error al subir la imagen', { type: 'error' });
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
           setUploading(false);
           setLoading(false);
           return;
@@ -245,8 +262,9 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
         onStoryUpdated(updatedStory)
       }
 
-      toast.success('Historia actualizada exitosamente', {
-        description: 'Los cambios han sido guardados correctamente.'
+      toast({
+        title: 'Éxito',
+        description: 'Historia actualizada exitosamente',
       })
 
       setIsOpen(false)
@@ -255,8 +273,11 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
       setImagePreviewUrl('')
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Hubo un problema al actualizar la historia. Inténtalo de nuevo.";
-      toast(errorMessage, { type: 'error' });
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : "Hubo un problema al actualizar la historia. Inténtalo de nuevo.",
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false)
     }
@@ -405,8 +426,9 @@ export function EditStoryForm({ story, onStoryUpdated, children }: EditStoryForm
                         setImagePreviewUrl('');
                         setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
                         setImageMarkedForDeletion(true);
-                        toast.success('Imagen marcada para eliminar', {
-                          description: 'Se eliminará del bucket al guardar los cambios'
+                        toast({
+                          title: 'Imagen marcada para eliminar',
+                          description: 'Se eliminará del bucket al guardar los cambios',
                         });
                       }}
                     >

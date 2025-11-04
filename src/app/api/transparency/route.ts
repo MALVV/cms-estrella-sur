@@ -39,9 +39,6 @@ export async function GET(request: NextRequest) {
       where.isFeatured = true;
     }
 
-    if (year) {
-      where.year = year;
-    }
 
     // Agregar búsqueda por título y descripción
     if (search) {
@@ -56,8 +53,6 @@ export async function GET(request: NextRequest) {
     const orderBy: any = {};
     if (sortBy === 'title') {
       orderBy.title = sortOrder;
-    } else if (sortBy === 'year') {
-      orderBy.year = sortOrder;
     } else if (sortBy === 'category') {
       orderBy.category = sortOrder;
     } else {
@@ -105,10 +100,7 @@ export async function POST(request: NextRequest) {
       description,
       fileName,
       fileUrl,
-      fileSize,
-      fileType,
       category,
-      year,
       isFeatured = false,
     } = body;
 
@@ -134,10 +126,7 @@ export async function POST(request: NextRequest) {
         description,
         fileName,
         fileUrl,
-        fileSize,
-        fileType,
         category,
-        year,
         isFeatured,
         createdBy: authResult.user.id,
       },

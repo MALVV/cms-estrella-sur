@@ -17,8 +17,11 @@ import {
   Trash2, 
   Eye,
   Calendar,
-  User
+  User,
+  Upload,
+  X
 } from 'lucide-react';
+import Image from 'next/image';
 import { useToast } from '@/components/ui/use-toast';
 
 interface ImageGalleryItem {
@@ -72,6 +75,10 @@ export function ImageGalleryManagement() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingImage, setEditingImage] = useState<ImageGalleryItem | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     imageUrl: '',
     imageAlt: '',
@@ -168,13 +175,96 @@ export function ImageGalleryManagement() {
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (!allowed.includes(file.type)) {
+        toast({
+          title: 'Error',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (file.size > maxBytes) {
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+        setImageMarkedForDeletion(false);
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al guardar los cambios',
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleAddImage = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!selectedImageFile && !formData.imageUrl.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Debes seleccionar una imagen o proporcionar una URL',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      setUploading(true);
+      let finalImageUrl = formData.imageUrl;
+
+      // Si hay un archivo seleccionado, subirlo primero
+      if (selectedImageFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', selectedImageFile);
+
+        const uploadResponse = await fetch('/api/admin/image-gallery/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Error al subir imagen');
+        }
+
+        const uploadData = await uploadResponse.json();
+        finalImageUrl = uploadData.url;
+      }
+
       // Preparar payload según el tipo de relación
       const payload: any = {
-        imageUrl: formData.imageUrl,
+        imageUrl: finalImageUrl,
         imageAlt: formData.imageAlt,
         title: formData.title
       };
@@ -214,6 +304,8 @@ export function ImageGalleryManagement() {
         methodologyId: '', 
         relationType: 'program' 
       });
+      setSelectedImageFile(null);
+      setImagePreviewUrl(null);
       fetchImages();
     } catch (error) {
       console.error('Error adding image:', error);
@@ -222,6 +314,8 @@ export function ImageGalleryManagement() {
         description: error instanceof Error ? error.message : "Hubo un problema al agregar la imagen.",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -230,10 +324,46 @@ export function ImageGalleryManagement() {
     
     if (!editingImage) return;
 
+    if (!selectedImageFile && !formData.imageUrl.trim() && imageMarkedForDeletion) {
+      toast({
+        title: 'Error',
+        description: 'Debes seleccionar una nueva imagen o proporcionar una URL',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
+      setUploading(true);
+      let finalImageUrl = formData.imageUrl;
+
+      // Si hay un archivo seleccionado, subirlo primero
+      if (selectedImageFile) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', selectedImageFile);
+
+        const uploadResponse = await fetch('/api/admin/image-gallery/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          throw new Error(errorData.error || 'Error al subir imagen');
+        }
+
+        const uploadData = await uploadResponse.json();
+        finalImageUrl = uploadData.url;
+      }
+
+      // Si se marca para eliminar, establecer null
+      if (imageMarkedForDeletion && !selectedImageFile) {
+        finalImageUrl = '';
+      }
+
       // Preparar payload según el tipo de relación
       const payload: any = {
-        imageUrl: formData.imageUrl,
+        imageUrl: finalImageUrl,
         imageAlt: formData.imageAlt,
         title: formData.title
       };
@@ -274,6 +404,9 @@ export function ImageGalleryManagement() {
         methodologyId: '', 
         relationType: 'program' 
       });
+      setSelectedImageFile(null);
+      setImagePreviewUrl(null);
+      setImageMarkedForDeletion(false);
       fetchImages();
     } catch (error) {
       console.error('Error updating image:', error);
@@ -282,6 +415,8 @@ export function ImageGalleryManagement() {
         description: error instanceof Error ? error.message : "Hubo un problema al actualizar la imagen.",
         variant: "destructive",
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -344,6 +479,9 @@ export function ImageGalleryManagement() {
       methodologyId,
       relationType
     });
+    setSelectedImageFile(null);
+    setImagePreviewUrl(null);
+    setImageMarkedForDeletion(false);
     setShowEditDialog(true);
   };
 
@@ -530,7 +668,22 @@ export function ImageGalleryManagement() {
       )}
 
       {/* Dialog para agregar imagen */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+      <Dialog open={showAddDialog} onOpenChange={(open) => {
+        setShowAddDialog(open);
+        if (!open) {
+          setSelectedImageFile(null);
+          setImagePreviewUrl(null);
+          setFormData({ 
+            imageUrl: '', 
+            imageAlt: '', 
+            title: '', 
+            programId: '', 
+            projectId: '', 
+            methodologyId: '', 
+            relationType: 'program' 
+          });
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Agregar Imagen a la Galería</DialogTitle>
@@ -574,9 +727,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay programas disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -598,9 +751,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay proyectos disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -622,9 +775,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay iniciativas disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -633,15 +786,75 @@ export function ImageGalleryManagement() {
                 
                 {formData.relationType && (
                   <div className="space-y-2">
-                    <Label htmlFor="imageUrl" className="text-sm font-medium">URL de la Imagen *</Label>
-                    <Input
-                      id="imageUrl"
-                      value={formData.imageUrl}
-                      onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                      placeholder="https://ejemplo.com/imagen.jpg"
-                      className="h-10"
-                      required
-                    />
+                    <Label className="text-sm font-medium">Imagen *</Label>
+                    <div className="w-full min-w-0">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                          e.target.value = '';
+                        }}
+                        className="hidden"
+                        id="image-upload-add"
+                        disabled={uploading}
+                      />
+                      <label
+                        htmlFor="image-upload-add"
+                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
+                        {imagePreviewUrl ? (
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={imagePreviewUrl}
+                              alt="Preview"
+                              fill
+                              className="object-contain rounded-lg"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-2 right-2"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelectedImageFile(null);
+                                setImagePreviewUrl(null);
+                                if (imagePreviewUrl.startsWith('blob:')) {
+                                  URL.revokeObjectURL(imagePreviewUrl);
+                                }
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="text-center">
+                            <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                            <p className="text-sm text-muted-foreground">
+                              Haz clic para seleccionar imagen
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Máximo {process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 20}MB
+                            </p>
+                          </div>
+                        )}
+                      </label>
+                      {formData.imageUrl && !imagePreviewUrl && (
+                        <div className="mt-2">
+                          <Label className="text-xs text-muted-foreground">O proporciona una URL:</Label>
+                          <Input
+                            value={formData.imageUrl}
+                            onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                            placeholder="https://ejemplo.com/imagen.jpg"
+                            className="h-9 mt-1"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -673,42 +886,29 @@ export function ImageGalleryManagement() {
               </div>
             </div>
 
-            {/* Vista previa */}
-            {formData.imageUrl && (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vista Previa</h3>
-                <div className="flex justify-center">
-                  <div className="relative w-full max-w-md">
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg border overflow-hidden">
-                      <img
-                        src={formData.imageUrl}
-                        alt={formData.imageAlt || formData.title || 'Vista previa'}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                        <ImageIcon className="h-12 w-12 text-gray-400" />
-                      </div>
-                    </div>
-                    {formData.title && (
-                      <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
-                        {formData.title}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Botones */}
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setSelectedImageFile(null);
+                  setImagePreviewUrl(null);
+                  setFormData({ 
+                    imageUrl: '', 
+                    imageAlt: '', 
+                    title: '', 
+                    programId: '', 
+                    projectId: '', 
+                    methodologyId: '', 
+                    relationType: 'program' 
+                  });
+                }}
+              >
                 Cancelar
               </Button>
-              <Button type="submit" className="min-w-[120px]">
+              <Button type="submit" className="min-w-[120px]" disabled={uploading}>
                 Agregar Imagen
               </Button>
             </div>
@@ -717,7 +917,24 @@ export function ImageGalleryManagement() {
       </Dialog>
 
       {/* Dialog para editar imagen */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+      <Dialog open={showEditDialog} onOpenChange={(open) => {
+        setShowEditDialog(open);
+        if (!open) {
+          setEditingImage(null);
+          setSelectedImageFile(null);
+          setImagePreviewUrl(null);
+          setImageMarkedForDeletion(false);
+          setFormData({ 
+            imageUrl: '', 
+            imageAlt: '', 
+            title: '', 
+            programId: '', 
+            projectId: '', 
+            methodologyId: '', 
+            relationType: 'program' 
+          });
+        }
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Editar Imagen</DialogTitle>
@@ -761,9 +978,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay programas disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -785,9 +1002,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay proyectos disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -809,9 +1026,9 @@ export function ImageGalleryManagement() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="" disabled>
+                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
                             No hay iniciativas disponibles
-                          </SelectItem>
+                          </div>
                         )}
                       </SelectContent>
                     </Select>
@@ -819,15 +1036,118 @@ export function ImageGalleryManagement() {
                 )}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-imageUrl" className="text-sm font-medium">URL de la Imagen *</Label>
-                  <Input
-                    id="edit-imageUrl"
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                    placeholder="https://ejemplo.com/imagen.jpg"
-                    className="h-10"
-                    required
-                  />
+                  <Label className="text-sm font-medium">Imagen *</Label>
+                  <div className="w-full min-w-0">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                        e.target.value = '';
+                      }}
+                      className="hidden"
+                      id="image-upload-edit"
+                      disabled={uploading}
+                    />
+                    <label
+                      htmlFor="image-upload-edit"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    >
+                      {imagePreviewUrl ? (
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={imagePreviewUrl}
+                            alt="Preview"
+                            fill
+                            className="object-contain rounded-lg"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedImageFile(null);
+                              setImagePreviewUrl(null);
+                              if (imagePreviewUrl.startsWith('blob:')) {
+                                URL.revokeObjectURL(imagePreviewUrl);
+                              }
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : editingImage && !imageMarkedForDeletion ? (
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={editingImage.imageUrl}
+                            alt={editingImage.imageAlt || editingImage.title || 'Imagen actual'}
+                            fill
+                            className="object-contain rounded-lg"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 hover:opacity-100 transition-opacity">
+                            <p className="text-white text-sm">Haz clic para cambiar</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setImageMarkedForDeletion(true);
+                              setFormData(prev => ({ ...prev, imageUrl: '' }));
+                            }}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="text-center">
+                          <Upload className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                          <p className="text-sm text-muted-foreground">
+                            {imageMarkedForDeletion ? 'Imagen marcada para eliminar. Selecciona una nueva.' : 'Haz clic para seleccionar imagen'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Máximo {process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 20}MB
+                          </p>
+                        </div>
+                      )}
+                    </label>
+                    {imageMarkedForDeletion && !selectedImageFile && (
+                      <div className="mt-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setImageMarkedForDeletion(false);
+                            setFormData(prev => ({ ...prev, imageUrl: editingImage?.imageUrl || '' }));
+                          }}
+                        >
+                          Cancelar eliminación
+                        </Button>
+                        <p className="text-xs text-orange-600 mt-1">Se eliminará al guardar</p>
+                      </div>
+                    )}
+                    {formData.imageUrl && !imagePreviewUrl && !editingImage && (
+                      <div className="mt-2">
+                        <Label className="text-xs text-muted-foreground">O proporciona una URL:</Label>
+                        <Input
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                          className="h-9 mt-1"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -858,43 +1178,32 @@ export function ImageGalleryManagement() {
               </div>
             </div>
 
-            {/* Vista previa */}
-            {formData.imageUrl && (
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Vista Previa</h3>
-                <div className="flex justify-center">
-                  <div className="relative w-full max-w-md">
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg border overflow-hidden">
-                      <img
-                        src={formData.imageUrl}
-                        alt={formData.imageAlt || formData.title || 'Vista previa'}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
-                        <ImageIcon className="h-12 w-12 text-gray-400" />
-                      </div>
-                    </div>
-                    {formData.title && (
-                      <p className="mt-2 text-sm text-center text-gray-600 dark:text-gray-400">
-                        {formData.title}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Botones */}
             <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowEditDialog(false);
+                  setEditingImage(null);
+                  setSelectedImageFile(null);
+                  setImagePreviewUrl(null);
+                  setImageMarkedForDeletion(false);
+                  setFormData({ 
+                    imageUrl: '', 
+                    imageAlt: '', 
+                    title: '', 
+                    programId: '', 
+                    projectId: '', 
+                    methodologyId: '', 
+                    relationType: 'program' 
+                  });
+                }}
+              >
                 Cancelar
               </Button>
-              <Button type="submit" className="min-w-[120px]">
-                Actualizar Imagen
+              <Button type="submit" className="min-w-[120px]" disabled={uploading}>
+                {uploading ? 'Actualizando...' : 'Actualizar Imagen'}
               </Button>
             </div>
           </form>

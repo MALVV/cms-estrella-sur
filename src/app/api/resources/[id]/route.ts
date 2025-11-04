@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyAuth } from '@/lib/simple-auth-middleware';
+import { storageService } from '@/lib/storage-service';
 
 // GET - Obtener un recurso específico
 export async function GET(
@@ -69,12 +70,10 @@ export async function PUT(
       description,
       fileName,
       fileUrl,
-      fileSize,
       fileType,
       category,
       subcategory,
       thumbnailUrl,
-      duration,
       isActive,
       isFeatured,
     } = body;
@@ -113,19 +112,87 @@ export async function PUT(
       }
     }
 
+    // Helpers para normalizar URLs
+    const normalizeUrl = (url: string | null | undefined): string | null => {
+      if (!url || url.trim() === '' || url === 'null') return null;
+      return url.trim();
+    };
+
+    const extractBucketAndKey = (u: string): { bucket: string | null; key: string | null } => {
+      try {
+        if (!u) return { bucket: null, key: null };
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && u.startsWith(endpoint + '/')) {
+          const rest = u.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && u.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    // Manejar eliminación de archivo anterior si se reemplaza o elimina
+    const oldFileUrl = normalizeUrl(existingResource.fileUrl);
+    const newFileUrl = normalizeUrl(fileUrl);
+    const shouldDeleteOldFile = oldFileUrl && (
+      (newFileUrl && oldFileUrl !== newFileUrl) || // Reemplazo
+      (newFileUrl === null && oldFileUrl !== null) || // Eliminación explícita
+      (fileUrl === '' && oldFileUrl !== null) // Cadena vacía
+    );
+
+    if (shouldDeleteOldFile && oldFileUrl) {
+      const { bucket, key } = extractBucketAndKey(oldFileUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Resources][PUT] No se pudo eliminar archivo anterior del bucket:', e);
+        }
+      }
+    }
+
+    // Manejar eliminación de miniatura anterior si se reemplaza o elimina
+    const oldThumbnailUrl = normalizeUrl(existingResource.thumbnailUrl);
+    const newThumbnailUrl = normalizeUrl(thumbnailUrl);
+    const shouldDeleteOldThumbnail = oldThumbnailUrl && (
+      (newThumbnailUrl && oldThumbnailUrl !== newThumbnailUrl) || // Reemplazo
+      (newThumbnailUrl === null && oldThumbnailUrl !== null) || // Eliminación explícita
+      (thumbnailUrl === null && oldThumbnailUrl !== null) // null explícito
+    );
+
+    if (shouldDeleteOldThumbnail && oldThumbnailUrl) {
+      const { bucket, key } = extractBucketAndKey(oldThumbnailUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Resources][PUT] No se pudo eliminar miniatura anterior del bucket:', e);
+        }
+      }
+    }
+
     const resource = await prisma.resource.update({
       where: { id },
       data: {
         ...(title && { title }),
         ...(description !== undefined && { description }),
         ...(fileName && { fileName }),
-        ...(fileUrl && { fileUrl }),
-        ...(fileSize !== undefined && { fileSize }),
+        ...(fileUrl !== undefined && fileUrl !== '' && fileUrl !== null && { fileUrl }),
         ...(fileType && { fileType }),
         ...(category && { category }),
         ...(subcategory !== undefined && { subcategory }),
-        ...(thumbnailUrl !== undefined && { thumbnailUrl }),
-        ...(duration !== undefined && { duration }),
+        ...(thumbnailUrl !== undefined && { thumbnailUrl: thumbnailUrl === null || thumbnailUrl === '' ? null : thumbnailUrl }),
         ...(isActive !== undefined && { isActive }),
         ...(isFeatured !== undefined && { isFeatured }),
       },
@@ -177,11 +244,63 @@ export async function DELETE(
       );
     }
 
+    // Helper para extraer bucket y key
+    const extractBucketAndKey = (u: string): { bucket: string | null; key: string | null } => {
+      try {
+        if (!u) return { bucket: null, key: null };
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && u.startsWith(endpoint + '/')) {
+          const rest = u.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && u.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    // Eliminar archivo del bucket si existe (no crítico si falla)
+    if (existingResource.fileUrl) {
+      const { bucket, key } = extractBucketAndKey(existingResource.fileUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Resources][DELETE] No se pudo eliminar archivo del bucket:', e);
+          // No fallar la eliminación si no se puede borrar del bucket
+        }
+      }
+    }
+
+    // Eliminar miniatura del bucket si existe (no crítico si falla)
+    if (existingResource.thumbnailUrl) {
+      const { bucket, key } = extractBucketAndKey(existingResource.thumbnailUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Resources][DELETE] No se pudo eliminar miniatura del bucket:', e);
+          // No fallar la eliminación si no se puede borrar del bucket
+        }
+      }
+    }
+
+    // Eliminar el recurso de la base de datos
     await prisma.resource.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: 'Recurso eliminado exitosamente' });
+    return NextResponse.json({ message: 'Recurso eliminado exitosamente' }, { status: 200 });
   } catch (error) {
     console.error('Error deleting resource:', error);
     return NextResponse.json(

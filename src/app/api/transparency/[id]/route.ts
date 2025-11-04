@@ -69,10 +69,7 @@ export async function PUT(
       description,
       fileName,
       fileUrl,
-      fileSize,
-      fileType,
       category,
-      year,
       isActive,
       isFeatured,
     } = body;
@@ -100,17 +97,56 @@ export async function PUT(
       }
     }
 
+    // Helper para extraer bucket y key de una URL
+    const extractBucketAndKey = (url: string): { bucket: string | null; key: string | null } => {
+      try {
+        if (!url) return { bucket: null, key: null };
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = url.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = url.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && url.startsWith(endpoint + '/')) {
+          const rest = url.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && url.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: url.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    const oldFileUrl = existingDocument.fileUrl;
+    const finalFileUrl = fileUrl || existingDocument.fileUrl;
+
+    // Eliminar archivo anterior del bucket si se reemplazó o se eliminó
+    const shouldDeleteOldFile = oldFileUrl && finalFileUrl !== oldFileUrl;
+    if (shouldDeleteOldFile && oldFileUrl) {
+      const { storageService } = await import('@/lib/storage-service');
+      const { bucket, key } = extractBucketAndKey(oldFileUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Transparency][PUT] No se pudo eliminar archivo del bucket:', e);
+        }
+      }
+    }
+
     const document = await prisma.transparencyDocument.update({
       where: { id },
       data: {
         ...(title && { title }),
         ...(description !== undefined && { description }),
         ...(fileName && { fileName }),
-        ...(fileUrl && { fileUrl }),
-        ...(fileSize !== undefined && { fileSize }),
-        ...(fileType && { fileType }),
+        ...(fileUrl !== undefined && { fileUrl: fileUrl || null }),
         ...(category && { category }),
-        ...(year !== undefined && { year }),
         ...(isActive !== undefined && { isActive }),
         ...(isFeatured !== undefined && { isFeatured }),
       },
@@ -160,6 +196,45 @@ export async function DELETE(
         { error: 'Documento no encontrado' },
         { status: 404 }
       );
+    }
+
+    // Helper para extraer bucket y key de una URL
+    const extractBucketAndKey = (url: string): { bucket: string | null; key: string | null } => {
+      try {
+        if (!url) return { bucket: null, key: null };
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = url.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = url.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && url.startsWith(endpoint + '/')) {
+          const rest = url.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && url.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: url.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    // Eliminar archivo del bucket si existe (no crítico si falla)
+    if (existingDocument.fileUrl) {
+      const { storageService } = await import('@/lib/storage-service');
+      const { bucket, key } = extractBucketAndKey(existingDocument.fileUrl);
+      if (bucket && key) {
+        try {
+          await storageService.deleteFile(bucket, key);
+        } catch (e) {
+          console.warn('[Transparency][DELETE] No se pudo eliminar archivo del bucket:', e);
+          // No fallar la eliminación si no se puede borrar del bucket
+        }
+      }
     }
 
     await prisma.transparencyDocument.delete({

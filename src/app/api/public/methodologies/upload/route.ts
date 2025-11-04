@@ -5,7 +5,7 @@ import { storageService } from '@/lib/storage-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Badge } from '@/components/ui/badge';
 import { X, Save, Plus, FileText, Calendar, Target, Users, BookOpen, Award, Globe, Edit, Upload, ImageIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import Image from 'next/image';
 
 interface Programa {
   id: string;
@@ -55,6 +56,9 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
   const [uploading, setUploading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [createdPrograma, setCreatedPrograma] = useState<any>(null);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
 
   useEffect(() => {
     if (programa) {
@@ -72,6 +76,9 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
         moreInfoLink: programa.moreInfoLink || '',
         isFeatured: programa.isFeatured,
       });
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
     }
   }, [programa]);
 
@@ -80,17 +87,124 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
     setLoading(true);
 
     try {
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          // Si es edición y hay imagen anterior, eliminarla del bucket
+          if (programa && programa.imageUrl && programa.imageUrl !== '/placeholder-news.jpg') {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 15000);
+              await fetch('/api/spaces/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: programa.imageUrl }),
+                signal: controller.signal,
+              });
+              clearTimeout(timer);
+            } catch (err) {
+              console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+            }
+          }
+
+          // Subir la nueva imagen
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/admin/programas/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: "Error al subir imagen",
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: "destructive",
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (imageMarkedForDeletion && programa) {
+        // Si se marcó para eliminar, eliminar del bucket antes de actualizar
+        const originalImageUrl = programa.imageUrl;
+        if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+          try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            await fetch('/api/spaces/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: originalImageUrl }),
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+          } catch (err) {
+            console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+          }
+        }
+        finalImageUrl = null;
+        finalImageAlt = null;
+      }
+
       const url = programa 
         ? `/api/admin/programas/${programa.id}`
         : '/api/admin/programas';
       
       const method = programa ? 'PUT' : 'POST';
 
+      const payload = programa ? {
+        ...formData,
+        imageUrl: finalImageUrl || null,
+        imageAlt: finalImageAlt || null,
+      } : {
+        nombreSector: formData.sectorName.trim(),
+        descripcion: formData.description.trim(),
+        imageUrl: finalImageUrl?.trim() || null,
+        imageAlt: finalImageAlt?.trim() || null,
+        videoPresentacion: formData.presentationVideo?.trim() || null,
+        alineacionODS: formData.odsAlignment?.trim() || null,
+        subareasResultados: formData.resultsAreas?.trim() || null,
+        resultados: formData.resultados?.trim() || null,
+        gruposAtencion: formData.targetGroups?.trim() || null,
+        contenidosTemas: formData.contentTopics?.trim() || null,
+        enlaceMasInformacion: formData.moreInfoLink?.trim() || null,
+        isFeatured: formData.isFeatured,
+      };
+
       const response = await fetch(url, {
         method,
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -123,12 +237,17 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
           moreInfoLink: '', 
           isFeatured: false 
         });
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
       } else {
         // Es una edición
         toast({
           title: "Programa actualizado",
           description: "El programa ha sido actualizado exitosamente.",
         });
+        setImageMarkedForDeletion(false);
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
         onClose();
       }
     } catch (error) {
@@ -168,21 +287,51 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
   };
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     try {
       const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
       const maxBytes = maxMb * 1024 * 1024;
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-      if (!allowed.includes((file as any).type)) return;
-      if ((file as any).size > maxBytes) return;
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/programas/upload', { method: 'POST', credentials: 'include', body: fd });
-      if (!res.ok) return;
-      const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: data.url, imageAlt: data.alt || (file as any).name }));
-    } finally {
-      setUploading(false);
+      if (!allowed.includes((file as any).type)) {
+        toast({
+          title: "Error",
+          description: "Formato no permitido. Usa JPG, PNG, WEBP o GIF",
+          variant: "destructive",
+        });
+        return;
+      }
+      if ((file as any).size > maxBytes) {
+        toast({
+          title: "Error",
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: (file as any).name,
+        }));
+        setImageMarkedForDeletion(false); // Si se selecciona una nueva imagen, ya no está marcada para eliminar
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: 'Imagen seleccionada',
+        description: programa ? 'La imagen se subirá al bucket al guardar los cambios' : 'La imagen se subirá al bucket al crear el programa',
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: "destructive",
+      });
     }
   };
 
@@ -253,7 +402,7 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
 
                 <div className="space-y-4">
                   <Label>Imagen Principal</Label>
-                  {!formData.imageUrl ? (
+                  {!imagePreviewUrl && !formData.imageUrl ? (
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
                       <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                       <div className="mt-4">
@@ -261,7 +410,7 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                           <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
                             {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen'}
                           </span>
-                          <input id="file-upload-program" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} disabled={uploading} />
+                          <input id="file-upload-program" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} disabled={uploading || loading} />
                         </label>
                         <p className="mt-2 text-sm text-gray-500">PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB</p>
                       </div>
@@ -269,24 +418,41 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                   ) : (
                     <div className="space-y-4">
                       <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                        <img src={formData.imageUrl} alt={formData.imageAlt || 'Vista previa'} className="w-full h-full object-cover" />
-                        <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={async () => {
-                          try {
-                            const controller = new AbortController();
-                            const timer = setTimeout(() => controller.abort(), 15000);
-                            const res = await fetch('/api/spaces/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: formData.imageUrl }), signal: controller.signal });
-                            clearTimeout(timer);
-                            if (!res.ok) return;
+                        <Image
+                          src={imagePreviewUrl || formData.imageUrl || ''}
+                          alt={formData.imageAlt || 'Vista previa'}
+                          fill
+                          className="object-cover"
+                        />
+                        <Button type="button" variant="destructive" size="sm" className="absolute top-2 right-2" onClick={() => {
+                          // Solo marcar para eliminar o limpiar el estado local
+                          if (programa) {
+                            setSelectedImageFile(null);
+                            setImagePreviewUrl('');
                             setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
-                          } catch {}
+                            setImageMarkedForDeletion(true);
+                            toast({
+                              title: 'Imagen marcada para eliminar',
+                              description: 'Se eliminará del bucket al guardar los cambios',
+                            });
+                          } else {
+                            // Si es creación, solo limpiar el estado local
+                            setSelectedImageFile(null);
+                            setImagePreviewUrl('');
+                            setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                            toast({
+                              title: 'Imagen eliminada',
+                              description: 'Se eliminó del formulario',
+                            });
+                          }
                         }}>Eliminar</Button>
                       </div>
                       <label htmlFor="file-upload-program-replace" className="cursor-pointer">
-                        <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                        <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
                           <Upload className="mr-2 h-4 w-4" />
                           {uploading ? 'Subiendo...' : 'Cambiar imagen'}
                         </Button>
-                        <input id="file-upload-program-replace" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} disabled={uploading} />
+                        <input id="file-upload-program-replace" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} disabled={uploading || loading} />
                       </label>
                     </div>
                   )}
@@ -425,9 +591,9 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading || uploading}>
                 <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Guardando...' : (programa ? 'Actualizar' : 'Crear Programa')}
+                {loading || uploading ? 'Procesando...' : (programa ? 'Actualizar' : 'Crear Programa')}
               </Button>
             </div>
           </form>

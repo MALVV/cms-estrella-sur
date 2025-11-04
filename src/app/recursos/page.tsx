@@ -21,8 +21,12 @@ import {
   ArrowRight,
   Star,
   Clock,
-  PlayCircle
+  PlayCircle,
+  Images,
+  X
 } from 'lucide-react';
+import Image from 'next/image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 
@@ -76,30 +80,37 @@ const categoryInfo = {
   }
 };
 
-interface ImageGallery {
+interface Album {
   id: string;
   title: string;
   description?: string;
-  imageUrl: string;
-  imageAlt?: string;
+  isActive: boolean;
+  isFeatured: boolean;
   createdAt: string;
-  program?: {
-    id: string;
-    sectorName: string;
+  _count?: {
+    images: number;
   };
-  project?: {
+  images?: GalleryImage[];
+  thumbnailImage?: {
     id: string;
-    title: string;
-  };
-  methodology?: {
-    id: string;
-    title: string;
-  };
+    imageUrl: string;
+    imageAlt?: string;
+  } | null;
+}
+
+interface GalleryImage {
+  id: string;
+  imageUrl: string;
+  caption?: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([]);
-  const [galleryImages, setGalleryImages] = useState<ImageGallery[]>([]);
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+  const [isAlbumDialogOpen, setIsAlbumDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [galleryLoading, setGalleryLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'multimedia' | 'publications' | 'gallery'>('multimedia');
@@ -141,21 +152,33 @@ export default function ResourcesPage() {
     }
   };
 
-  const fetchGalleryImages = async () => {
+  const fetchAlbums = async () => {
     try {
       setGalleryLoading(true);
-      const response = await fetch('/api/public/image-library?limit=12');
+      const response = await fetch('/api/public/albums');
       
       if (!response.ok) {
-        throw new Error('Error al cargar imágenes');
+        throw new Error('Error al cargar álbumes');
       }
       
       const data = await response.json();
-      setGalleryImages(data.images || []);
+      setAlbums(data || []);
     } catch (error) {
-      console.error('Error al cargar imágenes de galería:', error);
+      console.error('Error al cargar álbumes:', error);
     } finally {
       setGalleryLoading(false);
+    }
+  };
+
+  const openAlbumDialog = async (album: Album) => {
+    try {
+      const response = await fetch(`/api/public/albums/${album.id}`);
+      if (!response.ok) throw new Error('Error al cargar álbum');
+      const albumWithImages = await response.json();
+      setSelectedAlbum(albumWithImages);
+      setIsAlbumDialogOpen(true);
+    } catch (error) {
+      console.error('Error al cargar álbum:', error);
     }
   };
 
@@ -164,8 +187,10 @@ export default function ResourcesPage() {
   }, [activeTab, selectedSubcategory, searchTerm]);
 
   useEffect(() => {
-    fetchGalleryImages();
-  }, []);
+    if (activeTab === 'gallery') {
+      fetchAlbums();
+    }
+  }, [activeTab]);
 
   // Reset subcategory when tab changes
   useEffect(() => {
@@ -326,7 +351,13 @@ export default function ResourcesPage() {
             <div className="mt-4 mb-4">
               <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                 {activeTab === 'gallery' ? (
-                  <>Mostrando {galleryImages.length} {galleryImages.length === 1 ? 'imagen' : 'imágenes'}</>
+                  <>Mostrando {albums.filter(album =>
+                    album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (album.description && album.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                  ).length} {albums.filter(album =>
+                    album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (album.description && album.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                  ).length === 1 ? 'álbum' : 'álbumes'}</>
                 ) : (
                   <>Mostrando {resources.length} {resources.length === 1 ? 'recurso' : 'recursos'}</>
                 )}
@@ -343,74 +374,98 @@ export default function ResourcesPage() {
           {/* Tab: Galería */}
           {activeTab === 'gallery' && (
             <>
-
               {galleryLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="bg-card-light dark:bg-card-dark">
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          <div className="h-48 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3" />
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
-              ) : galleryImages.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {galleryImages.map((image) => (
-                    <div 
-                      key={image.id} 
-                      className="relative overflow-hidden rounded-lg aspect-square cursor-pointer group"
-                    >
-                      <img
-                        src={image.imageUrl}
-                        alt={image.imageAlt || image.title}
-                        className="w-full h-full object-cover transition-all duration-300 group-hover:scale-110"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                          <h3 className="font-bold text-sm mb-1 line-clamp-1">
-                            {image.title}
-                          </h3>
-                          {image.description && (
-                            <p className="text-xs text-gray-200 line-clamp-2">
-                              {image.description}
-                            </p>
-                          )}
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {image.methodology && (
-                              <span className="text-xs bg-purple-500/80 px-2 py-1 rounded">
-                                Iniciativa: {image.methodology.title}
-                              </span>
+              ) : (() => {
+                const filteredAlbums = albums.filter(album =>
+                  album.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  (album.description && album.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                );
+                return filteredAlbums.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredAlbums.map((album) => (
+                      <Card 
+                        key={album.id} 
+                        className="bg-card-light dark:bg-card-dark hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+                        onClick={() => openAlbumDialog(album)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="relative w-full h-64 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 overflow-hidden">
+                            {album.thumbnailImage ? (
+                              <>
+                                <Image
+                                  src={album.thumbnailImage.imageUrl}
+                                  alt={album.thumbnailImage.imageAlt || album.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                              </>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Images className="h-16 w-16 text-purple-400 opacity-50" />
+                              </div>
                             )}
-                            {image.program && (
-                              <span className="text-xs bg-blue-500/80 px-2 py-1 rounded">
-                                Programa: {image.program.sectorName}
-                              </span>
+                            {album._count && album._count.images > 0 && (
+                              <div className="absolute top-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs font-medium flex items-center gap-1 z-10">
+                                <Images className="w-3 h-3" />
+                                {album._count.images}
+                              </div>
                             )}
-                            {image.project && (
-                              <span className="text-xs bg-green-500/80 px-2 py-1 rounded">
-                                Proyecto: {image.project.title}
-                              </span>
-                            )}
-                            {!image.program && !image.project && !image.methodology && (
-                              <span className="text-xs bg-gray-500/80 px-2 py-1 rounded">
-                                Galería General
-                              </span>
+                            {album.isFeatured && (
+                              <div className="absolute top-2 left-2 z-10">
+                                <Star className="w-5 h-5 text-yellow-500 fill-current drop-shadow-md" />
+                              </div>
                             )}
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <PlayCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
-                    No hay imágenes disponibles
-                  </h3>
-                  <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                    Las imágenes de iniciativas, programas y proyectos aparecerán aquí cuando estén disponibles.
-                  </p>
-                </div>
-              )}
+                          <div className="p-6">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="text-lg font-semibold text-text-light dark:text-text-dark line-clamp-2 flex-1">
+                                {album.title}
+                              </h3>
+                            </div>
+                            {album.description && (
+                              <p className="text-text-secondary-light dark:text-text-secondary-dark text-sm mb-4 line-clamp-2">
+                                {album.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                              <Images className="h-4 w-4" />
+                              <span>{album._count?.images || 0} {album._count?.images === 1 ? 'imagen' : 'imágenes'}</span>
+                            </div>
+                            <Button className="w-full mt-4" variant="outline">
+                              <Eye className="h-4 w-4 mr-2" />
+                              Ver álbum
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Images className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-text-light dark:text-text-dark mb-2">
+                      No hay álbumes disponibles
+                    </h3>
+                    <p className="text-text-secondary-light dark:text-text-secondary-dark">
+                      Los álbumes de imágenes aparecerán aquí cuando estén disponibles.
+                    </p>
+                  </div>
+                );
+              })()}
             </>
           )}
 
@@ -698,6 +753,46 @@ export default function ResourcesPage() {
           </div>
         </div>
       </section>
+
+      {/* Dialog para ver imágenes del álbum */}
+      <Dialog open={isAlbumDialogOpen} onOpenChange={setIsAlbumDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{selectedAlbum?.title}</DialogTitle>
+            {selectedAlbum?.description && (
+              <p className="text-sm text-muted-foreground mt-2">{selectedAlbum.description}</p>
+            )}
+          </DialogHeader>
+          {selectedAlbum?.images && selectedAlbum.images.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+              {selectedAlbum.images.map((image) => (
+                <Card key={image.id} className="overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="relative w-full h-64 rounded-t-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <Image
+                        src={image.imageUrl}
+                        alt={image.caption || 'Imagen de galería'}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </div>
+                    {image.caption && (
+                      <div className="p-4">
+                        <p className="text-sm text-muted-foreground">{image.caption}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No hay imágenes en este álbum</p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
       
       <SiteFooter />
     </div>

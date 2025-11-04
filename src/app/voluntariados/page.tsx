@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Upload, Send, Users, Heart, Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Upload, Send, Users, Heart, Calendar, Clock, CheckCircle, XCircle, X, File, ImageIcon, Link as LinkIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -22,6 +22,12 @@ interface FormData {
   documents: FileList | null;
   driveLink: string;
   acceptPolicies: boolean;
+}
+
+interface SelectedFile {
+  file: File;
+  previewUrl?: string;
+  uploadUrl?: string;
 }
 
 const areasOfInterest = [
@@ -140,6 +146,8 @@ export default function VoluntariadosPage() {
     driveLink: '',
     acceptPolicies: false
   });
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
   const [errorDialog, setErrorDialog] = useState(false);
@@ -154,10 +162,43 @@ export default function VoluntariadosPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newFiles: SelectedFile[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100);
+      const maxBytes = maxMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        setErrorMessage(`El archivo ${file.name} es demasiado grande. Máximo ${maxMb}MB`);
+        setErrorDialog(true);
+        continue;
+      }
+
+      newFiles.push({
+        file,
+        previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+      });
+    }
+
+    setSelectedFiles(prev => [...prev, ...newFiles]);
     setFormData(prev => ({
       ...prev,
-      documents: e.target.files
+      documents: files
     }));
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const newFiles = [...prev];
+      if (newFiles[index].previewUrl) {
+        URL.revokeObjectURL(newFiles[index].previewUrl);
+      }
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -165,6 +206,46 @@ export default function VoluntariadosPage() {
     setIsSubmitting(true);
     
     try {
+      // Si hay archivos seleccionados, subirlos primero
+      const uploadedDocumentUrls: string[] = [];
+      
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        try {
+          for (const selectedFile of selectedFiles) {
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('file', selectedFile.file);
+
+            const uploadResponse = await fetch('/api/public/volunteer-applications/upload-document', {
+              method: 'POST',
+              body: formDataToUpload,
+            });
+
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Error al subir documento');
+            }
+
+            const uploadData = await uploadResponse.json();
+            uploadedDocumentUrls.push(uploadData.url);
+          }
+        } catch (error) {
+          console.error('Error uploading documents:', error);
+          setErrorMessage(error instanceof Error ? error.message : 'Error al subir documentos. Por favor intenta nuevamente');
+          setErrorDialog(true);
+          setUploading(false);
+          setIsSubmitting(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Determinar qué usar: documentos subidos o driveLink
+      const finalDocuments = uploadedDocumentUrls.length > 0 
+        ? uploadedDocumentUrls.join(',') 
+        : null;
+
       const formDataToSend = {
         fullName: formData.fullName,
         email: formData.email,
@@ -175,8 +256,9 @@ export default function VoluntariadosPage() {
         availability: formData.availability,
         motivation: formData.motivation,
         experience: formData.experience,
-        driveLink: formData.driveLink,
-        documents: formData.documents ? Array.from(formData.documents).map(f => f.name).join(', ') : null
+        driveLink: formData.driveLink || null,
+        documents: finalDocuments,
+        documentUrls: uploadedDocumentUrls.length > 0 ? uploadedDocumentUrls : undefined,
       };
 
       const response = await fetch('/api/public/volunteer-applications', {
@@ -214,6 +296,13 @@ export default function VoluntariadosPage() {
         driveLink: '',
         acceptPolicies: false
       });
+      // Limpiar previews de archivos
+      selectedFiles.forEach(file => {
+        if (file.previewUrl) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+      setSelectedFiles([]);
     } catch (error) {
       console.error('Error submitting form:', error);
       setErrorMessage('Error al enviar la solicitud. Por favor intenta de nuevo.');
@@ -696,40 +785,106 @@ export default function VoluntariadosPage() {
                     <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
                       Adjuntar Documentos
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                      <input
-                        type="file"
-                        name="documents"
-                        onChange={handleFileChange}
-                        multiple
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                        className="hidden"
-                        id="file-upload"
-                      />
-                      <label htmlFor="file-upload" className="cursor-pointer">
-                        <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                          Haz clic para subir archivos
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">
-                          CV, certificados, cartas de recomendación, etc.
-                        </p>
-                      </label>
-                    </div>
+                    {selectedFiles.length === 0 ? (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                        <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                        <div className="mt-4">
+                          <label htmlFor="file-upload" className="cursor-pointer">
+                            <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                              {uploading ? 'Subiendo documentos...' : 'Haz clic para subir archivos'}
+                            </span>
+                            <input
+                              type="file"
+                              name="documents"
+                              onChange={handleFileChange}
+                              multiple
+                              accept=".pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png,.rar,.zip"
+                              className="hidden"
+                              id="file-upload"
+                              disabled={uploading || isSubmitting}
+                            />
+                          </label>
+                          <p className="mt-2 text-sm text-gray-500">
+                            PDF, DOC, DOCX, XLS, XLSX, RAR, ZIP, JPG, PNG hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100))}MB
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            CV, certificados, cartas de recomendación, etc.
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 gap-3">
+                          {selectedFiles.map((selectedFile, index) => (
+                            <div key={index} className="relative border rounded-lg p-3 bg-gray-50 dark:bg-gray-800 flex items-center gap-3">
+                              {selectedFile.previewUrl ? (
+                                <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
+                                  <Image
+                                    src={selectedFile.previewUrl}
+                                    alt={selectedFile.file.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                              ) : (
+                                <File className="h-16 w-16 text-gray-400 flex-shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                  {selectedFile.file.name}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {(selectedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700 p-2"
+                                disabled={uploading || isSubmitting}
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <label htmlFor="file-upload-add" className="cursor-pointer">
+                          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                            <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                            <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                              Agregar más archivos
+                            </span>
+                            <input
+                              type="file"
+                              name="documents"
+                              onChange={handleFileChange}
+                              multiple
+                              accept=".pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png,.rar,.zip"
+                              className="hidden"
+                              id="file-upload-add"
+                              disabled={uploading || isSubmitting}
+                            />
+                          </div>
+                        </label>
+                      </div>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
                       Enlace de Google Drive (Opcional)
                     </label>
-                    <input
-                      type="url"
-                      name="driveLink"
-                      value={formData.driveLink}
-                      onChange={handleInputChange}
-                      placeholder="https://drive.google.com/..."
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
+                    <div className="relative">
+                      <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <input
+                        type="url"
+                        name="driveLink"
+                        value={formData.driveLink}
+                        onChange={handleInputChange}
+                        placeholder="https://drive.google.com/..."
+                        className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -756,12 +911,12 @@ export default function VoluntariadosPage() {
                 <Button 
                   type="submit" 
                   className="w-full py-3 text-lg" 
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || uploading}
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || uploading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Enviando Solicitud...
+                      {uploading ? 'Subiendo documentos...' : 'Enviando Solicitud...'}
                     </>
                   ) : (
                     <>

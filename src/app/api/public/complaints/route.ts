@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       peopleInvolved,
       evidence,
       contactName,
-      contactEmail
+      contactEmail,
+      documentUrls
     } = body;
 
     // Validar campos requeridos
@@ -33,15 +34,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Si se proporciona email de contacto, validar formato
-    if (contactEmail) {
+    if (contactEmail && contactEmail.trim() !== '') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(contactEmail)) {
+      if (!emailRegex.test(contactEmail.trim())) {
         return NextResponse.json(
           { error: 'Formato de email inválido' },
           { status: 400 }
         );
       }
     }
+
+    // Determinar qué usar: documentos subidos o evidence proporcionado
+    // Si hay documentUrls, las guardamos en evidence separadas por comas
+    // Si no, usamos el evidence proporcionado
+    const finalEvidence = documentUrls && Array.isArray(documentUrls) && documentUrls.length > 0
+      ? documentUrls.join(',')
+      : (evidence || null);
 
     // Crear la denuncia
     const complaint = await prisma.complaint.create({
@@ -51,9 +59,9 @@ export async function POST(request: NextRequest) {
         incidentDate: incidentDate || null,
         incidentLocation: incidentLocation || null,
         peopleInvolved: peopleInvolved || null,
-        evidence: evidence || null,
-        contactName: contactName || null,
-        contactEmail: contactEmail || null,
+        evidence: finalEvidence,
+        contactName: contactName && contactName.trim() !== '' ? contactName.trim() : null,
+        contactEmail: contactEmail && contactEmail.trim() !== '' ? contactEmail.trim() : null,
         status: 'PENDING'
       }
     });

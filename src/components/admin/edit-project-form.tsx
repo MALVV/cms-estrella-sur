@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
 import { Edit, Upload, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
+import { EntityImagesGallery } from './entity-images-gallery';
 
 interface Project {
   id: string;
@@ -46,6 +49,9 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
     executionStart: '',
@@ -79,6 +85,9 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
         isActive: project.isActive,
         isFeatured: project.isFeatured,
       });
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
     }
   }, [project]);
 
@@ -99,6 +108,95 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
     try {
       setLoading(true);
       
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          // Eliminar la imagen anterior del bucket si existe
+          const originalImageUrl = project.imageUrl;
+          if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 15000);
+              await fetch('/api/spaces/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: originalImageUrl }),
+                signal: controller.signal,
+              });
+              clearTimeout(timer);
+            } catch (err) {
+              console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+            }
+          }
+
+          // Subir la nueva imagen
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/projects/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (imageMarkedForDeletion) {
+        // Si se marcó para eliminar, eliminar del bucket antes de actualizar
+        const originalImageUrl = project.imageUrl;
+        if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+          try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            await fetch('/api/spaces/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: originalImageUrl }),
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+          } catch (err) {
+            console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+          }
+        }
+        finalImageUrl = null;
+        finalImageAlt = null;
+      }
+      
       const response = await fetch(`/api/projects/${project.id}`, {
         method: 'PUT',
         headers: {
@@ -107,6 +205,8 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
         },
         body: JSON.stringify({
           ...formData,
+          imageUrl: finalImageUrl || null,
+          imageAlt: finalImageAlt || null,
           executionStart: new Date(formData.executionStart).toISOString(),
           executionEnd: new Date(formData.executionEnd).toISOString(),
         }),
@@ -124,6 +224,9 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
       });
 
       setIsOpen(false);
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
       onProjectUpdated(updatedProject);
     } catch (error) {
       console.error('Error al actualizar proyecto:', error);
@@ -145,50 +248,70 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
   };
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-      const response = await fetch('/api/projects/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al subir imagen');
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
       }
 
-      const data = await response.json();
-      console.log('Imagen subida exitosamente:', data);
-      console.log('URL de la imagen:', data.url);
-      
-      setFormData(prev => ({
-        ...prev,
-        imageUrl: data.url,
-        imageAlt: data.alt || file.name,
-      }));
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+        setImageMarkedForDeletion(false); // Si se selecciona una nueva imagen, ya no está marcada para eliminar
+      };
+      reader.readAsDataURL(file);
 
       toast({
-        title: 'Éxito',
-        description: 'Imagen subida correctamente',
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al guardar los cambios',
       });
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('Error processing file:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Error al subir la imagen',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
         variant: 'destructive',
       });
-    } finally {
-      setUploading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        // Si se cierra sin guardar, resetear el estado
+        setImageMarkedForDeletion(false);
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
+        setFormData({
+          title: project.title || '',
+          executionStart: project.executionStart ? new Date(project.executionStart).toISOString().split('T')[0] : '',
+          executionEnd: project.executionEnd ? new Date(project.executionEnd).toISOString().split('T')[0] : '',
+          context: project.context || '',
+          objectives: project.objectives || '',
+          content: project.content || '',
+          strategicAllies: project.strategicAllies || '',
+          financing: project.financing || '',
+          imageUrl: project.imageUrl || '',
+          imageAlt: project.imageAlt || '',
+          isActive: project.isActive,
+          isFeatured: project.isFeatured,
+        });
+      }
+    }}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -197,6 +320,13 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
           <DialogTitle>Editar Proyecto</DialogTitle>
         </DialogHeader>
         
+        <Tabs defaultValue="info" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="info">Información</TabsTrigger>
+            <TabsTrigger value="gallery">Galería de Imágenes</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="info" className="space-y-4">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-sm font-medium">Título del Proyecto *</label>
@@ -285,7 +415,7 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Imagen</label>
-              {!formData.imageUrl ? (
+              {!imagePreviewUrl && !formData.imageUrl ? (
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2">
                   <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                   <div className="mt-4">
@@ -303,97 +433,45 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(file);
                         }}
-                        disabled={uploading}
+                        disabled={uploading || loading}
                       />
                     </label>
                     <p className="mt-2 text-sm text-gray-500">
-                      PNG, JPG, GIF hasta 10MB
+                      PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4 mt-2">
                   <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img
-                      src={formData.imageUrl}
+                    <Image
+                      src={imagePreviewUrl || formData.imageUrl || ''}
                       alt={formData.imageAlt || 'Vista previa'}
-                      className="w-full h-full object-cover"
-                      onLoad={() => console.log('Imagen cargada exitosamente:', formData.imageUrl)}
-                      onError={(e) => {
-                        console.error('Error cargando imagen. URL:', formData.imageUrl);
-                        // Intentar cargar la imagen directamente
-                        const img = e.currentTarget;
-                        img.style.display = 'none';
-                        // Mostrar mensaje de error visual
-                        const container = img.parentElement;
-                        if (container) {
-                          const errorDiv = document.createElement('div');
-                          errorDiv.className = 'absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700';
-                          errorDiv.innerHTML = '<p class="text-red-500 text-sm">Error al cargar imagen</p>';
-                          container.appendChild(errorDiv);
-                        }
-                      }}
+                      fill
+                      className="object-cover"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={async () => {
-                        try {
-                          if (formData.imageUrl) {
-                            const controller = new AbortController();
-                            const timer = setTimeout(() => controller.abort(), 15000);
-                            const res = await fetch('/api/spaces/delete', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ url: formData.imageUrl }),
-                              signal: controller.signal,
-                            });
-                            clearTimeout(timer);
-                            if (!res.ok) {
-                              const e = await res.json().catch(() => ({}));
-                              throw new Error(e.error || 'No se pudo eliminar del bucket');
-                            }
-                          }
-                          // Limpiar en UI
-                          handleChange('imageUrl', '');
-                          handleChange('imageAlt', '');
-
-                          // Persistir en BD inmediatamente
-                          try {
-                            const saveRes = await fetch(`/api/projects/${project.id}`, {
-                              method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${session?.customToken}`,
-                              },
-                              body: JSON.stringify({
-                                ...formData,
-                                imageUrl: null,
-                                imageAlt: null,
-                                executionStart: formData.executionStart ? new Date(formData.executionStart).toISOString() : undefined,
-                                executionEnd: formData.executionEnd ? new Date(formData.executionEnd).toISOString() : undefined,
-                              }),
-                            });
-                            if (!saveRes.ok) {
-                              console.warn('No se pudo persistir imageUrl=null para proyecto');
-                            }
-                          } catch (persistErr) {
-                            console.warn('Error persistiendo imageUrl=null en proyecto:', persistErr);
-                          }
-
-                          toast({ title: 'Imagen eliminada', description: 'Se eliminó del bucket y se actualizó el proyecto' });
-                        } catch (err) {
-                          toast({ title: 'Error', description: err instanceof Error ? err.message : 'No se pudo eliminar la imagen', variant: 'destructive' });
-                        }
+                      onClick={() => {
+                        // Solo marcar para eliminar, no eliminar del bucket todavía
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl('');
+                        setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                        setImageMarkedForDeletion(true);
+                        toast({ 
+                          title: 'Imagen marcada para eliminar', 
+                          description: 'Se eliminará del bucket al guardar los cambios' 
+                        });
                       }}
                     >
                       Eliminar
                     </Button>
                   </div>
                   <label htmlFor="file-upload-edit-project-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
                       <Upload className="mr-2 h-4 w-4" />
                       {uploading ? 'Subiendo...' : 'Cambiar imagen'}
                     </Button>
@@ -407,7 +485,7 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
                         const file = e.target.files?.[0];
                         if (file) handleFileUpload(file);
                       }}
-                      disabled={uploading}
+                      disabled={uploading || loading}
                     />
                   </label>
                 </div>
@@ -446,14 +524,44 @@ export const EditProjectForm: React.FC<EditProjectFormProps> = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => {
+              setIsOpen(false);
+              setImageMarkedForDeletion(false);
+              setSelectedImageFile(null);
+              setImagePreviewUrl('');
+              // Resetear a valores originales
+              setFormData({
+                title: project.title || '',
+                executionStart: project.executionStart ? new Date(project.executionStart).toISOString().split('T')[0] : '',
+                executionEnd: project.executionEnd ? new Date(project.executionEnd).toISOString().split('T')[0] : '',
+                context: project.context || '',
+                objectives: project.objectives || '',
+                content: project.content || '',
+                strategicAllies: project.strategicAllies || '',
+                financing: project.financing || '',
+                imageUrl: project.imageUrl || '',
+                imageAlt: project.imageAlt || '',
+                isActive: project.isActive,
+                isFeatured: project.isFeatured,
+              });
+            }}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Actualizando...' : 'Actualizar Proyecto'}
+            <Button type="submit" disabled={loading || uploading}>
+              {loading || uploading ? 'Procesando...' : 'Actualizar Proyecto'}
             </Button>
           </div>
         </form>
+          </TabsContent>
+          
+          <TabsContent value="gallery" className="space-y-4">
+            <EntityImagesGallery
+              entityType="project"
+              entityId={project.id}
+              entityName={project.title}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

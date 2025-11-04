@@ -27,9 +27,11 @@ import {
   Power,
   PowerOff
 } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
 import { ToggleDonationProjectStatusDialog } from '@/components/admin/toggle-donation-project-status-dialog';
 import { DeleteDonationProjectDialog } from '@/components/admin/delete-donation-project-dialog';
+import Image from 'next/image';
+import { Upload, X, ImageIcon } from 'lucide-react';
 
 interface DonationProject {
   id: string;
@@ -79,6 +81,17 @@ export default function ProyectosDonacionDashboardPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [uploading, setUploading] = useState(false);
+  
+  // Estados para QR
+  const [selectedQrFile, setSelectedQrFile] = useState<File | null>(null);
+  const [qrPreviewUrl, setQrPreviewUrl] = useState<string>('');
+  const [qrMarkedForDeletion, setQrMarkedForDeletion] = useState(false);
+  
+  // Estados para imagen de referencia
+  const [selectedReferenceFile, setSelectedReferenceFile] = useState<File | null>(null);
+  const [referencePreviewUrl, setReferencePreviewUrl] = useState<string>('');
+  const [referenceMarkedForDeletion, setReferenceMarkedForDeletion] = useState(false);
   
   const [formData, setFormData] = useState<DonationProjectForm>({
     projectTitle: '',
@@ -92,6 +105,8 @@ export default function ProyectosDonacionDashboardPage() {
     targetAmount: '',
     isActive: true
   });
+  
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchDonationProjects();
@@ -106,18 +121,162 @@ export default function ProyectosDonacionDashboardPage() {
       }
     } catch (error) {
       console.error('Error al cargar proyectos de donación:', error);
-      toast.error('Error al cargar proyectos de donación');
+      toast({
+        title: 'Error',
+        description: 'Error al cargar proyectos de donación',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
   };
 
 
+  const handleQrFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setQrPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setSelectedQrFile(file);
+      setQrMarkedForDeletion(false);
+    toast({
+      title: 'Imagen QR seleccionada',
+        description: 'La imagen se subirá al bucket al guardar el proyecto',
+    });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleReferenceFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setReferencePreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    setSelectedReferenceFile(file);
+      setReferenceMarkedForDeletion(false);
+    toast({
+      title: 'Imagen de referencia seleccionada',
+        description: 'La imagen se subirá al bucket al guardar el proyecto',
+    });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(false);
     
     try {
-      // Crear directamente el proyecto de donación
+      let finalQrImageUrl = formData.qrImageUrl;
+      let finalQrImageAlt = formData.qrImageAlt;
+      let finalReferenceImageUrl = formData.referenceImageUrl;
+      let finalReferenceImageAlt = formData.referenceImageAlt;
+
+      // Subir QR si se seleccionó uno
+      if (selectedQrFile) {
+        setUploading(true);
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedQrFile);
+
+          const uploadResponse = await fetch('/api/donation-projects/upload-qr', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen QR');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalQrImageUrl = uploadData.url;
+          finalQrImageAlt = uploadData.alt || selectedQrFile.name;
+        } catch (error) {
+          console.error('Error uploading QR:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen QR',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Subir imagen de referencia si se seleccionó una
+      if (selectedReferenceFile) {
+        setUploading(true);
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedReferenceFile);
+
+          const uploadResponse = await fetch('/api/donation-projects/upload-reference', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen de referencia');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalReferenceImageUrl = uploadData.url;
+          finalReferenceImageAlt = uploadData.alt || selectedReferenceFile.name;
+        } catch (error) {
+          console.error('Error uploading reference image:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen de referencia',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Crear el proyecto de donación
       const donationProjectResponse = await fetch('/api/donation-projects', {
         method: 'POST',
         headers: {
@@ -132,27 +291,38 @@ export default function ProyectosDonacionDashboardPage() {
           executionEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 año desde ahora
           accountNumber: formData.accountNumber,
           recipientName: formData.recipientName,
-          qrImageUrl: formData.qrImageUrl || null,
-          qrImageAlt: formData.qrImageAlt || null,
-          referenceImageUrl: formData.referenceImageUrl || null,
-          referenceImageAlt: formData.referenceImageAlt || null,
+          qrImageUrl: finalQrImageUrl || null,
+          qrImageAlt: finalQrImageAlt || null,
+          referenceImageUrl: finalReferenceImageUrl || null,
+          referenceImageAlt: finalReferenceImageAlt || null,
           targetAmount: formData.targetAmount ? parseFloat(formData.targetAmount) : null,
           isActive: formData.isActive
         }),
       });
 
       if (donationProjectResponse.ok) {
-        toast.success('Proyecto de donación creado exitosamente');
+        toast({
+          title: 'Éxito',
+          description: 'Proyecto de donación creado exitosamente',
+        });
         fetchDonationProjects();
         setIsCreateDialogOpen(false);
         resetForm();
       } else {
         const error = await donationProjectResponse.json();
-        toast.error(error.error || 'Error al crear proyecto de donación');
+        toast({
+          title: 'Error',
+          description: error.error || 'Error al crear proyecto de donación',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error al crear proyecto:', error);
-      toast.error('Error al crear proyecto de donación');
+      toast({
+        title: 'Error',
+        description: 'Error al crear proyecto de donación',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -161,30 +331,131 @@ export default function ProyectosDonacionDashboardPage() {
     
     if (!selectedProject) return;
 
+    setUploading(false);
+
     try {
+      let finalQrImageUrl = formData.qrImageUrl;
+      let finalQrImageAlt = formData.qrImageAlt;
+      let finalReferenceImageUrl = formData.referenceImageUrl;
+      let finalReferenceImageAlt = formData.referenceImageAlt;
+
+      // Subir QR si se seleccionó uno nuevo
+      if (selectedQrFile) {
+        setUploading(true);
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedQrFile);
+
+          const uploadResponse = await fetch('/api/donation-projects/upload-qr', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen QR');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalQrImageUrl = uploadData.url;
+          finalQrImageAlt = uploadData.alt || selectedQrFile.name;
+        } catch (error) {
+          console.error('Error uploading QR:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen QR',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (qrMarkedForDeletion) {
+        // Si se marcó para eliminar, establecer como null
+        finalQrImageUrl = null as any;
+        finalQrImageAlt = null as any;
+      }
+
+      // Subir imagen de referencia si se seleccionó una nueva
+      if (selectedReferenceFile) {
+        setUploading(true);
+        try {
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedReferenceFile);
+
+          const uploadResponse = await fetch('/api/donation-projects/upload-reference', {
+            method: 'POST',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen de referencia');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalReferenceImageUrl = uploadData.url;
+          finalReferenceImageAlt = uploadData.alt || selectedReferenceFile.name;
+        } catch (error) {
+          console.error('Error uploading reference image:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen de referencia',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (referenceMarkedForDeletion) {
+        // Si se marcó para eliminar, establecer como null
+        finalReferenceImageUrl = null as any;
+        finalReferenceImageAlt = null as any;
+      }
+
+      // Actualizar el proyecto de donación
       const response = await fetch(`/api/donation-projects/${selectedProject.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          targetAmount: formData.targetAmount ? parseFloat(formData.targetAmount) : null
+          accountNumber: formData.accountNumber,
+          recipientName: formData.recipientName,
+          qrImageUrl: finalQrImageUrl,
+          qrImageAlt: finalQrImageAlt,
+          referenceImageUrl: finalReferenceImageUrl,
+          referenceImageAlt: finalReferenceImageAlt,
+          targetAmount: formData.targetAmount ? parseFloat(formData.targetAmount) : null,
+          isActive: formData.isActive
         }),
       });
 
       if (response.ok) {
-        toast.success('Proyecto de donación actualizado exitosamente');
+        toast({
+          title: 'Éxito',
+          description: 'Proyecto de donación actualizado exitosamente',
+        });
         fetchDonationProjects();
         setIsEditDialogOpen(false);
         resetForm();
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Error al actualizar proyecto de donación');
+        toast({
+          title: 'Error',
+          description: error.error || 'Error al actualizar proyecto de donación',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error al actualizar proyecto:', error);
-      toast.error('Error al actualizar proyecto de donación');
+      toast({
+        title: 'Error',
+        description: 'Error al actualizar proyecto de donación',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -213,6 +484,12 @@ export default function ProyectosDonacionDashboardPage() {
       targetAmount: '',
       isActive: true
     });
+    setSelectedQrFile(null);
+    setQrPreviewUrl('');
+    setQrMarkedForDeletion(false);
+    setSelectedReferenceFile(null);
+    setReferencePreviewUrl('');
+    setReferenceMarkedForDeletion(false);
   };
 
   const openEditDialog = (project: DonationProject) => {
@@ -229,6 +506,12 @@ export default function ProyectosDonacionDashboardPage() {
       targetAmount: project.targetAmount?.toString() || '',
       isActive: project.isActive
     });
+    setSelectedQrFile(null);
+    setQrPreviewUrl('');
+    setQrMarkedForDeletion(false);
+    setSelectedReferenceFile(null);
+    setReferencePreviewUrl('');
+    setReferenceMarkedForDeletion(false);
     setIsEditDialogOpen(true);
   };
 
@@ -285,18 +568,23 @@ export default function ProyectosDonacionDashboardPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+            setIsCreateDialogOpen(open);
+            if (!open) {
+              resetForm();
+            }
+          }}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
                 Nuevo Proyecto
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
               <DialogHeader>
                 <DialogTitle>Crear Proyecto de Donación</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCreateProject} className="space-y-4">
+              <form onSubmit={handleCreateProject} className="space-y-4 w-full min-w-0">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="projectTitle">Título del Proyecto *</Label>
@@ -355,17 +643,83 @@ export default function ProyectosDonacionDashboardPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="qrImageUrl">URL de Imagen QR</Label>
+                    <Label>Imagen QR</Label>
+                    {!qrPreviewUrl && !formData.qrImageUrl ? (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+                        <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                        <div className="mt-4">
+                          <label htmlFor="create-qr-file-input" className="cursor-pointer">
+                            <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                              {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen QR'}
+                            </span>
                     <Input
-                      id="qrImageUrl"
-                      value={formData.qrImageUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, qrImageUrl: e.target.value }))}
-                      placeholder="https://ejemplo.com/qr.png"
-                    />
+                              id="create-qr-file-input"
+                              name="file-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleQrFileUpload(file);
+                              }}
+                              disabled={uploading}
+                            />
+                          </label>
+                          <p className="mt-2 text-sm text-gray-500">
+                            PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                          </p>
                   </div>
-
+                      </div>
+                    ) : (
+                      <div className="space-y-4 mt-2">
+                        <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <Image
+                            src={qrPreviewUrl || formData.qrImageUrl || ''}
+                            alt={formData.qrImageAlt || 'QR'}
+                            fill
+                            className="object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setSelectedQrFile(null);
+                              setQrPreviewUrl('');
+                              setFormData(prev => ({ ...prev, qrImageUrl: '', qrImageAlt: '' }));
+                              toast({
+                                title: 'Imagen QR eliminada',
+                                description: 'La imagen fue removida del formulario'
+                              });
+                            }}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+                        <label htmlFor="create-qr-file-input-replace" className="cursor-pointer">
+                          <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            {uploading ? 'Subiendo...' : 'Cambiar imagen QR'}
+                          </Button>
+                          <Input
+                            id="create-qr-file-input-replace"
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleQrFileUpload(file);
+                            }}
+                            disabled={uploading}
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <Label htmlFor="qrImageAlt">Alt Text de Imagen QR</Label>
                     <Input
@@ -377,17 +731,83 @@ export default function ProyectosDonacionDashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div>
-                    <Label htmlFor="referenceImageUrl">URL de Imagen de Referencia</Label>
+                    <Label>Imagen de Referencia</Label>
+                    {!referencePreviewUrl && !formData.referenceImageUrl ? (
+                      <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+                        <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                        <div className="mt-4">
+                          <label htmlFor="create-reference-file-input" className="cursor-pointer">
+                            <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                              {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen de referencia'}
+                            </span>
                     <Input
-                      id="referenceImageUrl"
-                      value={formData.referenceImageUrl}
-                      onChange={(e) => setFormData(prev => ({ ...prev, referenceImageUrl: e.target.value }))}
-                      placeholder="https://ejemplo.com/referencia.jpg"
-                    />
+                              id="create-reference-file-input"
+                              name="file-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleReferenceFileUpload(file);
+                              }}
+                              disabled={uploading}
+                            />
+                          </label>
+                          <p className="mt-2 text-sm text-gray-500">
+                            PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                          </p>
                   </div>
-
+                      </div>
+                    ) : (
+                      <div className="space-y-4 mt-2">
+                        <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <Image
+                            src={referencePreviewUrl || formData.referenceImageUrl || ''}
+                            alt={formData.referenceImageAlt || 'Referencia'}
+                            fill
+                            className="object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute top-2 right-2"
+                            onClick={() => {
+                              setSelectedReferenceFile(null);
+                              setReferencePreviewUrl('');
+                              setFormData(prev => ({ ...prev, referenceImageUrl: '', referenceImageAlt: '' }));
+                              toast({
+                                title: 'Imagen de referencia eliminada',
+                                description: 'La imagen fue removida del formulario'
+                              });
+                            }}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
+                        <label htmlFor="create-reference-file-input-replace" className="cursor-pointer">
+                          <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            {uploading ? 'Subiendo...' : 'Cambiar imagen de referencia'}
+                          </Button>
+                          <Input
+                            id="create-reference-file-input-replace"
+                            name="file-upload"
+                            type="file"
+                            className="sr-only"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleReferenceFileUpload(file);
+                            }}
+                            disabled={uploading}
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
                   <div>
                     <Label htmlFor="referenceImageAlt">Alt Text de Imagen de Referencia</Label>
                     <Input
@@ -411,10 +831,13 @@ export default function ProyectosDonacionDashboardPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4">
-                  <Button type="submit">
-                    Crear Proyecto
+                  <Button type="submit" disabled={uploading}>
+                    {uploading ? 'Subiendo...' : 'Crear Proyecto'}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => {
+                    setIsCreateDialogOpen(false);
+                    resetForm();
+                  }}>
                     Cancelar
                   </Button>
                 </div>
@@ -607,12 +1030,17 @@ export default function ProyectosDonacionDashboardPage() {
       </div>
 
       {/* Dialog para editar proyecto */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+        setIsEditDialogOpen(open);
+        if (!open) {
+          resetForm();
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Editar Proyecto de Donación</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleEditProject} className="space-y-4">
+          <form onSubmit={handleEditProject} className="space-y-4 w-full min-w-0">
             <div>
               <Label htmlFor="edit-targetAmount">Meta de Recaudación (Bs.)</Label>
               <Input
@@ -646,17 +1074,108 @@ export default function ProyectosDonacionDashboardPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-qrImageUrl">URL de Imagen QR</Label>
-                <Input
-                  id="edit-qrImageUrl"
-                  value={formData.qrImageUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, qrImageUrl: e.target.value }))}
-                  placeholder="https://ejemplo.com/qr.png"
-                />
-              </div>
-
+            <div className="space-y-4">
+            <div>
+              <Label>Imagen QR</Label>
+                {!qrPreviewUrl && !formData.qrImageUrl ? (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+                    <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                    <div className="mt-4">
+                      <label htmlFor="edit-qr-file-input" className="cursor-pointer">
+                        <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                          {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen QR'}
+                        </span>
+                        <Input
+                          id="edit-qr-file-input"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleQrFileUpload(file);
+                              setQrMarkedForDeletion(false);
+                            }
+                          }}
+                          disabled={uploading}
+                        />
+                      </label>
+                      <p className="mt-2 text-sm text-gray-500">
+                        PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4 mt-2">
+                    <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <Image
+                      src={qrPreviewUrl || formData.qrImageUrl || ''}
+                      alt={formData.qrImageAlt || 'QR'}
+                      fill
+                        className="object-cover"
+                    />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setQrMarkedForDeletion(true);
+                          setSelectedQrFile(null);
+                          setQrPreviewUrl('');
+                          setFormData(prev => ({ ...prev, qrImageUrl: '', qrImageAlt: '' }));
+                          toast({
+                            title: 'Imagen QR marcada para eliminar',
+                            description: 'Se eliminará del bucket al guardar los cambios',
+                          });
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    {qrMarkedForDeletion && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <p className="text-white font-semibold">Se eliminará al guardar</p>
+                      </div>
+                    )}
+                  </div>
+                    {qrMarkedForDeletion && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setQrMarkedForDeletion(false);
+                          setFormData(prev => ({ ...prev, qrImageUrl: selectedProject?.qrImageUrl || '', qrImageAlt: selectedProject?.qrImageAlt || '' }));
+                        }}
+                      >
+                        Cancelar eliminación
+                      </Button>
+                    )}
+                    <label htmlFor="edit-qr-file-input-replace" className="cursor-pointer">
+                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploading ? 'Subiendo...' : 'Cambiar imagen QR'}
+                      </Button>
+                  <Input
+                        id="edit-qr-file-input-replace"
+                        name="file-upload"
+                    type="file"
+                        className="sr-only"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleQrFileUpload(file);
+                        setQrMarkedForDeletion(false);
+                      }
+                    }}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                  )}
+                </div>
               <div>
                 <Label htmlFor="edit-qrImageAlt">Alt Text de Imagen QR</Label>
                 <Input
@@ -668,17 +1187,108 @@ export default function ProyectosDonacionDashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-referenceImageUrl">URL de Imagen de Referencia</Label>
-                <Input
-                  id="edit-referenceImageUrl"
-                  value={formData.referenceImageUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, referenceImageUrl: e.target.value }))}
-                  placeholder="https://ejemplo.com/referencia.jpg"
-                />
-              </div>
-
+            <div className="space-y-4">
+            <div>
+              <Label>Imagen de Referencia</Label>
+                {!referencePreviewUrl && !formData.referenceImageUrl ? (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2">
+                    <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                    <div className="mt-4">
+                      <label htmlFor="edit-reference-file-input" className="cursor-pointer">
+                        <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                          {uploading ? 'Subiendo imagen...' : 'Haz clic para subir imagen de referencia'}
+                        </span>
+                        <Input
+                          id="edit-reference-file-input"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleReferenceFileUpload(file);
+                              setReferenceMarkedForDeletion(false);
+                            }
+                          }}
+                          disabled={uploading}
+                        />
+                      </label>
+                      <p className="mt-2 text-sm text-gray-500">
+                        PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4 mt-2">
+                    <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <Image
+                      src={referencePreviewUrl || formData.referenceImageUrl || ''}
+                      alt={formData.referenceImageAlt || 'Referencia'}
+                      fill
+                        className="object-cover"
+                    />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setReferenceMarkedForDeletion(true);
+                          setSelectedReferenceFile(null);
+                          setReferencePreviewUrl('');
+                          setFormData(prev => ({ ...prev, referenceImageUrl: '', referenceImageAlt: '' }));
+                          toast({
+                            title: 'Imagen de referencia marcada para eliminar',
+                            description: 'Se eliminará del bucket al guardar los cambios',
+                          });
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    {referenceMarkedForDeletion && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                        <p className="text-white font-semibold">Se eliminará al guardar</p>
+                      </div>
+                    )}
+                  </div>
+                    {referenceMarkedForDeletion && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setReferenceMarkedForDeletion(false);
+                          setFormData(prev => ({ ...prev, referenceImageUrl: selectedProject?.referenceImageUrl || '', referenceImageAlt: selectedProject?.referenceImageAlt || '' }));
+                        }}
+                      >
+                        Cancelar eliminación
+                      </Button>
+                    )}
+                    <label htmlFor="edit-reference-file-input-replace" className="cursor-pointer">
+                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploading ? 'Subiendo...' : 'Cambiar imagen de referencia'}
+                      </Button>
+                  <Input
+                        id="edit-reference-file-input-replace"
+                        name="file-upload"
+                    type="file"
+                        className="sr-only"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleReferenceFileUpload(file);
+                        setReferenceMarkedForDeletion(false);
+                      }
+                    }}
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                  )}
+                </div>
               <div>
                 <Label htmlFor="edit-referenceImageAlt">Alt Text de Imagen de Referencia</Label>
                 <Input
@@ -702,10 +1312,13 @@ export default function ProyectosDonacionDashboardPage() {
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button type="submit">
-                Actualizar Proyecto
+              <Button type="submit" disabled={uploading}>
+                {uploading ? 'Subiendo...' : 'Actualizar Proyecto'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => {
+                setIsEditDialogOpen(false);
+                resetForm();
+              }}>
                 Cancelar
               </Button>
             </div>

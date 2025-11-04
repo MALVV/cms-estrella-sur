@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Save, X, Upload, ImageIcon } from 'lucide-react';
-import { toast } from 'sonner';
+import { useToast } from '@/components/ui/use-toast';
+import Image from 'next/image';
 
 interface Methodology {
   id: string;
@@ -57,6 +58,7 @@ interface MethodologyFormData {
 }
 
 export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMethodologyFormProps) {
+  const { toast } = useToast();
   const [formData, setFormData] = useState<MethodologyFormData>({
     title: methodology.title,
     description: methodology.description,
@@ -75,6 +77,9 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
   });
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [imageMarkedForDeletion, setImageMarkedForDeletion] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
 
   const handleInputChange = (field: keyof MethodologyFormData, value: string) => {
     setFormData(prev => ({
@@ -96,48 +101,169 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
     e.preventDefault();
     
     if (!formData.title.trim()) {
-      toast.error('El título es requerido');
+      toast({
+        title: 'Error',
+        description: 'El título es requerido',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.description.trim()) {
-      toast.error('La descripción es requerida');
+      toast({
+        title: 'Error',
+        description: 'La descripción es requerida',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.shortDescription.trim()) {
-      toast.error('La descripción corta es requerida');
+      toast({
+        title: 'Error',
+        description: 'La descripción corta es requerida',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.ageGroup.trim()) {
-      toast.error('El grupo de edad es requerido');
+      toast({
+        title: 'Error',
+        description: 'El grupo de edad es requerido',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.targetAudience.trim()) {
-      toast.error('El público objetivo es requerido');
+      toast({
+        title: 'Error',
+        description: 'El público objetivo es requerido',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.objectives.trim()) {
-      toast.error('Los objetivos son requeridos');
+      toast({
+        title: 'Error',
+        description: 'Los objetivos son requeridos',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (!formData.implementation.trim()) {
-      toast.error('La implementación es requerida');
+      toast({
+        title: 'Error',
+        description: 'La implementación es requerida',
+        variant: 'destructive',
+      });
       return;
     }
 
     if (formData.sectors.length === 0) {
-      toast.error('Debe seleccionar al menos un sector programático');
+      toast({
+        title: 'Error',
+        description: 'Debe seleccionar al menos un sector programático',
+        variant: 'destructive',
+      });
       return;
     }
 
     setIsLoading(true);
 
     try {
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl: string | null = formData.imageUrl || null;
+      let finalImageAlt: string | null = formData.imageAlt || null;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          // Eliminar la imagen anterior del bucket si existe
+          const originalImageUrl = methodology.imageUrl;
+          if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 15000);
+              await fetch('/api/spaces/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: originalImageUrl }),
+                signal: controller.signal,
+              });
+              clearTimeout(timer);
+            } catch (err) {
+              console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+            }
+          }
+
+          // Subir la nueva imagen
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/public/methodologies/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setIsLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      } else if (imageMarkedForDeletion) {
+        // Si se marcó para eliminar, eliminar del bucket antes de actualizar
+        const originalImageUrl = methodology.imageUrl;
+        if (originalImageUrl && originalImageUrl !== '/placeholder-news.jpg') {
+          try {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 15000);
+            await fetch('/api/spaces/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: originalImageUrl }),
+              signal: controller.signal,
+            });
+            clearTimeout(timer);
+          } catch (err) {
+            console.warn('No se pudo eliminar imagen anterior del bucket:', err);
+          }
+        }
+        finalImageUrl = null;
+        finalImageAlt = null;
+      }
+
       const sectorMap: Record<string, string> = {
         'SALUD': 'HEALTH',
         'EDUCACION': 'EDUCATION',
@@ -149,6 +275,8 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
       };
       const payload = {
         ...formData,
+        imageUrl: finalImageUrl || null,
+        imageAlt: finalImageAlt || null,
         sectors: formData.sectors.map(s => sectorMap[s] || s),
       };
 
@@ -165,18 +293,27 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
         throw new Error(errorData.error || 'Error al actualizar iniciativa');
       }
 
-      toast.success('Iniciativa actualizada exitosamente');
+      toast({
+        title: 'Éxito',
+        description: 'Iniciativa actualizada exitosamente',
+      });
+      setImageMarkedForDeletion(false);
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
       onSuccess?.();
     } catch (error) {
       console.error('Error updating methodology:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al actualizar iniciativa');
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al actualizar iniciativa',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     try {
       const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
       const maxBytes = maxMb * 1024 * 1024;
@@ -187,24 +324,31 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
       if (file.size > maxBytes) {
         throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
       }
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/public/methodologies/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
+
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+        setImageMarkedForDeletion(false); // Si se selecciona una nueva imagen, ya no está marcada para eliminar
+      };
+      reader.readAsDataURL(file);
+
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al guardar los cambios',
       });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error || 'Error al subir imagen');
-      }
-      const data = await res.json();
-      setFormData(prev => ({ ...prev, imageUrl: data.url, imageAlt: data.alt || file.name }));
-      toast.success('Imagen subida correctamente');
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al subir la imagen');
-    } finally {
-      setUploading(false);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -423,7 +567,7 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
           {/* Imagen */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Imagen</h3>
-            {!formData.imageUrl ? (
+            {!imagePreviewUrl && !formData.imageUrl ? (
               <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
                 <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                 <div className="mt-4">
@@ -441,7 +585,7 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
                         const file = e.target.files?.[0];
                         if (file) handleFileUpload(file);
                       }}
-                      disabled={uploading}
+                      disabled={uploading || isLoading}
                     />
                   </label>
                   <p className="mt-2 text-sm text-gray-500">
@@ -452,49 +596,34 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
             ) : (
               <div className="space-y-4">
                 <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  <img src={formData.imageUrl} alt={formData.imageAlt || 'Vista previa'} className="w-full h-full object-cover" />
+                  <Image
+                    src={imagePreviewUrl || formData.imageUrl || ''}
+                    alt={formData.imageAlt || 'Vista previa'}
+                    fill
+                    className="object-cover"
+                  />
                   <Button
                     type="button"
                     variant="destructive"
                     size="sm"
                     className="absolute top-2 right-2"
-                    onClick={async () => {
-                      try {
-                        if (formData.imageUrl) {
-                          const controller = new AbortController();
-                          const timer = setTimeout(() => controller.abort(), 15000);
-                          const res = await fetch('/api/spaces/delete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ url: formData.imageUrl }),
-                            signal: controller.signal,
-                          });
-                          clearTimeout(timer);
-                          if (!res.ok) {
-                            const e = await res.json().catch(() => ({}));
-                            throw new Error(e.error || 'No se pudo eliminar del bucket');
-                          }
-                        }
-                        setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
-                        // Persistir null inmediatamente
-                        try {
-                          await fetch(`/api/public/methodologies/${methodology.id}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ...formData, imageUrl: null, imageAlt: null }),
-                          });
-                        } catch {}
-                        toast.success('Imagen eliminada');
-                      } catch (err) {
-                        toast.error(err instanceof Error ? err.message : 'No se pudo eliminar la imagen');
-                      }
+                    onClick={() => {
+                      // Solo marcar para eliminar, no eliminar del bucket todavía
+                      setSelectedImageFile(null);
+                      setImagePreviewUrl('');
+                      setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
+                      setImageMarkedForDeletion(true);
+                      toast({
+                        title: 'Imagen marcada para eliminar',
+                        description: 'Se eliminará del bucket al guardar los cambios',
+                      });
                     }}
                   >
                     Eliminar
                   </Button>
                 </div>
                 <label htmlFor="file-upload-methodology-replace-edit" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                  <Button type="button" variant="outline" className="w-full" disabled={uploading || isLoading}>
                     <Upload className="mr-2 h-4 w-4" />
                     {uploading ? 'Subiendo...' : 'Cambiar imagen'}
                   </Button>
@@ -508,7 +637,7 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
                       const file = e.target.files?.[0];
                       if (file) handleFileUpload(file);
                     }}
-                    disabled={uploading}
+                    disabled={uploading || isLoading}
                   />
                 </label>
               </div>
@@ -530,11 +659,11 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
               <X className="h-4 w-4 mr-2" />
               Cancelar
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" disabled={isLoading || uploading}>
+              {isLoading || uploading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Actualizando...
+                  Procesando...
                 </>
               ) : (
                 <>

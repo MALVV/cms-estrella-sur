@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { toast } from 'sonner'
-import { CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { useToast } from '@/components/ui/use-toast'
+import { CheckCircle, XCircle, Trash2, Upload, ImageIcon } from 'lucide-react'
+import Image from 'next/image'
 
 interface Donation {
   id: string
@@ -32,7 +33,10 @@ export function ConfirmDonationActionDialog({
 }: ConfirmDonationActionDialogProps) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [bankTransferImageUrl, setBankTransferImageUrl] = useState<string>('')
+  const [uploading, setUploading] = useState(false)
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('')
+  const { toast } = useToast()
 
   const isApprove = action === 'approve'
   const isDelete = action === 'delete'
@@ -42,11 +46,89 @@ export function ConfirmDonationActionDialog({
   const actionColor = isApprove ? 'text-green-600' : 'text-red-600'
   const actionBgColor = isApprove ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
 
+  const handleFileUpload = async (file: File) => {
+    try {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setSelectedImageFile(file);
+      toast({
+        title: 'Comprobante seleccionado',
+        description: 'El comprobante se subirá al bucket al aprobar la donación',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleConfirm = async () => {
     try {
       setLoading(true)
       
       if (isApprove) {
+        let finalBankTransferImageUrl = '';
+        let finalBankTransferImageAlt = 'Comprobante de transferencia';
+
+        // Si hay una imagen seleccionada, subirla al bucket primero
+        if (selectedImageFile) {
+          setUploading(true);
+          try {
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('file', selectedImageFile);
+
+            const uploadResponse = await fetch('/api/donations/upload-proof', {
+              method: 'POST',
+              body: formDataToUpload,
+            });
+
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Error al subir comprobante');
+            }
+
+            const uploadData = await uploadResponse.json();
+            finalBankTransferImageUrl = uploadData.url;
+            finalBankTransferImageAlt = uploadData.alt || selectedImageFile.name;
+          } catch (error) {
+            console.error('Error uploading proof:', error);
+            toast({
+              title: 'Error',
+              description: error instanceof Error ? error.message : 'Error al subir el comprobante',
+              variant: 'destructive',
+            });
+            setUploading(false);
+            setLoading(false);
+            return;
+          } finally {
+            setUploading(false);
+          }
+        } else {
+          toast({
+            title: 'Error',
+            description: 'Debes subir un comprobante para aprobar la donación',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
+
         // Para aprobación, hacer la llamada con URL
         const response = await fetch(`/api/donations/${donation.id}`, {
           method: 'PATCH',
@@ -56,19 +138,27 @@ export function ConfirmDonationActionDialog({
           body: JSON.stringify({
             donationId: donation.id,
             status: 'APPROVED',
-            bankTransferImage: bankTransferImageUrl || null,
-            bankTransferImageAlt: bankTransferImageUrl ? 'Comprobante de transferencia' : null
+            bankTransferImage: finalBankTransferImageUrl,
+            bankTransferImageAlt: finalBankTransferImageAlt
           })
         });
 
         if (response.ok) {
-          toast.success('Donación aprobada exitosamente');
+          toast({
+            title: 'Éxito',
+            description: 'Donación aprobada exitosamente',
+          });
           onActionConfirmed(donation.id);
           setOpen(false);
-          setBankTransferImageUrl('');
+          setSelectedImageFile(null);
+          setImagePreviewUrl('');
         } else {
           const error = await response.json();
-          toast.error(error.error || 'Error al aprobar donación');
+          toast({
+            title: 'Error',
+            description: error.error || 'Error al aprobar donación',
+            variant: 'destructive',
+          });
         }
       } else if (isDelete) {
         // Para eliminación, usar DELETE
@@ -77,12 +167,19 @@ export function ConfirmDonationActionDialog({
         });
 
         if (response.ok) {
-          toast.success('Donación eliminada exitosamente');
+          toast({
+            title: 'Éxito',
+            description: 'Donación eliminada exitosamente',
+          });
           onActionConfirmed(donation.id);
           setOpen(false);
         } else {
           const error = await response.json();
-          toast.error(error.error || 'Error al eliminar donación');
+          toast({
+            title: 'Error',
+            description: error.error || 'Error al eliminar donación',
+            variant: 'destructive',
+          });
         }
       } else if (isUnapprove) {
         // Para desaprobación, cambiar a PENDING
@@ -98,12 +195,19 @@ export function ConfirmDonationActionDialog({
         });
 
         if (response.ok) {
-          toast.success('Donación desaprobada exitosamente');
+          toast({
+            title: 'Éxito',
+            description: 'Donación desaprobada exitosamente',
+          });
           onActionConfirmed(donation.id);
           setOpen(false);
         } else {
           const error = await response.json();
-          toast.error(error.error || 'Error al desaprobar donación');
+          toast({
+            title: 'Error',
+            description: error.error || 'Error al desaprobar donación',
+            variant: 'destructive',
+          });
         }
       } else {
         // Para rechazo, usar la función original
@@ -111,11 +215,14 @@ export function ConfirmDonationActionDialog({
         setOpen(false)
       }
     } catch (error) {
-      toast.error("Error al procesar la acción", {
-        description: "Hubo un problema al procesar la solicitud.",
-      })
+      toast({
+        title: 'Error',
+        description: 'Hubo un problema al procesar la solicitud',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
+      setUploading(false);
     }
   }
 
@@ -155,19 +262,82 @@ export function ConfirmDonationActionDialog({
           </p>
           
           {isApprove && (
-            <div className="mt-4 space-y-2">
-              <Label htmlFor="bankTransferImageUrl">URL del comprobante de transferencia *</Label>
-              <Input
-                id="bankTransferImageUrl"
-                type="url"
-                placeholder="https://ejemplo.com/comprobante.jpg"
-                value={bankTransferImageUrl}
-                onChange={(e) => setBankTransferImageUrl(e.target.value)}
-                required
-              />
-              <p className="text-xs text-gray-500">
-                Ingresa la URL de la imagen del comprobante de transferencia bancaria
-              </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <Label>Comprobante de Transferencia *</Label>
+                {!imagePreviewUrl ? (
+                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2 w-full min-w-0">
+                    <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                    <div className="mt-4">
+                      <label htmlFor="proof-file-input" className="cursor-pointer">
+                        <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                          {uploading ? 'Subiendo imagen...' : 'Haz clic para subir comprobante'}
+                        </span>
+                        <Input
+                          id="proof-file-input"
+                          name="file-upload"
+                          type="file"
+                          className="sr-only"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(file);
+                          }}
+                          disabled={uploading || loading}
+                        />
+                      </label>
+                      <p className="mt-2 text-sm text-gray-500">
+                        PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4 mt-2">
+                    <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <Image
+                        src={imagePreviewUrl}
+                        alt="Comprobante de transferencia"
+                        fill
+                        className="object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setSelectedImageFile(null);
+                          setImagePreviewUrl('');
+                          toast({
+                            title: 'Comprobante eliminado',
+                            description: 'El comprobante fue removido del formulario'
+                          });
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </div>
+                    <label htmlFor="proof-file-input-replace" className="cursor-pointer">
+                      <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        {uploading ? 'Subiendo...' : 'Cambiar comprobante'}
+                      </Button>
+                      <Input
+                        id="proof-file-input-replace"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                        }}
+                        disabled={uploading || loading}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           
@@ -193,16 +363,17 @@ export function ConfirmDonationActionDialog({
         <DialogFooter>
           <Button variant="outline" onClick={() => {
             setOpen(false);
-            setBankTransferImageUrl('');
-          }} disabled={loading}>
+            setSelectedImageFile(null);
+            setImagePreviewUrl('');
+          }} disabled={loading || uploading}>
             Cancelar
           </Button>
           <Button 
             className={isDelete ? 'bg-red-600 hover:bg-red-700 text-white' : isUnapprove ? 'bg-orange-600 hover:bg-orange-700 text-white' : `${actionBgColor} text-white`}
             onClick={handleConfirm}
-            disabled={loading || (isApprove && !bankTransferImageUrl.trim())}
+            disabled={loading || uploading || (isApprove && !selectedImageFile)}
           >
-            {loading ? 'Procesando...' : actionTextCapitalized}
+            {loading || uploading ? 'Procesando...' : actionTextCapitalized}
           </Button>
         </DialogFooter>
       </DialogContent>

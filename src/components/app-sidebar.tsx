@@ -10,6 +10,7 @@ import {
   ChevronRight,
   FolderOpen,
   Image,
+  ImageIcon,
   Settings,
   Briefcase,
   Newspaper,

@@ -5,7 +5,7 @@ import { storageService } from '@/lib/storage-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions as any);
+    const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
@@ -19,8 +19,6 @@ export async function POST(request: NextRequest) {
     const maxSize = maxMb * 1024 * 1024;
     if (file.size > maxSize) return NextResponse.json({ error: `El archivo es demasiado grande. Máximo ${maxMb}MB` }, { status: 400 });
 
-    console.log(`[Programas][UPLOAD] Subiendo imagen: ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)`);
-
     const buffer = Buffer.from(await file.arrayBuffer());
     const upload = await storageService.uploadFile(buffer, file.name, {
       bucket: process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET,
@@ -28,8 +26,6 @@ export async function POST(request: NextRequest) {
       contentType: file.type,
       prefix: 'programs-images/'
     });
-
-    console.log(`[Programas][UPLOAD] Imagen subida: ${upload.url}`);
 
     return NextResponse.json({ success: true, url: upload.url, filename: upload.filename, originalName: upload.originalName, size: upload.size, alt: file.name });
   } catch (error) {

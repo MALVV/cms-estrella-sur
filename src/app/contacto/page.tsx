@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Mail, MapPin, Phone, Clock, AlertTriangle, Send, ArrowRight, Check, Users, Shield, Heart } from 'lucide-react';
+import { Mail, MapPin, Phone, Clock, AlertTriangle, Send, ArrowRight, Check, Users, Shield, Heart, Upload, X, File, ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -33,6 +33,8 @@ export default function ContactoPage() {
     contactName: '',
     contactEmail: ''
   });
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ file: File; previewUrl?: string }>>([]);
+  const [uploading, setUploading] = useState(false);
 
   // Detectar parámetro de URL para abrir automáticamente la pestaña de denuncia
   useEffect(() => {
@@ -64,6 +66,46 @@ export default function ContactoPage() {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const newFiles: Array<{ file: File; previewUrl?: string }> = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100);
+      const maxBytes = maxMb * 1024 * 1024;
+
+      if (file.size > maxBytes) {
+        setSubmitStatus('error');
+        setSubmitMessage(`El archivo ${file.name} es demasiado grande. Máximo ${maxMb}MB`);
+        setTimeout(() => {
+          setSubmitStatus('idle');
+          setSubmitMessage('');
+        }, 5000);
+        continue;
+      }
+
+      newFiles.push({
+        file,
+        previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+      });
+    }
+
+    setSelectedFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const newFiles = [...prev];
+      if (newFiles[index].previewUrl) {
+        URL.revokeObjectURL(newFiles[index].previewUrl);
+      }
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,12 +158,60 @@ export default function ContactoPage() {
     setSubmitStatus('idle');
     
     try {
+      // Si hay archivos seleccionados, subirlos primero
+      const uploadedDocumentUrls: string[] = [];
+      
+      if (selectedFiles.length > 0) {
+        setUploading(true);
+        try {
+          for (const selectedFile of selectedFiles) {
+            const formDataToUpload = new FormData();
+            formDataToUpload.append('file', selectedFile.file);
+
+            const uploadResponse = await fetch('/api/public/complaints/upload-document', {
+              method: 'POST',
+              body: formDataToUpload,
+            });
+
+            if (!uploadResponse.ok) {
+              const error = await uploadResponse.json();
+              throw new Error(error.error || 'Error al subir documento');
+            }
+
+            const uploadData = await uploadResponse.json();
+            uploadedDocumentUrls.push(uploadData.url);
+          }
+        } catch (error) {
+          console.error('Error uploading documents:', error);
+          setSubmitStatus('error');
+          setSubmitMessage(error instanceof Error ? error.message : 'Error al subir documentos. Por favor intenta nuevamente');
+          setUploading(false);
+          setIsSubmitting(false);
+          setTimeout(() => {
+            setSubmitStatus('idle');
+            setSubmitMessage('');
+          }, 8000);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
+
+      // Determinar qué usar: documentos subidos o evidence proporcionado
+      const finalEvidence = uploadedDocumentUrls.length > 0 
+        ? uploadedDocumentUrls.join(',') 
+        : (complaintData.evidence || null);
+
       const response = await fetch('/api/public/complaints', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(complaintData),
+        body: JSON.stringify({
+          ...complaintData,
+          evidence: finalEvidence,
+          documentUrls: uploadedDocumentUrls.length > 0 ? uploadedDocumentUrls : undefined,
+        }),
       });
 
       const data = await response.json();
@@ -142,6 +232,13 @@ export default function ContactoPage() {
         contactName: '',
         contactEmail: ''
       });
+      // Limpiar previews de archivos
+      selectedFiles.forEach(file => {
+        if (file.previewUrl) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+      setSelectedFiles([]);
       
       // Limpiar mensaje después de 8 segundos
       setTimeout(() => {
@@ -781,18 +878,105 @@ export default function ContactoPage() {
                     {/* Grid Derecho - Información de Contacto y Envío */}
                     <div className="space-y-6 lg:flex-1">
                       {/* Evidencias o Información Adicional */}
-                      <div>
-                        <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                          Evidencias o Información Adicional
-                        </label>
-                        <textarea 
-                          name="evidence"
-                          value={complaintData.evidence}
-                          onChange={handleComplaintChange}
-                          className="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
-                          rows={5}
-                          placeholder="¿Hay testigos? ¿Existe documentación? Cualquier información adicional relevante..."
-                        />
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
+                            Adjuntar Evidencias (Documentos, Fotos, etc.)
+                          </label>
+                          {selectedFiles.length === 0 ? (
+                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-red-500 transition-colors">
+                              <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                              <div className="mt-4">
+                                <label htmlFor="complaint-file-upload" className="cursor-pointer">
+                                  <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                                    {uploading ? 'Subiendo evidencias...' : 'Haz clic para subir archivos'}
+                                  </span>
+                                  <input
+                                    type="file"
+                                    name="evidenceFiles"
+                                    onChange={handleFileChange}
+                                    multiple
+                                    accept=".pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png,.rar,.zip,.mp4,.mp3,.wav"
+                                    className="hidden"
+                                    id="complaint-file-upload"
+                                    disabled={uploading || isSubmitting}
+                                  />
+                                </label>
+                                <p className="mt-2 text-sm text-gray-500">
+                                  PDF, DOC, DOCX, XLS, XLSX, RAR, ZIP, JPG, PNG, MP4, MP3 hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || 100))}MB
+                                </p>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-1 gap-3">
+                                {selectedFiles.map((selectedFile, index) => (
+                                  <div key={index} className="relative border rounded-lg p-3 bg-gray-50 dark:bg-gray-800 flex items-center gap-3">
+                                    {selectedFile.previewUrl ? (
+                                      <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0">
+                                        <Image
+                                          src={selectedFile.previewUrl}
+                                          alt={selectedFile.file.name}
+                                          fill
+                                          className="object-cover"
+                                        />
+                                      </div>
+                                    ) : (
+                                      <File className="h-16 w-16 text-gray-400 flex-shrink-0" />
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                        {selectedFile.file.name}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {(selectedFile.file.size / 1024 / 1024).toFixed(2)} MB
+                                      </p>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeFile(index)}
+                                      className="text-red-500 hover:text-red-700 p-2"
+                                      disabled={uploading || isSubmitting}
+                                    >
+                                      <X className="h-5 w-5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                              <label htmlFor="complaint-file-upload-add" className="cursor-pointer">
+                                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-red-500 transition-colors">
+                                  <Upload className="h-6 w-6 text-gray-400 mx-auto mb-2" />
+                                  <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
+                                    Agregar más archivos
+                                  </span>
+                                  <input
+                                    type="file"
+                                    name="evidenceFiles"
+                                    onChange={handleFileChange}
+                                    multiple
+                                    accept=".pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png,.rar,.zip,.mp4,.mp3,.wav"
+                                    className="hidden"
+                                    id="complaint-file-upload-add"
+                                    disabled={uploading || isSubmitting}
+                                  />
+                                </div>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
+                            Información Adicional sobre Evidencias (Texto)
+                          </label>
+                          <textarea 
+                            name="evidence"
+                            value={complaintData.evidence}
+                            onChange={handleComplaintChange}
+                            className="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md text-text-light dark:text-text-dark focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                            rows={5}
+                            placeholder="¿Hay testigos? ¿Existe documentación? Cualquier información adicional relevante..."
+                          />
+                        </div>
                       </div>
 
                       {/* Información de Contacto Opcional */}
@@ -869,17 +1053,17 @@ export default function ContactoPage() {
                     )}
                     <button 
                       onClick={handleComplaintSubmit}
-                      disabled={isSubmitting || activeTab !== 'complaint'}
+                      disabled={isSubmitting || uploading || activeTab !== 'complaint'}
                       className="w-full bg-red-500 hover:bg-red-600 disabled:bg-gray-400 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center space-x-2 transition-colors text-lg disabled:cursor-not-allowed" 
                       type="button"
                     >
-                      {isSubmitting && activeTab === 'complaint' ? (
+                      {(isSubmitting || uploading) && activeTab === 'complaint' ? (
                         <>
                           <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          <span>ENVIANDO...</span>
+                          <span>{uploading ? 'SUBIENDO EVIDENCIAS...' : 'ENVIANDO...'}</span>
                         </>
                       ) : (
                         <>

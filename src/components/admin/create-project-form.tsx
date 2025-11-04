@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
 import { Plus, Upload, ImageIcon } from 'lucide-react';
+import Image from 'next/image';
 
 interface CreateProjectFormProps {
   onProjectCreated: () => void;
@@ -17,6 +18,8 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
     executionStart: '',
@@ -47,9 +50,58 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
       return;
     }
 
-
     try {
       setLoading(true);
+      
+      // Si hay una imagen seleccionada, subirla al bucket primero
+      let finalImageUrl = formData.imageUrl;
+      let finalImageAlt = formData.imageAlt;
+      
+      if (selectedImageFile) {
+        setUploading(true);
+        try {
+          const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+          const maxBytes = maxMb * 1024 * 1024;
+          const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+          if (!allowed.includes(selectedImageFile.type)) {
+            throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+          }
+          if (selectedImageFile.size > maxBytes) {
+            throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
+          }
+
+          const formDataToUpload = new FormData();
+          formDataToUpload.append('file', selectedImageFile);
+
+          const uploadResponse = await fetch('/api/projects/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formDataToUpload,
+          });
+
+          if (!uploadResponse.ok) {
+            const error = await uploadResponse.json();
+            throw new Error(error.error || 'Error al subir imagen');
+          }
+
+          const uploadData = await uploadResponse.json();
+          finalImageUrl = uploadData.url;
+          finalImageAlt = uploadData.alt || selectedImageFile.name;
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setLoading(false);
+          return;
+        } finally {
+          setUploading(false);
+        }
+      }
       
       const response = await fetch('/api/projects', {
         method: 'POST',
@@ -59,6 +111,8 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
         },
         body: JSON.stringify({
           ...formData,
+          imageUrl: finalImageUrl || null,
+          imageAlt: finalImageAlt || null,
           executionStart: new Date(formData.executionStart).toISOString(),
           executionEnd: new Date(formData.executionEnd).toISOString(),
         }),
@@ -88,6 +142,8 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
         isActive: true,
         isFeatured: false,
       });
+      setSelectedImageFile(null);
+      setImagePreviewUrl('');
 
       setIsOpen(false);
       onProjectCreated();
@@ -111,50 +167,68 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
   };
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
-      const response = await fetch('/api/projects/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error al subir imagen');
+      if (!allowed.includes(file.type)) {
+        throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o GIF');
+      }
+      if (file.size > maxBytes) {
+        throw new Error(`El archivo es demasiado grande. Máximo ${maxMb}MB`);
       }
 
-      const data = await response.json();
-      console.log('Imagen subida exitosamente:', data);
-      console.log('URL de la imagen:', data.url);
-      
-      setFormData(prev => ({
-        ...prev,
-        imageUrl: data.url,
-        imageAlt: data.alt || file.name,
-      }));
+      // Crear preview local (no subir al bucket todavía)
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const previewUrl = reader.result as string;
+        setImagePreviewUrl(previewUrl);
+        setSelectedImageFile(file);
+        setFormData(prev => ({
+          ...prev,
+          imageAlt: file.name,
+        }));
+      };
+      reader.readAsDataURL(file);
 
       toast({
-        title: 'Éxito',
-        description: 'Imagen subida correctamente',
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al crear el proyecto',
       });
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('Error processing file:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Error al subir la imagen',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
         variant: 'destructive',
       });
-    } finally {
-      setUploading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      if (!open) {
+        // Si se cierra sin guardar, resetear el estado
+        setSelectedImageFile(null);
+        setImagePreviewUrl('');
+        setFormData({
+          title: '',
+          executionStart: '',
+          executionEnd: '',
+          context: '',
+          objectives: '',
+          content: '',
+          strategicAllies: '',
+          financing: '',
+          imageUrl: '',
+          imageAlt: '',
+          isActive: true,
+          isFeatured: false,
+        });
+      }
+    }}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -254,7 +328,7 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Imagen</label>
-              {!formData.imageUrl ? (
+              {!imagePreviewUrl && !formData.imageUrl ? (
                 <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors mt-2">
                   <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
                   <div className="mt-4">
@@ -272,72 +346,45 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(file);
                         }}
-                        disabled={uploading}
+                        disabled={uploading || loading}
                       />
                     </label>
                     <p className="mt-2 text-sm text-gray-500">
-                      PNG, JPG, GIF hasta 10MB
+                      PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-4 mt-2">
                   <div className="relative w-full h-64 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    <img
-                      src={formData.imageUrl}
+                    <Image
+                      src={imagePreviewUrl || formData.imageUrl || ''}
                       alt={formData.imageAlt || 'Vista previa'}
-                      className="w-full h-full object-cover"
-                      onLoad={() => console.log('Imagen cargada exitosamente:', formData.imageUrl)}
-                      onError={(e) => {
-                        console.error('Error cargando imagen. URL:', formData.imageUrl);
-                        // Intentar cargar la imagen directamente
-                        const img = e.currentTarget;
-                        img.style.display = 'none';
-                        // Mostrar mensaje de error visual
-                        const container = img.parentElement;
-                        if (container) {
-                          const errorDiv = document.createElement('div');
-                          errorDiv.className = 'absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700';
-                          errorDiv.innerHTML = '<p class="text-red-500 text-sm">Error al cargar imagen</p>';
-                          container.appendChild(errorDiv);
-                        }
-                      }}
+                      fill
+                      className="object-cover"
                     />
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={async () => {
-                        try {
-                          if (formData.imageUrl) {
-                            const controller = new AbortController();
-                            const timer = setTimeout(() => controller.abort(), 15000);
-                            const res = await fetch('/api/spaces/delete', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ url: formData.imageUrl }),
-                              signal: controller.signal,
-                            });
-                            clearTimeout(timer);
-                            if (!res.ok) {
-                              const e = await res.json().catch(() => ({}));
-                              throw new Error(e.error || 'No se pudo eliminar del bucket');
-                            }
-                          }
-                          handleChange('imageUrl', '');
-                          handleChange('imageAlt', '');
-                          toast({ title: 'Imagen eliminada', description: 'Se eliminó del bucket y del formulario' });
-                        } catch (err) {
-                          toast({ title: 'Error', description: err instanceof Error ? err.message : 'No se pudo eliminar la imagen', variant: 'destructive' });
-                        }
+                      onClick={() => {
+                        // Solo limpiar el estado local, no eliminar del bucket (aún no se ha subido)
+                        setSelectedImageFile(null);
+                        setImagePreviewUrl('');
+                        handleChange('imageUrl', '');
+                        handleChange('imageAlt', '');
+                        toast({ 
+                          title: 'Imagen eliminada', 
+                          description: 'La imagen fue removida del formulario' 
+                        });
                       }}
                     >
                       Eliminar
                     </Button>
                   </div>
                   <label htmlFor="file-upload-project-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading}>
+                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
                       <Upload className="mr-2 h-4 w-4" />
                       {uploading ? 'Subiendo...' : 'Cambiar imagen'}
                     </Button>
@@ -351,7 +398,7 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
                         const file = e.target.files?.[0];
                         if (file) handleFileUpload(file);
                       }}
-                      disabled={uploading}
+                      disabled={uploading || loading}
                     />
                   </label>
                 </div>
@@ -393,8 +440,8 @@ export const CreateProjectForm: React.FC<CreateProjectFormProps> = ({ onProjectC
             <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Proyecto'}
+            <Button type="submit" disabled={loading || uploading}>
+              {loading || uploading ? 'Procesando...' : 'Crear Proyecto'}
             </Button>
           </div>
         </form>

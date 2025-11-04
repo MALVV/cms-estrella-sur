@@ -9,7 +9,7 @@ export async function POST(
     const { id } = await params;
     const body = await request.json();
 
-    const { fullName, email, phone, experience, driveLink } = body;
+    const { fullName, email, phone, experience, driveLink, documentUrls } = body;
 
     // Validaciones
     if (!fullName || !email || !phone || !experience) {
@@ -53,6 +53,13 @@ export async function POST(
       );
     }
 
+    // Determinar qué usar: documentos subidos o driveLink
+    // Si hay documentUrls, las guardamos separadas por comas en driveLink
+    // Si no, usamos el driveLink proporcionado
+    const finalDriveLink = documentUrls && Array.isArray(documentUrls) && documentUrls.length > 0
+      ? documentUrls.join(',')
+      : (driveLink || null);
+
     // Crear la aplicación
     const application = await prisma.convocatoriaApplication.create({
       data: {
@@ -60,7 +67,7 @@ export async function POST(
         email,
         phone,
         experience,
-        driveLink: driveLink || null,
+        driveLink: finalDriveLink,
         convocatoriaId: id,
       },
     });

@@ -472,7 +472,9 @@ function StoryList({
                     story={{
                       ...story,
                       content: story.content || '',
-                      summary: story.summary || ''
+                      summary: story.summary || '',
+                      imageUrl: story.imageUrl || '',
+                      imageAlt: story.imageAlt || ''
                     }}
                     onStoryUpdated={onStoryUpdated}
                   >
@@ -605,7 +607,9 @@ function StoryList({
                         story={{
                           ...story,
                           content: story.content || '',
-                          summary: story.summary || ''
+                          summary: story.summary || '',
+                          imageUrl: story.imageUrl || '',
+                          imageAlt: story.imageAlt || ''
                         }}
                         onStoryUpdated={onStoryUpdated}
                       >
@@ -639,7 +643,9 @@ function StoryList({
                               story={{
                                 ...story,
                                 content: story.content || '',
-                                summary: story.summary || ''
+                                summary: story.summary || '',
+                                imageUrl: story.imageUrl || '',
+                                imageAlt: story.imageAlt || ''
                               }}
                               onStoryUpdated={onStoryUpdated}
                             >

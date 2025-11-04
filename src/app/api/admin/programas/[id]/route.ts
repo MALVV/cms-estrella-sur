@@ -95,33 +95,53 @@ export async function PUT(
       return NextResponse.json({ error: 'Programa no encontrado' }, { status: 404 });
     }
 
-    if (imageUrl !== undefined && existing.imageUrl && existing.imageUrl !== imageUrl) {
-      const extractBucketAndKey = (u: string): { bucket: string | null; key: string | null } => {
-        try {
-          const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
-          const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
-          const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
-          const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
-          if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
-          const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
-          if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
-          if (endpoint && u.startsWith(endpoint + '/')) {
-            const rest = u.substring((endpoint + '/').length);
-            const idx = rest.indexOf('/');
-            if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
-          }
-          if (publicBase && u.startsWith(publicBase + '/')) {
-            return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
-          }
-          return { bucket: envBucket || null, key: null };
-        } catch {
-          return { bucket: null, key: null };
+    // Helper para normalizar URLs
+    const normalizeImageUrlForSave = (url: string | null | undefined): string | null => {
+      if (url === undefined) return existing.imageUrl;
+      if (!url || url.trim() === '' || url === 'null') return null;
+      return url.trim();
+    };
+
+    const normalizeImageUrl = (url: string | null | undefined): string | null => {
+      if (!url || url.trim() === '' || url === 'null') return null;
+      return url.trim();
+    };
+
+    const extractBucketAndKey = (u: string): { bucket: string | null; key: string | null } => {
+      try {
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && u.startsWith(endpoint + '/')) {
+          const rest = u.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
         }
-      };
-      const { bucket, key } = extractBucketAndKey(existing.imageUrl);
+        if (publicBase && u.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    // Determinar si necesitamos eliminar la imagen anterior
+    const finalImageUrl = normalizeImageUrlForSave(imageUrl);
+    const oldImageUrl = normalizeImageUrl(existing.imageUrl);
+    const shouldDeleteOldImage = oldImageUrl && (
+      (finalImageUrl && oldImageUrl !== finalImageUrl) || // Reemplazo
+      (finalImageUrl === null && oldImageUrl !== null)    // Eliminación explícita
+    );
+
+    if (shouldDeleteOldImage && oldImageUrl) {
+      const { bucket, key } = extractBucketAndKey(oldImageUrl);
       if (bucket && key) {
         try {
-          console.log('[Programs][PUT] Eliminando imagen anterior', { bucket, key, id });
           await storageService.deleteFile(bucket, key);
         } catch (e) {
           console.warn('[Programs][PUT] No se pudo eliminar imagen anterior', { bucket, key, id, error: String(e) });
@@ -134,7 +154,7 @@ export async function PUT(
       data: {
         sectorName,
         description,
-        imageUrl: imageUrl === undefined ? existing.imageUrl : (imageUrl || null),
+        imageUrl: finalImageUrl,
         imageAlt: imageAlt === undefined ? existing.imageAlt : (imageAlt || null),
         presentationVideo,
         odsAlignment,
@@ -212,6 +232,52 @@ export async function DELETE(
           console.warn('[Programs][DELETE] No se pudo eliminar imagen', { bucket, key, id, error: String(e) });
         }
       }
+    }
+
+    // Eliminar relaciones en ImageLibrary asociadas a este programa
+    const relatedImages = await prisma.imageLibrary.findMany({
+      where: { programId: id },
+    });
+
+    const extractBucketAndKeyForImage = (u: string): { bucket: string | null; key: string | null } => {
+      try {
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = u.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = u.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && u.startsWith(endpoint + '/')) {
+          const rest = u.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && u.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: u.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    for (const image of relatedImages) {
+      // Eliminar imagen del bucket si existe
+      if (image.imageUrl) {
+        const { bucket, key } = extractBucketAndKeyForImage(image.imageUrl);
+        if (bucket && key) {
+          try {
+            await storageService.deleteFile(bucket, key);
+          } catch (e) {
+            console.warn(`[Programs][DELETE] No se pudo eliminar imagen de ImageLibrary del bucket:`, e);
+          }
+        }
+      }
+      // Eliminar relación de ImageLibrary
+      await prisma.imageLibrary.delete({
+        where: { id: image.id },
+      });
     }
 
     await prisma.program.delete({ where: { id } });

@@ -41,10 +41,35 @@ export async function GET() {
     }))
 
     return NextResponse.json(formattedStories)
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error al obtener stories públicas:', error)
+    
+    // Proporcionar más información sobre el error
+    const errorMessage = error?.message || 'Error desconocido'
+    const errorCode = error?.code || 'UNKNOWN_ERROR'
+    
+    // Verificar si es un error de conexión a la base de datos
+    if (errorMessage.includes('Can\'t reach database server') || errorCode === 'P1001') {
+      console.error('Error de conexión a la base de datos:', {
+        message: errorMessage,
+        code: errorCode,
+        databaseUrl: process.env.DATABASE_URL ? 'configurada' : 'no configurada'
+      })
+      
+      return NextResponse.json(
+        { 
+          error: 'Error de conexión a la base de datos',
+          details: 'No se pudo conectar al servidor de base de datos. Verifica que el servidor esté corriendo y que las credenciales sean correctas.'
+        },
+        { status: 503 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { 
+        error: 'Error interno del servidor',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
       { status: 500 }
     )
   }

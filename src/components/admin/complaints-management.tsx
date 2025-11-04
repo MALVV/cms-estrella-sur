@@ -18,8 +18,13 @@ import {
   Search,
   CheckCircle,
   Clock,
-  Mail
+  Mail,
+  ExternalLink,
+  File,
+  Image as ImageIcon,
+  Download
 } from 'lucide-react';
+import Image from 'next/image';
 import { toast } from 'sonner';
 
 interface Complaint {
@@ -217,6 +222,33 @@ export function ComplaintsManagement() {
       otro: 'Otro'
     };
     return types[type] || type;
+  };
+
+  const parseEvidenceUrls = (evidence: string | null): { urls: string[]; text: string } => {
+    if (!evidence) return { urls: [], text: '' };
+    
+    // Detectar si contiene URLs (separadas por comas o espacios)
+    const urlPattern = /https?:\/\/[^\s,]+/g;
+    const urls = evidence.match(urlPattern) || [];
+    const text = evidence.replace(urlPattern, '').trim();
+    
+    return { urls, text };
+  };
+
+  const isImageUrl = (url: string): boolean => {
+    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(url) || 
+           !!url.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)/i);
+  };
+
+  const getFileName = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const fileName = pathname.split('/').pop() || 'Documento';
+      return decodeURIComponent(fileName);
+    } catch {
+      return url.split('/').pop() || 'Documento';
+    }
   };
 
   const filteredComplaints = complaints.filter(complaint => 
@@ -427,7 +459,7 @@ export function ComplaintsManagement() {
                           Ver detalles
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
                         <DialogHeader>
                           <DialogTitle>Detalles de la Denuncia</DialogTitle>
                         </DialogHeader>
@@ -477,12 +509,122 @@ export function ComplaintsManagement() {
                                 <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{selectedComplaint.peopleInvolved}</p>
                               </div>
                             )}
-                            {selectedComplaint.evidence && (
-                              <div>
-                                <label className="text-sm font-medium">Evidencias</label>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">{selectedComplaint.evidence}</p>
-                              </div>
-                            )}
+                            {selectedComplaint.evidence && (() => {
+                              const { urls, text } = parseEvidenceUrls(selectedComplaint.evidence);
+                              return (
+                                <div className="space-y-4">
+                                  <label className="text-sm font-medium block">Evidencias</label>
+                                  
+                                  {/* URLs de documentos subidos */}
+                                  {urls.length > 0 && (
+                                    <div className="space-y-3">
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                        Documentos y Archivos Adjuntos ({urls.length})
+                                      </p>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        {urls.map((url, index) => (
+                                          <div key={index} className="border rounded-lg p-3 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                                            {isImageUrl(url) ? (
+                                              <div className="space-y-2">
+                                                <div className="relative w-full h-32 rounded overflow-hidden bg-gray-200 dark:bg-gray-700">
+                                                  <Image
+                                                    src={url}
+                                                    alt={`Evidencia ${index + 1}`}
+                                                    fill
+                                                    className="object-contain"
+                                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                                  />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate flex-1">
+                                                    {getFileName(url)}
+                                                  </p>
+                                                  <div className="flex gap-1">
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-7 w-7 p-0"
+                                                      asChild
+                                                    >
+                                                      <a
+                                                        href={url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        title="Abrir en nueva pestaña"
+                                                      >
+                                                        <ExternalLink className="h-3 w-3" />
+                                                      </a>
+                                                    </Button>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      className="h-7 w-7 p-0"
+                                                      asChild
+                                                    >
+                                                      <a
+                                                        href={url}
+                                                        download
+                                                        title="Descargar"
+                                                      >
+                                                        <Download className="h-3 w-3" />
+                                                      </a>
+                                                    </Button>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ) : (
+                                              <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-gray-200 dark:bg-gray-700 rounded">
+                                                  <File className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                    {getFileName(url)}
+                                                  </p>
+                                                  <div className="flex items-center gap-2 mt-1">
+                                                    <button
+                                                      onClick={(e) => {
+                                                        e.preventDefault();
+                                                        window.open(url, '_blank', 'noopener,noreferrer');
+                                                      }}
+                                                      className="text-xs text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                                                    >
+                                                      Ver archivo
+                                                      <ExternalLink className="h-3 w-3" />
+                                                    </button>
+                                                    <span className="text-gray-400">•</span>
+                                                    <a
+                                                      href={url}
+                                                      download={getFileName(url)}
+                                                      className="text-xs text-primary hover:underline flex items-center gap-1"
+                                                    >
+                                                      Descargar
+                                                      <Download className="h-3 w-3" />
+                                                    </a>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {/* Texto adicional si existe */}
+                                  {text && (
+                                    <div className="mt-4">
+                                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
+                                        Información Adicional sobre Evidencias
+                                      </p>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                                        {text}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })()}
                             {selectedComplaint.reviewer && (
                               <div>
                                 <label className="text-sm font-medium">Revisado por</label>

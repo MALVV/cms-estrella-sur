@@ -16,7 +16,8 @@ export async function POST(request: NextRequest) {
       motivation,
       experience,
       driveLink,
-      documents
+      documents,
+      documentUrls
     } = body;
 
     // Validaciones básicas
@@ -41,14 +42,23 @@ export async function POST(request: NextRequest) {
       const timeSinceLastApplication = Date.now() - existingApplication.createdAt.getTime();
       const daysSinceLastApplication = timeSinceLastApplication / (1000 * 60 * 60 * 24);
       
-      // Si han pasado menos de 30 días desde la última aplicación
-      if (daysSinceLastApplication < 30) {
+      // Si han pasado menos de 1 día desde la última aplicación
+      if (daysSinceLastApplication < 1) {
         return NextResponse.json(
-          { error: 'Ya has enviado una aplicación recientemente. Por favor espera al menos 30 días antes de volver a aplicar.' },
+          { error: 'Ya has enviado una aplicación recientemente. Por favor espera al menos 1 día antes de volver a aplicar.' },
           { status: 400 }
         );
       }
     }
+
+    // Determinar qué usar: documentos subidos o driveLink/documents proporcionados
+    // Si hay documentUrls, las guardamos en documents separadas por comas
+    // Si no, usamos documents o driveLink proporcionados
+    const finalDocuments = documentUrls && Array.isArray(documentUrls) && documentUrls.length > 0
+      ? documentUrls.join(',')
+      : (documents || null);
+    
+    const finalDriveLink = driveLink || null;
 
     // Crear la aplicación
     const application = await prisma.volunteerApplication.create({
@@ -62,8 +72,8 @@ export async function POST(request: NextRequest) {
         availability,
         motivation,
         experience: experience || null,
-        driveLink: driveLink || null,
-        documents: documents || null,
+        driveLink: finalDriveLink,
+        documents: finalDocuments,
         status: 'PENDING'
       },
     });

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Plus, FileText, Calendar, Upload, ImageIcon } from 'lucide-react'
-import { toast } from 'sonner'
+import { useToast } from '@/components/ui/use-toast'
 
 interface Story {
   id: string;
@@ -24,6 +24,7 @@ interface CreateStoryFormProps {
 }
 
 export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [formData, setFormData] = useState({
@@ -81,8 +82,11 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
           finalImageAlt = uploadData.alt || selectedImageFile.name;
         } catch (error) {
           console.error('Error uploading file:', error);
-          const errorMessage = error instanceof Error ? error.message : 'Error al subir la imagen';
-          toast(errorMessage, { type: 'error' });
+          toast({
+            title: 'Error',
+            description: error instanceof Error ? error.message : 'Error al subir la imagen',
+            variant: 'destructive',
+          });
           setUploading(false);
           setLoading(false);
           return;
@@ -123,8 +127,11 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       setImagePreviewUrl('')
       
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Hubo un problema al crear la historia. Inténtalo de nuevo.";
-      toast(errorMessage, { type: 'error' });
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : "Hubo un problema al crear la historia. Inténtalo de nuevo.",
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false)
     }
@@ -154,11 +161,19 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       const maxBytes = maxMb * 1024 * 1024;
       const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
       if (!allowed.includes(file.type)) {
-        toast('Formato no permitido. Usa JPG, PNG, WEBP o GIF', { type: 'error' });
+        toast({
+          title: 'Error',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
         return;
       }
       if (file.size > maxBytes) {
-        toast(`El archivo es demasiado grande. Máximo ${maxMb}MB`, { type: 'error' });
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
+          variant: 'destructive',
+        });
         return;
       }
 
@@ -175,12 +190,16 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       };
       reader.readAsDataURL(file);
 
-      toast.success('Imagen seleccionada', {
-        description: 'La imagen se subirá al bucket al crear la historia'
+      toast({
+        title: 'Imagen seleccionada',
+        description: 'La imagen se subirá al bucket al crear la historia',
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al procesar la imagen';
-      toast(errorMessage, { type: 'error' });
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Error al procesar la imagen',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -296,8 +315,9 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
                         setSelectedImageFile(null);
                         setImagePreviewUrl('');
                         setFormData(prev => ({ ...prev, imageUrl: '', imageAlt: '' }));
-                        toast.success('Imagen eliminada', {
-                          description: 'La imagen fue removida del formulario'
+                        toast({
+                          title: 'Imagen eliminada',
+                          description: 'Se eliminó del formulario',
                         });
                       }}
                     >
