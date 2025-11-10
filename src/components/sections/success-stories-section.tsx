@@ -7,7 +7,6 @@ interface Story {
   id: string;
   title: string;
   content?: string;
-  summary?: string;
   imageUrl: string;
   imageAlt: string;
   createdAt: string;
@@ -224,7 +223,7 @@ export default function SuccessStoriesSection() {
                   {currentStory.title.toUpperCase()}
                 </h1>
                 <p className="text-white mt-4 text-base">
-                  {currentStory.summary || 'No hay resumen disponible.'}
+                  {currentStory.content ? (currentStory.content.length > 200 ? currentStory.content.substring(0, 200) + '...' : currentStory.content) : 'No hay contenido disponible.'}
                 </p>
               </div>
               <div className="mt-8 md:mt-0">

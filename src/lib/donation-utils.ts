@@ -41,6 +41,20 @@ export async function checkAndUpdateProjectCompletion(donationProjectId: string)
         console.log(`🎯 Proyecto ${donationProjectId} marcado como completado automáticamente. Meta alcanzada: ${totalRaised} >= ${donationProject.targetAmount}`);
         return true;
       }
+    } else {
+      // Si el proyecto estaba completado pero ya no alcanza la meta, marcarlo como no completado
+      if (donationProject.isCompleted) {
+        await prisma.donationProject.update({
+          where: { id: donationProjectId },
+          data: {
+            isCompleted: false,
+            currentAmount: totalRaised // Asegurar que el monto actual esté sincronizado
+          }
+        });
+
+        console.log(`⚠️ Proyecto ${donationProjectId} marcado como no completado. Meta no alcanzada: ${totalRaised} < ${donationProject.targetAmount}`);
+        return false;
+      }
     }
 
     return false;

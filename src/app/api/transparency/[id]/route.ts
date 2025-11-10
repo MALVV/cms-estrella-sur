@@ -88,7 +88,7 @@ export async function PUT(
 
     // Validar que la categoría sea válida si se proporciona
     if (category) {
-      const validCategories = ['DOCUMENT_CENTER', 'ACCOUNTABILITY', 'FINANCIERS_AND_ALLIES', 'ANNUAL_REPORTS'];
+      const validCategories = ['ACCOUNTABILITY', 'ANNUAL_REPORTS', 'AUDIT_REPORTS'];
       if (!validCategories.includes(category)) {
         return NextResponse.json(
           { error: 'Categoría inválida' },

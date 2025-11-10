@@ -27,7 +27,6 @@ interface Programa {
   news?: Array<{
     id: string;
     title: string;
-    excerpt: string;
     imageUrl: string;
     publishedAt: string;
     category: string;
@@ -219,7 +218,7 @@ export function ProgramasView({ programa, onClose }: ProgramasViewProps) {
                     <div key={news.id} className="border-l-2 border-blue-500 pl-3">
                       <h4 className="font-medium text-sm">{news.title}</h4>
                       <p className="text-xs text-gray-600 mt-1 line-clamp-2">
-                        {news.excerpt}
+                        {news.title}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         {new Date(news.publishedAt).toLocaleDateString()}

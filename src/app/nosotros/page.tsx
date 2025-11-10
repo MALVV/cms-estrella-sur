@@ -93,14 +93,14 @@ export default function AboutUsPage() {
   }, []);
 
   const teamImages: Record<1 | 2 | 3 | 4, string> = {
-    1: "https://lh3.googleusercontent.com/aida-public/AB6AXuD8VUB2xLHAWgBfe1XYO7-lIP6fZh6-5bCJm9bggcbxbdADdXEV1C3EE3I4U8BgYGluLzaHwczKf3j9I0nvKUTvIp2wAK3uyYcZp6Wo2M7E0KbjYXqRoAhFHswjy8YuveSJaSAv9d2jkqak5KNi375y_88sDomAcoEoFYvPsbEctymmtN3Y3TQW_EPczouNU9ASGpu5wDX7phIuy53C9qnv7A_pZUNhquGco3FZgtOB7x6dHv36aDpjFdk856fHI_c_BDZc-BsnwCGj",
-    2: "https://images.pexels.com/photos/2219024/pexels-photo-2219024.jpeg",
-    3: "https://lh3.googleusercontent.com/aida-public/AB6AXuB0DKGKMYw36YxwT9YsJXl1eVtdB-GCWJZ_4WjzDxUdML2vGmj6xbZ9_DwGHVQvh1D0lRny2Gki7pbHQWxUau_Inz0RHWtE6GevDh5_mykpglJ_LQSgxeGtCVCdHkXj_urWqkI8DkcmEH4EBrDXR-5153a4nN5xOuPvOr4Vs2y0Ii2HOYhPTuOpXEheDFlaSvA3XCpWfhe04uSO1aOu70z8qif64ppIm4lQWU2hWjlhHF-fSMDaXrbvE9MC_5dHxtbxBKygXs0JoO0",
-    4: "https://lh3.googleusercontent.com/aida-public/AB6AXuCcojMb_tNeqCrnNo1DH8v1vKFm2shH7i9X_UrDGDxoSUU6JdshPCdQy99xuAfZp_78sh87ME9W706dQ75iClppApHElnQaU0Svwngv46AOmz3-ke1ulDNpRN02F5Iujger72_L06XMRQBNEq3zPIXy7Jw7GPUm4rKpHEUBemS2jq5vmMKX_KQ3c7R0qRF0B2ZWlgIBFoMbn6UOXdsCepwN_iRMrzWpzQGLKhhitD8rxMKlOOlgf2mz6zhwgpXJV_NXcrTDU92VGkE"
+    1: "/static-images/sections/nuestro_equipo1.jpg",
+    2: "/static-images/sections/nuestro_equipo2.jpg",
+    3: "/static-images/sections/nuestro_equipo3.jpg",
+    4: "/static-images/sections/nuestro_equipo1.jpg"
   };
 
   const teamDescriptions: Record<1 | 2 | 3 | 4, string> = {
-    1: "Nuestro equipo está compuesto por individuos talentosos de diversos orígenes, todos unidos por un objetivo común: crear un impacto duradero.",
+    1: "Individuos talentosos de diversos orígenes, unidos por un objetivo común: crear un impacto duradero.",
     2: "Somos un equipo apasionado que trabaja incansablemente para transformar las vidas de niños y jóvenes en comunidades vulnerables.",
     3: "Con años de experiencia en el campo social, nuestro equipo experimentado desarrolla programas integrales de largo plazo.",
     4: "Como parte de una red global, trabajamos con organizaciones internacionales para amplificar nuestro impacto mundial."
@@ -111,7 +111,14 @@ export default function AboutUsPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/nosotros_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -427,7 +434,7 @@ export default function AboutUsPage() {
                     {teamDescriptions[selectedTeam]}
                   </p>
                   <div className="text-center">
-                    <Button size="lg" className="bg-zinc-800 text-white font-semibold px-6 py-3 rounded-md flex items-center space-x-2 hover:bg-zinc-700 transition-all duration-300 hover:scale-110 hover:shadow-lg mx-auto" asChild>
+                    <Button size="lg" className="bg-zinc-800 text-white font-semibold px-6 py-3 rounded-md flex items-center space-x-2 mx-auto" asChild>
                   <Link href="/equipo">
                     <span>CONOCER MÁS</span>
                     <span className="material-symbols-outlined">arrow_forward</span>
@@ -573,7 +580,7 @@ export default function AboutUsPage() {
               viewport={{ once: true }}
             >
               <motion.img 
-                src="/static-images/sections/seccion-childfund.jpg"
+                src="/static-images/sections/child_fund_section.jpg"
                 alt="ChildFund Alliance - Red Global de Impacto"
                 className="w-full h-auto object-cover rounded-lg shadow-xl"
                 initial={{ opacity: 0, scale: 0.8 }}

@@ -22,13 +22,13 @@ export default function ParticiparPage() {
               Da una mano amiga a quienes más lo necesitan
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Estamos trabajando directamente en el terreno, en Bolivia y alrededor del mundo, entregando ayuda humanitaria esencial. Tu participación hoy ayuda a este trabajo que salva vidas.
+              Tu apoyo puede transformar vidas. Con tu aporte, ayudamos a niñas, niños, adolescentes y sus familias a crecer en entornos seguros, protegidos y llenos de nuevas oportunidades.
             </p>
             {/* Estadísticas de participación */}
             <div className="grid grid-cols-3 gap-4 pt-6">
               <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
                 <div className="text-2xl font-bold text-primary mb-1">500+</div>
-                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Voluntarios</div>
+                <div className="text-xs text-text-secondary-light dark:text-text-secondary-dark">Voluntarios/Pasantes</div>
               </div>
               <div className="text-center p-3 bg-card-light dark:bg-card-dark rounded-lg shadow-sm">
                 <div className="text-2xl font-bold text-primary mb-1">50+</div>
@@ -43,7 +43,7 @@ export default function ParticiparPage() {
             {/* Información adicional sobre participación */}
             <div className="pt-4">
               <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                Explora nuestras opciones de participación: voluntariados, donaciones y convocatorias de trabajo.
+                Explora nuestras opciones de participación: voluntariados/pasantías, donaciones y convocatorias de trabajo.
               </p>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default function ParticiparPage() {
             <img 
               alt="Personas trabajando juntas en comunidad" 
               className="w-full h-full object-cover object-center rounded-xl shadow-lg" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIx1tx00heJil1bwsXkts_1o3J29jKe59-7Bxk31ZSa8eDKJgQczCR-5uQIamAhmQ4WDo1FIRFNjM4e2V3dJzjTiA4-6Jo0xip4JKYg7L2oT5VY-0rqXbgoRlXtGC2DvrL5nbGYpcYsoC7j64abKKLbMTT8SQ5AlMQ6JbXYBkACgX7MaWFxO9siMrFUw4F4_nVC489CAr16AiP5j-eLpVWZEGMR1pTl7vOz0lLUt7LI6DgbjVEBYUuFiTBrPdlOfEGs8R2scMhP2E"
+              src="/static-images/heroes/participar-hero.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
           </div>
@@ -80,10 +80,10 @@ export default function ParticiparPage() {
                 <img 
                   alt="Voluntario trabajando" 
                   className="rounded-lg w-full h-56 object-cover mb-6" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNoowQe1sA533prRb3qVjIH4HNB9OCrmnSUR2XzryNwkABDCTZ9LWo9OVo1lXpKph9XpF-wPcWrWoTNZqaONOkI37zRZ_hf0nldguKJ45KH1ekiarPbDLCLK2ASQBGo119zft00SZ5Ork0I5LSz8hpx6BMofowkZrogwSIl4TaXz1T3vyLRx56jqcwBAUU9fyWQ4yqtGOE2607InXbNTNFV5WsMSv0FWZsVScRaxcoMEf53Ynp-yOTccA-TENqZ_YXB0MbV3Qiyw"
+                  src="/static-images/sections/voluntariado_tarjeta.jpg"
                 />
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 uppercase font-display mb-4">VOLUNTARIADO/PASANTIA</h3>
-                <p className="text-gray-700 dark:text-gray-300 text-base mb-6 leading-relaxed">Únete como voluntario y contribuye con tus habilidades ayudando en programas de liderazgo y actividades recreativas.</p>
+                <p className="text-gray-700 dark:text-gray-300 text-base mb-6 leading-relaxed">Únete como voluntario/pasante y contribuye con tus habilidades ayudando en programas de liderazgo y actividades recreativas.</p>
               </div>
               <a className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-base hover:text-blue-800 dark:hover:text-blue-300" href="/voluntariados">
                 VER MÁS
@@ -100,7 +100,7 @@ export default function ParticiparPage() {
                 <img 
                   alt="Personas trabajando juntas" 
                   className="rounded-lg w-full h-56 object-cover mb-6" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0pGgRLmEmN3uyq8qS0lEiLd_PUulGAWf178KTggRIwuRJXUaMKHIAp2sY6vb6gXon-Boh5q4_HpABLTsxXnEOZV-neRH42ANRT-y9Pla1JKcdNCzu76Rs0X5nis-Yb5tw--_vepp-GXEGkDMcBaqX1ETbrS_leSN96BEkGR0CLyKpBLvynGon4uxbhJAIOD80rnPA1NJISFnQXQFxAYMzzIEu-ispCJWifoY2bYCI4oSDhdKPTgCQSNLX-81vAU1oF8O-5e0PqQ"
+                  src="/static-images/sections/amigo_estrella_tarjeta.jpg"
                 />
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 uppercase font-display mb-4">SÉ UN AMIGO ESTRELLA</h3>
                 <p className="text-gray-700 dark:text-gray-300 text-base mb-6 leading-relaxed">Tu donación transforma vidas y comunidades. Contribuye con recursos económicos para apoyar nuestros programas.</p>
@@ -120,7 +120,7 @@ export default function ParticiparPage() {
                 <img 
                   alt="Persona trabajando en proyecto" 
                   className="rounded-lg w-full h-56 object-cover mb-6" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwubKoaz0rnyaviAG8NrwJC7nmDrzfksWo9dzxw_lVV6mVL3cUp8HeJKc6r7xF0Zk1HSa8hajdJsMfB85SMbUrRMqS6N67JRiZRIlG5eJeIWg-a3eqcvIIyIVZnJ8sSTKMiajzgTnvfwlvVSdOT2kOiizvJEYrUCvkQzZ5ML0B9p-OQN-JIOpPmmF1y6nOYxrocFUBPA1alY8Ui3C6xqPQ1dBuVvhewL_UoAmYS7X0i427dzwOeeS_WIcl2Ex3zmBNEVXDhWuXjQ"
+                  src="/static-images/sections/convocatorias_tarjeta.jpg"
                 />
                 <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 uppercase font-display mb-4">CONVOCATORIAS</h3>
                 <p className="text-gray-700 dark:text-gray-300 text-base mb-6 leading-relaxed">Explora nuestras convocatorias de trabajo y consultorías. Únete a nuestro equipo y contribuye al desarrollo social de Bolivia.</p>

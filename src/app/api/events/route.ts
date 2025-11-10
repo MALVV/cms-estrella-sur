@@ -33,11 +33,11 @@ export async function GET(request: NextRequest) {
       where.isFeatured = true;
     }
 
-    // Agregar búsqueda por título y descripción
+    // Agregar búsqueda por título y contenido
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
         { location: { contains: search, mode: 'insensitive' } },
       ];
     }
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       title,
-      description,
+      content,
       imageUrl,
       imageAlt,
       eventDate,
@@ -113,9 +113,9 @@ export async function POST(request: NextRequest) {
       isFeatured = false,
     } = body;
 
-    if (!title || !description || !eventDate) {
+    if (!title || !content || !eventDate) {
       return NextResponse.json(
-        { error: 'Título, descripción y fecha del evento son requeridos' },
+        { error: 'Título, contenido y fecha del evento son requeridos' },
         { status: 400 }
       );
     }
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
     const event = await prisma.event.create({
       data: {
         title,
-        description,
+        content,
         imageUrl: normalizeImageUrlForSave(imageUrl),
         imageAlt: imageAlt || null,
         eventDate: new Date(eventDate),

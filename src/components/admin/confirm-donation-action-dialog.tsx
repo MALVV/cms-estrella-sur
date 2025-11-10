@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { useToast } from '@/components/ui/use-toast'
-import { CheckCircle, XCircle, Trash2, Upload, ImageIcon } from 'lucide-react'
+import { CheckCircle, XCircle, Trash2, ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 
 interface Donation {
@@ -317,24 +317,6 @@ export function ConfirmDonationActionDialog({
                         Eliminar
                       </Button>
                     </div>
-                    <label htmlFor="proof-file-input-replace" className="cursor-pointer">
-                      <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                        <Upload className="mr-2 h-4 w-4" />
-                        {uploading ? 'Subiendo...' : 'Cambiar comprobante'}
-                      </Button>
-                      <Input
-                        id="proof-file-input-replace"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(file);
-                        }}
-                        disabled={uploading || loading}
-                      />
-                    </label>
                   </div>
                 )}
               </div>

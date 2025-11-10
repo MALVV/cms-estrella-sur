@@ -57,6 +57,66 @@ export const MethodologyCardWrapper: React.FC<MethodologyCardWrapperProps> = ({
 }) => {
   const editDialogRef = useRef<HTMLButtonElement>(null);
 
+  // Función para convertir sectores del formato enum al formato español
+  const mapSectorsToSpanish = (sectors: string[]): ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[] => {
+    const enumToSpanishMap: Record<string, 'SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS'> = {
+      'HEALTH': 'SALUD',
+      'EDUCATION': 'EDUCACION',
+      'LIVELIHOODS': 'MEDIOS_DE_VIDA',
+      'PROTECTION': 'PROTECCION',
+      'SUSTAINABILITY': 'SOSTENIBILIDAD',
+      'EARLY_CHILD_DEVELOPMENT': 'DESARROLLO_INFANTIL_TEMPRANO',
+      'CHILDREN_IN_CRISIS': 'NINEZ_EN_CRISIS',
+    };
+    const validSpanishSectors = ['SALUD', 'EDUCACION', 'MEDIOS_DE_VIDA', 'PROTECCION', 'SOSTENIBILIDAD', 'DESARROLLO_INFANTIL_TEMPRANO', 'NINEZ_EN_CRISIS'] as const;
+    type SpanishSector = typeof validSpanishSectors[number];
+    
+    return sectors
+      .map((sector): SpanishSector | undefined => {
+        if (validSpanishSectors.includes(sector as SpanishSector)) {
+          return sector as SpanishSector;
+        }
+        return enumToSpanishMap[sector];
+      })
+      .filter((sector): sector is SpanishSector => sector !== undefined);
+  };
+
+  // Función para convertir sectores del formato español al formato enum
+  const mapSectorsToEnum = (sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[]): string[] => {
+    const spanishToEnumMap: Record<string, string> = {
+      'SALUD': 'HEALTH',
+      'EDUCACION': 'EDUCATION',
+      'MEDIOS_DE_VIDA': 'LIVELIHOODS',
+      'PROTECCION': 'PROTECTION',
+      'SOSTENIBILIDAD': 'SUSTAINABILITY',
+      'DESARROLLO_INFANTIL_TEMPRANO': 'EARLY_CHILD_DEVELOPMENT',
+      'NINEZ_EN_CRISIS': 'CHILDREN_IN_CRISIS',
+    };
+    const validEnums = ['HEALTH', 'EDUCATION', 'LIVELIHOODS', 'PROTECTION', 'SUSTAINABILITY', 'EARLY_CHILD_DEVELOPMENT', 'CHILDREN_IN_CRISIS'];
+    
+    return sectors
+      .map(sector => {
+        if (validEnums.includes(sector)) {
+          return sector;
+        }
+        return spanishToEnumMap[sector] || sector;
+      })
+      .filter(s => s !== undefined) as string[];
+  };
+
+  // Convertir methodology al formato esperado por EditMethodologyDialog
+  const methodologyForEdit = {
+    ...methodology,
+    sectors: mapSectorsToEnum(methodology.sectors),
+  };
+
+  // Wrapper para convertir el methodology antes de pasarlo a onMethodologyUpdated
+  const handleMethodologyUpdated = (updatedMethodology: { sectors: string[] } & Omit<Methodology, 'sectors'>) => {
+    onMethodologyUpdated({
+      ...updatedMethodology,
+      sectors: mapSectorsToSpanish(updatedMethodology.sectors || []),
+    });
+  };
 
   const handleToggleStatus = () => {
     // Abrir el diálogo de toggle status
@@ -94,8 +154,8 @@ export const MethodologyCardWrapper: React.FC<MethodologyCardWrapperProps> = ({
       {/* Diálogos con botones ocultos */}
       <div data-methodology-id={methodology.id} style={{ display: 'none' }}>
         <EditMethodologyDialog
-          methodology={methodology}
-          onMethodologyUpdated={onMethodologyUpdated}
+          methodology={methodologyForEdit}
+          onMethodologyUpdated={handleMethodologyUpdated}
         >
           <button ref={editDialogRef} />
         </EditMethodologyDialog>

@@ -80,7 +80,14 @@ export default function ProgramasPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/programas_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -94,7 +101,7 @@ export default function ProgramasPage() {
               DE IMPACTO
             </h1>
             <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
-              Descubre nuestros programas de desarrollo integral que abordan las causas raíz de los problemas sociales, creando soluciones sostenibles y transformadoras.
+              Encaminamos programas de desarrollo integral que abordan las causas raíz de los problemas sociales, creando soluciones sostenibles y transformadoras.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#programas">
@@ -109,19 +116,6 @@ export default function ProgramasPage() {
       </div>
 
       <main className="container mx-auto px-4 py-8" id="programas">
-        {/* Introducción */}
-        <div className="text-center mb-12">
-          <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-            NUESTROS PROGRAMAS
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark leading-tight mb-6">
-            Programas Estratégicos de Impacto
-              </h2>
-          <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-4xl mx-auto">
-            Descubre nuestros programas integrales diseñados para abordar desafíos sociales fundamentales. Cada programa está estructurado para generar impacto sostenible y transformador en las comunidades más vulnerables.
-              </p>
-            </div>
-
             {programas.length === 0 ? (
               <div className="text-center py-12">
                 <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />

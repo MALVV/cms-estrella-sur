@@ -566,22 +566,6 @@ export function EntityImagesGallery({ entityType, entityId, entityName }: Entity
                     className="object-contain"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-2">
-                    <Label htmlFor="edit-image-file" className="cursor-pointer">
-                      <Button type="button" variant="secondary" size="sm">
-                        <Upload className="h-4 w-4 mr-2" />
-                        Cambiar Imagen
-                      </Button>
-                      <Input
-                        id="edit-image-file"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(file);
-                        }}
-                      />
-                    </Label>
                     <Button
                       type="button"
                       variant="destructive"

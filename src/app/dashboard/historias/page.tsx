@@ -22,7 +22,6 @@ interface Story {
   id: string
   title: string
   content?: string
-  summary?: string
   imageUrl: string | null
   imageAlt: string | null
   status: 'ACTIVE' | 'INACTIVE'
@@ -452,7 +451,7 @@ function StoryList({
                 </Badge>
               </div>
               <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                {story.summary || 'No hay resumen disponible.'}
+                {story.content ? (story.content.length > 150 ? story.content.substring(0, 150) + '...' : story.content) : 'No hay contenido disponible.'}
               </p>
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-1">
@@ -472,7 +471,6 @@ function StoryList({
                     story={{
                       ...story,
                       content: story.content || '',
-                      summary: story.summary || '',
                       imageUrl: story.imageUrl || '',
                       imageAlt: story.imageAlt || ''
                     }}
@@ -487,7 +485,7 @@ function StoryList({
                   story={{
                     id: story.id,
                     title: story.title,
-                    description: story.summary || '',
+                    description: story.content?.substring(0, 100) || '' || '',
                     status: story.status
                   }}
                   onStatusChanged={onToggleStatus}
@@ -509,7 +507,7 @@ function StoryList({
                     story={{
                       id: story.id,
                       title: story.title,
-                      description: story.summary || ''
+                      description: story.content?.substring(0, 100) || '' || ''
                     }}
                     onStoryDeleted={onStoryDeleted}
                   >
@@ -582,7 +580,7 @@ function StoryList({
                       </Badge>
                     </div>
                     <p className="text-sm text-gray-600 line-clamp-3 mb-2">
-                      {story.summary || 'No hay resumen disponible.'}
+                      {story.content?.substring(0, 100) || '' || 'No hay resumen disponible.'}
                     </p>
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
                       <div className="flex items-center gap-1">
@@ -607,7 +605,6 @@ function StoryList({
                         story={{
                           ...story,
                           content: story.content || '',
-                          summary: story.summary || '',
                           imageUrl: story.imageUrl || '',
                           imageAlt: story.imageAlt || ''
                         }}
@@ -622,7 +619,7 @@ function StoryList({
                       story={{
                         id: story.id,
                         title: story.title,
-                        description: story.summary || '',
+                        description: story.content?.substring(0, 100) || '' || '',
                         status: story.status
                       }}
                       onStatusChanged={onToggleStatus}
@@ -643,7 +640,6 @@ function StoryList({
                               story={{
                                 ...story,
                                 content: story.content || '',
-                                summary: story.summary || '',
                                 imageUrl: story.imageUrl || '',
                                 imageAlt: story.imageAlt || ''
                               }}
@@ -659,7 +655,7 @@ function StoryList({
                             story={{
                               id: story.id,
                               title: story.title,
-                              description: story.summary || '',
+                              description: story.content?.substring(0, 100) || '' || '',
                               status: story.status
                             }}
                             onStatusChanged={onToggleStatus}
@@ -683,7 +679,7 @@ function StoryList({
                               story={{
                                 id: story.id,
                                 title: story.title,
-                                description: story.summary || ''
+                                description: story.content?.substring(0, 100) || '' || ''
                               }}
                               onStoryDeleted={onStoryDeleted}
                             >

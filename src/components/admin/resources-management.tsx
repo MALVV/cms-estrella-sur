@@ -44,9 +44,8 @@ interface Resource {
   description?: string;
   fileName: string;
   fileUrl: string;
-  fileType?: string;
   category: 'MULTIMEDIA_CENTER' | 'PUBLICATIONS';
-  subcategory?: 'VIDEOS' | 'AUDIOS' | 'DIGITAL_LIBRARY' | 'DOWNLOADABLE_GUIDES' | 'MANUALS' | 'none';
+  subcategory?: 'VIDEOS' | 'AUDIOS' | 'INVESTIGATIONS' | 'METHODOLOGICAL_RESOURCES' | 'SYSTEMATIZATION_DOCUMENTS' | 'none';
   thumbnailUrl?: string;
   isActive: boolean;
   isFeatured: boolean;
@@ -64,7 +63,7 @@ const categoryInfo = {
   MULTIMEDIA_CENTER: {
     title: 'Centro Multimedia',
     icon: PlayCircle,
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-100 transition-colors duration-200 cursor-default',
     subcategories: {
       VIDEOS: { title: 'Videos', icon: Video },
       AUDIOS: { title: 'Audios', icon: Music }
@@ -73,11 +72,11 @@ const categoryInfo = {
   PUBLICATIONS: {
     title: 'Publicaciones',
     icon: BookOpen,
-    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 hover:text-orange-900 dark:hover:bg-orange-800 dark:hover:text-orange-100 transition-colors duration-200 cursor-default',
     subcategories: {
-      DIGITAL_LIBRARY: { title: 'Biblioteca Digital', icon: Library },
-      DOWNLOADABLE_GUIDES: { title: 'Guías Descargables', icon: FileDown },
-      MANUALS: { title: 'Manuales', icon: Book }
+      INVESTIGATIONS: { title: 'Investigaciones', icon: Library },
+      METHODOLOGICAL_RESOURCES: { title: 'Recursos Metodológicos', icon: FileDown },
+      SYSTEMATIZATION_DOCUMENTS: { title: 'Documentos de Sistematización', icon: Book }
     }
   }
 };
@@ -732,7 +731,6 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
     description: '',
     fileName: '',
     fileUrl: '',
-    fileType: '',
     category: '',
     subcategory: 'none',
     thumbnailUrl: '',
@@ -748,10 +746,22 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
 
   const handleFileUpload = async (file: File, isThumbnail: boolean = false) => {
     if (isThumbnail) {
-      if (!file.type.startsWith('image/')) {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      
+      if (!file.type.startsWith('image/') || !allowed.includes(file.type)) {
         toast({
           title: 'Error',
-          description: 'Solo se permiten archivos de imagen para la miniatura',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (file.size > maxBytes) {
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
           variant: 'destructive',
         });
         return;
@@ -767,13 +777,22 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         description: 'La imagen se subirá al guardar el recurso',
       });
     } else {
+      // Validar que no sea un video
+      if (file.type.startsWith('video/')) {
+        toast({
+          title: 'Error',
+          description: 'No se pueden subir videos al bucket. Por favor, proporciona un enlace (URL) al video en su lugar.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
       setSelectedFile(file);
-      setFormData({ ...formData, fileName: file.name, fileType: file.type });
+      setFormData({ ...formData, fileName: file.name });
       toast({
         title: 'Archivo seleccionado',
         description: 'El archivo se subirá al guardar el recurso',
@@ -783,6 +802,16 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validar campos requeridos
+    if (!formData.title || !formData.category) {
+      toast({
+        title: 'Error',
+        description: 'Título y categoría son campos requeridos',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     // Validar que haya un archivo o URL
     if (!selectedFile && !formData.fileUrl) {
@@ -799,7 +828,7 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
 
     try {
       let finalFileUrl = formData.fileUrl;
-      let finalFileType = formData.fileType;
+      let finalFileName = formData.fileName;
       let finalThumbnailUrl: string | null = formData.thumbnailUrl || null;
 
       // Subir archivo si se seleccionó uno
@@ -821,7 +850,7 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
 
           const uploadData = await uploadResponse.json();
           finalFileUrl = uploadData.url;
-          finalFileType = selectedFile.type;
+          finalFileName = formData.fileName || selectedFile.name || uploadData.originalName || 'archivo';
         } catch (error) {
           console.error('Error uploading file:', error);
           toast({
@@ -835,6 +864,44 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         } finally {
           setUploading(false);
         }
+      }
+
+      // Generar fileName si no existe
+      if (!finalFileName || finalFileName.trim() === '') {
+        if (finalFileUrl) {
+          try {
+            // Para URLs de YouTube, usar el título del recurso como nombre
+            if (finalFileUrl.includes('youtube.com') || finalFileUrl.includes('youtu.be')) {
+              finalFileName = formData.title || 'video-youtube';
+            } else {
+              // Intentar extraer el nombre del archivo de la URL
+              const urlObj = new URL(finalFileUrl);
+              const pathParts = urlObj.pathname.split('/').filter(p => p);
+              finalFileName = pathParts[pathParts.length - 1] || formData.title || 'recurso';
+            }
+          } catch {
+            // Si falla al parsear la URL, usar el título o un nombre por defecto
+            finalFileName = formData.title || 'recurso';
+          }
+        } else {
+          finalFileName = formData.title || 'recurso';
+        }
+      }
+
+      // Asegurar que fileName no esté vacío
+      if (!finalFileName || finalFileName.trim() === '') {
+        finalFileName = formData.title || 'recurso';
+      }
+
+      // Validar que todos los campos requeridos estén presentes antes de enviar
+      if (!formData.title || !formData.category || !finalFileName || !finalFileUrl) {
+        toast({
+          title: 'Error',
+          description: 'Por favor completa todos los campos requeridos: Título, Categoría, Nombre de archivo y URL',
+          variant: 'destructive',
+        });
+        setLoading(false);
+        return;
       }
 
       // Subir miniatura si se seleccionó una
@@ -871,22 +938,31 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         }
       }
 
+      const requestBody = {
+        title: formData.title.trim(),
+        description: formData.description?.trim() || undefined,
+        fileName: finalFileName.trim(),
+        fileUrl: finalFileUrl.trim(),
+        category: formData.category,
+        subcategory: formData.subcategory === 'none' ? undefined : formData.subcategory,
+        thumbnailUrl: finalThumbnailUrl || undefined,
+        isFeatured: formData.isFeatured || false,
+      };
+
+      // Log para debugging (remover en producción si es necesario)
+      console.log('Enviando recurso:', requestBody);
+
       const response = await fetch('/api/resources', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          fileUrl: finalFileUrl,
-          fileType: finalFileType,
-          thumbnailUrl: finalThumbnailUrl || undefined,
-          subcategory: formData.subcategory === 'none' ? undefined : formData.subcategory,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error('Error al crear el recurso');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al crear el recurso');
       }
 
       toast({
@@ -904,7 +980,6 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         description: '',
         fileName: '',
         fileUrl: '',
-        fileType: '',
         category: '',
         subcategory: 'none',
         thumbnailUrl: '',
@@ -916,7 +991,7 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
       console.error('Error al crear recurso:', error);
       toast({
         title: 'Error',
-        description: 'Error al crear el recurso',
+        description: error instanceof Error ? error.message : 'Error al crear el recurso',
         variant: 'destructive',
       });
     } finally {
@@ -942,75 +1017,6 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
-      </div>
-
-        <div>
-        <label className="block text-sm font-medium mb-2">URL del archivo *</label>
-        <div className="space-y-2">
-          {filePreviewUrl || formData.fileUrl ? (
-            <div className="relative border rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-gray-500" />
-                  <span className="text-sm">{formData.fileName || 'Archivo seleccionado'}</span>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedFile(null);
-                    setFilePreviewUrl('');
-                    setFormData({ ...formData, fileName: '', fileUrl: '', fileType: '' });
-                  }}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                {selectedFile ? 'El archivo se subirá al guardar el recurso' : 'URL actual: ' + formData.fileUrl}
-              </p>
-            </div>
-          ) : null}
-          <div className="flex gap-2">
-          <Input
-              type="file"
-              accept="*/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file, false);
-                }
-              }}
-              className="flex-1"
-            />
-            {!filePreviewUrl && !formData.fileUrl && (
-          <Input
-                type="text"
-                placeholder="O ingresa una URL manualmente"
-            value={formData.fileUrl}
-            onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
-                className="flex-1"
-          />
-            )}
-        </div>
-          {formData.fileName && (
-          <Input
-              value={formData.fileName}
-              onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
-              placeholder="Nombre del archivo"
-              className="mt-2"
-            />
-          )}
-        </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Tipo MIME</label>
-          <Input
-            value={formData.fileType}
-            onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-          />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -1050,70 +1056,131 @@ const CreateResourceForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) 
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">URL de miniatura</label>
+        <div>
+        <label className="block text-sm font-medium mb-2">URL del archivo *</label>
         <div className="space-y-2">
-          {thumbnailPreviewUrl || formData.thumbnailUrl ? (
+          {filePreviewUrl || formData.fileUrl ? (
             <div className="relative border rounded-lg p-4">
-              <div className="flex items-center gap-4">
-                {thumbnailPreviewUrl || (formData.thumbnailUrl && formData.thumbnailUrl.startsWith('http')) ? (
-                  <div className="relative w-24 h-24 rounded overflow-hidden">
-                    <Image
-                      src={thumbnailPreviewUrl || formData.thumbnailUrl}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : null}
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {selectedThumbnailFile ? selectedThumbnailFile.name : 'Miniatura actual'}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedThumbnailFile(null);
-                        setThumbnailPreviewUrl('');
-                        setFormData({ ...formData, thumbnailUrl: '' });
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {selectedThumbnailFile ? 'La imagen se subirá al guardar el recurso' : 'URL actual: ' + formData.thumbnailUrl}
-                  </p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-gray-500" />
+                  <span className="text-sm">{formData.fileName || 'Archivo seleccionado'}</span>
                 </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedFile(null);
+                    setFilePreviewUrl('');
+                    setFormData({ ...formData, fileName: '', fileUrl: '' });
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                {selectedFile ? 'El archivo se subirá al guardar el recurso' : 'URL actual: ' + formData.fileUrl}
+              </p>
             </div>
           ) : null}
           <div className="flex gap-2">
-        <Input
+          {formData.subcategory !== 'VIDEOS' && (
+            <Input
               type="file"
-              accept="image/*"
+              accept="*/*"
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  handleFileUpload(file, true);
+                  handleFileUpload(file, false);
                 }
               }}
               className="flex-1"
             />
-            {!thumbnailPreviewUrl && !formData.thumbnailUrl && (
-              <Input
+          )}
+            {(!filePreviewUrl && !formData.fileUrl) || formData.subcategory === 'VIDEOS' ? (
+          <Input
                 type="text"
-                placeholder="O ingresa una URL manualmente"
-          value={formData.thumbnailUrl}
-          onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+                placeholder={formData.subcategory === 'VIDEOS' ? 'Ingresa la URL del video (YouTube, Vimeo, etc.)' : 'O ingresa una URL manualmente'}
+            value={formData.fileUrl}
+            onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
                 className="flex-1"
-        />
-            )}
-          </div>
+          />
+            ) : null}
         </div>
+          {formData.subcategory === 'VIDEOS' && (
+            <p className="text-xs text-gray-500 mt-1">
+              Los videos solo pueden ser enlaces externos (no se pueden subir al bucket)
+            </p>
+          )}
+          {formData.fileName && (
+          <Input
+              value={formData.fileName}
+              onChange={(e) => setFormData({ ...formData, fileName: e.target.value })}
+              placeholder="Nombre del archivo"
+              className="mt-2"
+            />
+          )}
+        </div>
+        </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">Miniatura</label>
+        {!thumbnailPreviewUrl && !formData.thumbnailUrl ? (
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+            <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <div className="mt-4">
+              <label htmlFor="thumbnail-upload-create" className="cursor-pointer">
+                <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                  {uploading ? 'Subiendo imagen...' : 'Haz clic para subir miniatura'}
+                </span>
+                <input
+                  id="thumbnail-upload-create"
+                  name="thumbnail-upload"
+                  type="file"
+                  className="sr-only"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file, true);
+                  }}
+                  disabled={uploading || loading}
+                />
+              </label>
+              <p className="mt-2 text-sm text-gray-500">
+                PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <Image
+                src={thumbnailPreviewUrl || formData.thumbnailUrl || ''}
+                alt="Vista previa de miniatura"
+                fill
+                className="object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setSelectedThumbnailFile(null);
+                  setThumbnailPreviewUrl('');
+                  setFormData({ ...formData, thumbnailUrl: '' });
+                  toast({
+                    title: 'Imagen eliminada',
+                    description: 'Se eliminó del formulario',
+                  });
+                }}
+              >
+                Eliminar
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex items-center space-x-2">
@@ -1146,7 +1213,6 @@ const EditResourceForm: React.FC<{
     description: resource.description || '',
     fileName: resource.fileName,
     fileUrl: resource.fileUrl,
-    fileType: resource.fileType || '',
     category: resource.category,
     subcategory: resource.subcategory || 'none',
     thumbnailUrl: resource.thumbnailUrl || '',
@@ -1169,7 +1235,6 @@ const EditResourceForm: React.FC<{
       description: resource.description || '',
       fileName: resource.fileName,
       fileUrl: resource.fileUrl,
-      fileType: resource.fileType || '',
       category: resource.category,
       subcategory: resource.subcategory || 'none',
       thumbnailUrl: resource.thumbnailUrl || '',
@@ -1186,10 +1251,22 @@ const EditResourceForm: React.FC<{
 
   const handleFileUpload = async (file: File, isThumbnail: boolean = false) => {
     if (isThumbnail) {
-      if (!file.type.startsWith('image/')) {
+      const maxMb = Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20);
+      const maxBytes = maxMb * 1024 * 1024;
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      
+      if (!file.type.startsWith('image/') || !allowed.includes(file.type)) {
         toast({
           title: 'Error',
-          description: 'Solo se permiten archivos de imagen para la miniatura',
+          description: 'Formato no permitido. Usa JPG, PNG, WEBP o GIF',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (file.size > maxBytes) {
+        toast({
+          title: 'Error',
+          description: `El archivo es demasiado grande. Máximo ${maxMb}MB`,
           variant: 'destructive',
         });
         return;
@@ -1206,6 +1283,15 @@ const EditResourceForm: React.FC<{
         description: 'La imagen se subirá al guardar el recurso',
       });
     } else {
+      // Validar que no sea un video
+      if (file.type.startsWith('video/')) {
+        toast({
+          title: 'Error',
+          description: 'No se pueden subir videos al bucket. Por favor, proporciona un enlace (URL) al video en su lugar.',
+          variant: 'destructive',
+        });
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         setFilePreviewUrl(reader.result as string);
@@ -1213,7 +1299,7 @@ const EditResourceForm: React.FC<{
       reader.readAsDataURL(file);
       setSelectedFile(file);
       setFileMarkedForDeletion(false);
-      setFormData({ ...formData, fileName: file.name, fileType: file.type });
+      setFormData({ ...formData, fileName: file.name });
       toast({
         title: 'Archivo seleccionado',
         description: 'El archivo se subirá al guardar el recurso',
@@ -1259,7 +1345,6 @@ const EditResourceForm: React.FC<{
       let finalFileUrl = fileMarkedForDeletion 
         ? (selectedFile ? null : formData.fileUrl) // Si hay archivo nuevo, se asignará después
         : (formData.fileUrl || resource.fileUrl); // Mantener el existente si no hay nuevo
-      let finalFileType = formData.fileType || resource.fileType;
       let finalThumbnailUrl: string | null = formData.thumbnailUrl || null;
 
       // Manejar archivo: subir nuevo o mantener existente
@@ -1300,7 +1385,6 @@ const EditResourceForm: React.FC<{
 
           const uploadData = await uploadResponse.json();
           finalFileUrl = uploadData.url;
-          finalFileType = selectedFile.type;
         } catch (error) {
           console.error('Error uploading file:', error);
           toast({
@@ -1419,7 +1503,6 @@ const EditResourceForm: React.FC<{
       // Solo incluir fileUrl si hay un cambio (nuevo archivo, nueva URL, o se marcó para eliminar)
       if (selectedFile || (fileMarkedForDeletion && formData.fileUrl) || (formData.fileUrl && formData.fileUrl !== resource.fileUrl)) {
         updateData.fileUrl = finalFileUrl;
-        if (finalFileType) updateData.fileType = finalFileType;
       }
 
       const response = await fetch(`/api/resources/${resource.id}`, {
@@ -1478,6 +1561,43 @@ const EditResourceForm: React.FC<{
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-2">Categoría *</label>
+          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'MULTIMEDIA_CENTER' | 'PUBLICATIONS', subcategory: 'none' })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(categoryInfo).map(([key, info]) => (
+                <SelectItem key={key} value={key}>{info.title}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Subcategoría</label>
+          <Select value={formData.subcategory} onValueChange={(value) => setFormData({ ...formData, subcategory: value as any })}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar subcategoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Sin subcategoría</SelectItem>
+              {formData.category && categoryInfo[formData.category as keyof typeof categoryInfo]?.subcategories ? (
+                Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
+                  <SelectItem key={key} value={key}>{info.title}</SelectItem>
+                ))
+              ) : !formData.category ? (
+                <SelectItem value="select-category" disabled>
+                  Selecciona una categoría primero
+                </SelectItem>
+              ) : null}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
         <div>
@@ -1544,7 +1664,8 @@ const EditResourceForm: React.FC<{
             </div>
           ) : null}
           <div className="flex gap-2">
-          <Input
+          {formData.subcategory !== 'VIDEOS' && (
+            <Input
               type="file"
               accept="*/*"
               onChange={(e) => {
@@ -1555,16 +1676,22 @@ const EditResourceForm: React.FC<{
               }}
               className="flex-1"
             />
-            {!filePreviewUrl && !formData.fileUrl && !fileMarkedForDeletion && (
+          )}
+            {(!filePreviewUrl && !formData.fileUrl && !fileMarkedForDeletion) || formData.subcategory === 'VIDEOS' ? (
           <Input
                 type="text"
-                placeholder="O ingresa una URL manualmente"
+                placeholder={formData.subcategory === 'VIDEOS' ? 'Ingresa la URL del video (YouTube, Vimeo, etc.)' : 'O ingresa una URL manualmente'}
             value={formData.fileUrl}
             onChange={(e) => setFormData({ ...formData, fileUrl: e.target.value })}
                 className="flex-1"
           />
-            )}
+            ) : null}
         </div>
+          {formData.subcategory === 'VIDEOS' && (
+            <p className="text-xs text-gray-500 mt-1">
+              Los videos solo pueden ser enlaces externos (no se pueden subir al bucket)
+            </p>
+          )}
           {formData.fileName && !fileMarkedForDeletion && (
           <Input
               value={formData.fileName}
@@ -1576,148 +1703,97 @@ const EditResourceForm: React.FC<{
         </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Tipo MIME</label>
-          <Input
-            value={formData.fileType}
-            onChange={(e) => setFormData({ ...formData, fileType: e.target.value })}
-          />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-2">Categoría *</label>
-          <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'MULTIMEDIA_CENTER' | 'PUBLICATIONS', subcategory: 'none' })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar categoría" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(categoryInfo).map(([key, info]) => (
-                <SelectItem key={key} value={key}>{info.title}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-2">Subcategoría</label>
-          <Select value={formData.subcategory} onValueChange={(value) => setFormData({ ...formData, subcategory: value as any })}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar subcategoría" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Sin subcategoría</SelectItem>
-              {formData.category && categoryInfo[formData.category as keyof typeof categoryInfo]?.subcategories ? (
-                Object.entries(categoryInfo[formData.category as keyof typeof categoryInfo].subcategories).map(([key, info]) => (
-                  <SelectItem key={key} value={key}>{info.title}</SelectItem>
-                ))
-              ) : !formData.category ? (
-                <SelectItem value="select-category" disabled>
-                  Selecciona una categoría primero
-                </SelectItem>
-              ) : null}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
       <div>
-        <label className="block text-sm font-medium mb-2">URL de miniatura</label>
-        <div className="space-y-2">
-          {(thumbnailPreviewUrl || formData.thumbnailUrl) && !thumbnailMarkedForDeletion ? (
-            <div className="relative border rounded-lg p-4">
-              <div className="flex items-center gap-4">
-                {thumbnailPreviewUrl || (formData.thumbnailUrl && formData.thumbnailUrl.startsWith('http')) ? (
-                  <div className="relative w-24 h-24 rounded overflow-hidden">
-                    <Image
-                      src={thumbnailPreviewUrl || formData.thumbnailUrl}
-                      alt="Preview"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ) : null}
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {selectedThumbnailFile ? selectedThumbnailFile.name : 'Miniatura actual'}
-                    </span>
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setThumbnailMarkedForDeletion(true);
-                          setSelectedThumbnailFile(null);
-                          setThumbnailPreviewUrl('');
-                          toast({
-                            title: 'Imagen marcada para eliminar',
-                            description: 'La imagen se eliminará al guardar el recurso',
-                          });
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedThumbnailFile(null);
-                          setThumbnailPreviewUrl('');
-                          setThumbnailMarkedForDeletion(false);
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {selectedThumbnailFile ? 'La imagen se subirá al guardar el recurso' : 'URL actual: ' + formData.thumbnailUrl}
-                  </p>
-                </div>
+        <label className="block text-sm font-medium mb-2">Miniatura</label>
+        {!thumbnailPreviewUrl && !formData.thumbnailUrl && !thumbnailMarkedForDeletion ? (
+          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-primary transition-colors">
+            <ImageIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+            <div className="mt-4">
+              <label htmlFor="thumbnail-upload-edit" className="cursor-pointer">
+                <span className="mt-2 block text-base font-semibold text-gray-900 dark:text-gray-100 mb-1 underline">
+                  {uploading ? 'Subiendo imagen...' : 'Haz clic para subir miniatura'}
+                </span>
+                <input
+                  id="thumbnail-upload-edit"
+                  name="thumbnail-upload"
+                  type="file"
+                  className="sr-only"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file, true);
+                  }}
+                  disabled={uploading || loading}
+                />
+              </label>
+              <p className="mt-2 text-sm text-gray-500">
+                PNG, JPG, WEBP o GIF hasta {String(Number(process.env.NEXT_PUBLIC_MAX_UPLOAD_MB || process.env.MAX_UPLOAD_MB || 20))}MB
+              </p>
+            </div>
+          </div>
+        ) : thumbnailMarkedForDeletion ? (
+          <div className="border border-red-300 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+            <p className="text-sm text-red-600 dark:text-red-400">La miniatura se eliminará al guardar</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setThumbnailMarkedForDeletion(false);
+              }}
+              className="mt-2"
+            >
+              Cancelar eliminación
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="relative w-full h-48 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+              <Image
+                src={thumbnailPreviewUrl || formData.thumbnailUrl || ''}
+                alt="Vista previa de miniatura"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute top-2 right-2 flex gap-2">
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setThumbnailMarkedForDeletion(true);
+                    setSelectedThumbnailFile(null);
+                    setThumbnailPreviewUrl('');
+                    toast({
+                      title: 'Imagen marcada para eliminar',
+                      description: 'La imagen se eliminará al guardar el recurso',
+                    });
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    // Permitir cambiar la imagen
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) handleFileUpload(file, true);
+                    };
+                    input.click();
+                  }}
+                >
+                  Cambiar
+                </Button>
               </div>
             </div>
-          ) : thumbnailMarkedForDeletion ? (
-            <div className="border border-red-300 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
-              <p className="text-sm text-red-600 dark:text-red-400">La miniatura se eliminará al guardar</p>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setThumbnailMarkedForDeletion(false);
-                }}
-                className="mt-2"
-              >
-                Cancelar eliminación
-              </Button>
-            </div>
-          ) : null}
-          <div className="flex gap-2">
-        <Input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file, true);
-                }
-              }}
-              className="flex-1"
-            />
-            {!thumbnailPreviewUrl && !formData.thumbnailUrl && !thumbnailMarkedForDeletion && (
-              <Input
-                type="text"
-                placeholder="O ingresa una URL manualmente"
-          value={formData.thumbnailUrl}
-          onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
-                className="flex-1"
-        />
-            )}
           </div>
-        </div>
+        )}
       </div>
 
       <div className="flex items-center space-x-4">

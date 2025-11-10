@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { UserRole } from '@/lib/roles'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 
 interface EditUserModalProps {
   user: {
@@ -26,7 +26,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'MANAGER' as 'ADMINISTRATOR' | 'MANAGER',
+    role: 'MANAGER' as UserRole,
     isActive: true
   })
 
@@ -35,7 +35,7 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
       setFormData({
         name: user.name,
         email: user.email,
-        role: user.role as 'ADMINISTRATOR' | 'MANAGER',
+        role: user.role as UserRole,
         isActive: user.status === 'ACTIVE'
       })
     }
@@ -94,8 +94,9 @@ export function EditUserModal({ user, isOpen, onClose, onSave }: EditUserModalPr
                 <SelectValue placeholder="Seleccionar rol" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
-                <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
+                <SelectItem value={UserRole.ADMINISTRATOR}>{getRoleDisplayName(UserRole.ADMINISTRATOR)}</SelectItem>
+                <SelectItem value={UserRole.MANAGER}>{getRoleDisplayName(UserRole.MANAGER)}</SelectItem>
+                <SelectItem value={UserRole.CONSULTANT}>{getRoleDisplayName(UserRole.CONSULTANT)}</SelectItem>
               </SelectContent>
             </Select>
           </div>

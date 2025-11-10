@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,10 +23,13 @@ import {
   Clock,
   PlayCircle,
   Images,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 
@@ -59,23 +62,23 @@ const categoryInfo = {
     title: 'Centro Multimedia',
     description: 'Videos, audios y contenido multimedia interactivo',
     icon: PlayCircle,
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-100 transition-colors duration-200 cursor-default',
     bgColor: 'bg-blue-50 dark:bg-blue-950',
     subcategories: {
-      VIDEOS: { title: 'Videos', icon: Video, color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
-      AUDIOS: { title: 'Audios', icon: Music, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' }
+      VIDEOS: { title: 'Videos', icon: Video, color: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 hover:bg-red-200 hover:text-red-900 dark:hover:bg-red-800 dark:hover:text-red-100 transition-colors duration-200 cursor-default' },
+      AUDIOS: { title: 'Audios', icon: Music, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 hover:text-green-900 dark:hover:bg-green-800 dark:hover:text-green-100 transition-colors duration-200 cursor-default' }
     }
   },
   PUBLICATIONS: {
     title: 'Publicaciones',
     description: 'Biblioteca digital, guías y manuales descargables',
     icon: BookOpen,
-    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 hover:text-orange-900 dark:hover:bg-orange-800 dark:hover:text-orange-100 transition-colors duration-200 cursor-default',
     bgColor: 'bg-orange-50 dark:bg-orange-950',
     subcategories: {
-      DIGITAL_LIBRARY: { title: 'Biblioteca Digital', icon: Library, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200' },
-      DOWNLOADABLE_GUIDES: { title: 'Guías Descargables', icon: FileDown, color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200' },
-      MANUALS: { title: 'Manuales', icon: Book, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' }
+      INVESTIGATIONS: { title: 'Investigaciones', icon: Library, color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-200 hover:text-indigo-900 dark:hover:bg-indigo-800 dark:hover:text-indigo-100 transition-colors duration-200 cursor-default' },
+      METHODOLOGICAL_RESOURCES: { title: 'Recursos Metodológicos', icon: FileDown, color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200 hover:bg-teal-200 hover:text-teal-900 dark:hover:bg-teal-800 dark:hover:text-teal-100 transition-colors duration-200 cursor-default' },
+      SYSTEMATIZATION_DOCUMENTS: { title: 'Documentos de Sistematización', icon: Book, color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 hover:bg-amber-200 hover:text-amber-900 dark:hover:bg-amber-800 dark:hover:text-amber-100 transition-colors duration-200 cursor-default' }
     }
   }
 };
@@ -111,6 +114,10 @@ export default function ResourcesPage() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
   const [isAlbumDialogOpen, setIsAlbumDialogOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<Resource | null>(null);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [galleryLoading, setGalleryLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'multimedia' | 'publications' | 'gallery'>('multimedia');
@@ -182,6 +189,22 @@ export default function ResourcesPage() {
     }
   };
 
+  const openImageViewer = (imageIndex: number) => {
+    setSelectedImageIndex(imageIndex);
+    setIsImageViewerOpen(true);
+  };
+
+  const navigateImage = useCallback((direction: 'prev' | 'next') => {
+    if (selectedImageIndex === null || !selectedAlbum?.images) return;
+    
+    const totalImages = selectedAlbum.images.length;
+    if (direction === 'prev') {
+      setSelectedImageIndex(selectedImageIndex > 0 ? selectedImageIndex - 1 : totalImages - 1);
+    } else {
+      setSelectedImageIndex(selectedImageIndex < totalImages - 1 ? selectedImageIndex + 1 : 0);
+    }
+  }, [selectedImageIndex, selectedAlbum]);
+
   useEffect(() => {
     fetchResources();
   }, [activeTab, selectedSubcategory, searchTerm]);
@@ -197,6 +220,24 @@ export default function ResourcesPage() {
     setSelectedSubcategory('');
   }, [activeTab]);
 
+  // Navegación con teclado en el visor de imágenes
+  useEffect(() => {
+    if (!isImageViewerOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        navigateImage('prev');
+      } else if (e.key === 'ArrowRight') {
+        navigateImage('next');
+      } else if (e.key === 'Escape') {
+        setIsImageViewerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isImageViewerOpen, navigateImage]);
+
   const formatFileSize = (bytes?: number) => {
     if (!bytes) return '';
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -209,6 +250,76 @@ export default function ResourcesPage() {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  // Función para extraer el ID de YouTube de una URL
+  const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    // Patrones comunes de URLs de YouTube
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
+      /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    
+    return null;
+  };
+
+  // Función para extraer el ID de archivo de Google Drive de una URL
+  const getGoogleDriveFileId = (url: string): string | null => {
+    if (!url) return null;
+    
+    // Patrones comunes de URLs de Google Drive
+    const patterns = [
+      /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,
+      /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/,
+      /docs\.google\.com\/.*\/d\/([a-zA-Z0-9_-]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    
+    return null;
+  };
+
+  // Función para detectar si es un video de Facebook
+  const isFacebookVideo = (url: string): boolean => {
+    if (!url) return false;
+    
+    // Patrones comunes de URLs de Facebook
+    const patterns = [
+      /facebook\.com\/.*\/videos\//,
+      /facebook\.com\/watch/,
+      /fb\.watch\//,
+      /facebook\.com\/.*\/videos\/\d+/,
+    ];
+    
+    return patterns.some(pattern => pattern.test(url));
+  };
+
+  // Función para detectar el tipo de enlace
+  const getVideoType = (url: string): 'youtube' | 'googledrive' | 'facebook' | null => {
+    if (getYouTubeVideoId(url)) return 'youtube';
+    if (getGoogleDriveFileId(url)) return 'googledrive';
+    if (isFacebookVideo(url)) return 'facebook';
+    return null;
+  };
+
+  // Función para abrir el dialog de video
+  const openVideoDialog = (resource: Resource) => {
+    setSelectedVideo(resource);
+    setIsVideoDialogOpen(true);
   };
 
   const getFileIcon = (fileType?: string, subcategory?: string) => {
@@ -233,7 +344,14 @@ export default function ResourcesPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/centro_multimedia_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -554,26 +672,29 @@ export default function ResourcesPage() {
                             <span>{resource.downloadCount} descargas</span>
                           </div>
                         </div>
-                          <Button className="w-full" asChild>
-                          <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
-                            {resource.subcategory === 'VIDEOS' ? (
-                              <>
-                                <Play className="h-4 w-4 mr-2" />
-                                Reproducir
-                              </>
-                            ) : resource.subcategory === 'AUDIOS' ? (
-                              <>
+                          {resource.subcategory === 'VIDEOS' ? (
+                            <Button 
+                              className="w-full" 
+                              onClick={() => openVideoDialog(resource)}
+                            >
+                              <Play className="h-4 w-4 mr-2" />
+                              Reproducir
+                            </Button>
+                          ) : resource.subcategory === 'AUDIOS' ? (
+                            <Button className="w-full" asChild>
+                              <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
                                 <Volume2 className="h-4 w-4 mr-2" />
                                 Escuchar
-                              </>
-                            ) : (
-                              <>
+                              </a>
+                            </Button>
+                          ) : (
+                            <Button className="w-full" asChild>
+                              <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
                                 <Download className="h-4 w-4 mr-2" />
                                 Descargar
-                              </>
-                            )}
-                          </a>
-                        </Button>
+                              </a>
+                            </Button>
+                          )}
                       </CardContent>
                     </Card>
                   );
@@ -668,26 +789,29 @@ export default function ResourcesPage() {
                                   <span>{resource.downloadCount} descargas</span>
                                 </div>
                               </div>
-                          <Button className="w-full" asChild>
-                                <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
-                                  {resource.subcategory === 'VIDEOS' ? (
-                                    <>
-                                      <Play className="h-4 w-4 mr-2" />
-                                      Reproducir
-                                    </>
-                                  ) : resource.subcategory === 'AUDIOS' ? (
-                                    <>
-                                      <Volume2 className="h-4 w-4 mr-2" />
-                                      Escuchar
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Download className="h-4 w-4 mr-2" />
-                                      Descargar
-                                    </>
-                                  )}
-                                </a>
-                              </Button>
+                          {resource.subcategory === 'VIDEOS' ? (
+                            <Button 
+                              className="w-full" 
+                              onClick={() => openVideoDialog(resource)}
+                            >
+                              <Play className="h-4 w-4 mr-2" />
+                              Reproducir
+                            </Button>
+                          ) : resource.subcategory === 'AUDIOS' ? (
+                            <Button className="w-full" asChild>
+                              <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
+                                <Volume2 className="h-4 w-4 mr-2" />
+                                Escuchar
+                              </a>
+                            </Button>
+                          ) : (
+                            <Button className="w-full" asChild>
+                              <a href={resource.fileUrl} target="_blank" rel="noopener noreferrer">
+                                <Download className="h-4 w-4 mr-2" />
+                                Descargar
+                              </a>
+                            </Button>
+                          )}
                             </CardContent>
                           </Card>
                         );
@@ -765,8 +889,12 @@ export default function ResourcesPage() {
           </DialogHeader>
           {selectedAlbum?.images && selectedAlbum.images.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-4">
-              {selectedAlbum.images.map((image) => (
-                <Card key={image.id} className="overflow-hidden">
+              {selectedAlbum.images.map((image, index) => (
+                <Card 
+                  key={image.id} 
+                  className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => openImageViewer(index)}
+                >
                   <CardContent className="p-0">
                     <div className="relative w-full h-64 rounded-t-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
                       <Image
@@ -790,6 +918,169 @@ export default function ResourcesPage() {
             <div className="text-center py-12">
               <p className="text-muted-foreground">No hay imágenes en este álbum</p>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para reproducir video de YouTube */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={(open) => {
+        setIsVideoDialogOpen(open);
+        if (!open) {
+          setSelectedVideo(null);
+        }
+      }}>
+        <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-1">
+            <DialogTitle className="text-2xl">{selectedVideo?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedVideo && (() => {
+            const videoType = getVideoType(selectedVideo.fileUrl);
+            
+            if (!videoType) {
+              return (
+                <div className="px-6 pb-6">
+                  <p className="text-center text-muted-foreground py-8">
+                    URL de video no válida. Por favor, verifica que sea una URL de YouTube, Google Drive o Facebook.
+                  </p>
+                </div>
+              );
+            }
+
+            if (videoType === 'youtube') {
+              const videoId = getYouTubeVideoId(selectedVideo.fileUrl);
+              if (!videoId) return null;
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                      title={selectedVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            if (videoType === 'googledrive') {
+              const fileId = getGoogleDriveFileId(selectedVideo.fileUrl);
+              if (!fileId) return null;
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://drive.google.com/file/d/${fileId}/preview`}
+                      title={selectedVideo.title}
+                      allow="autoplay"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            if (videoType === 'facebook') {
+              // Usar el plugin de Facebook para incrustar el video
+              const encodedUrl = encodeURIComponent(selectedVideo.fileUrl);
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=560&height=315`}
+                      title={selectedVideo.title}
+                      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                      allowFullScreen
+                      scrolling="no"
+                      frameBorder="0"
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            return null;
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para ver imagen en grande */}
+      <Dialog open={isImageViewerOpen} onOpenChange={setIsImageViewerOpen}>
+        <DialogContent className="max-w-7xl max-h-[95vh] p-0 overflow-hidden">
+          <VisuallyHidden>
+            <DialogTitle>
+              {selectedAlbum?.title && selectedImageIndex !== null && selectedAlbum?.images?.[selectedImageIndex]
+                ? `Imagen ${selectedImageIndex + 1} de ${selectedAlbum.images.length} - ${selectedAlbum.title}`
+                : 'Visor de imágenes'}
+            </DialogTitle>
+          </VisuallyHidden>
+          {selectedImageIndex !== null && selectedAlbum?.images && selectedAlbum.images[selectedImageIndex] && (
+            <>
+              <div className="relative w-full h-[85vh] bg-black flex items-center justify-center">
+                {/* Botón cerrar */}
+                <button
+                  onClick={() => setIsImageViewerOpen(false)}
+                  className="absolute top-4 right-4 z-50 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
+                  aria-label="Cerrar"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+
+                {/* Botón anterior */}
+                {selectedAlbum.images.length > 1 && (
+                  <button
+                    onClick={() => navigateImage('prev')}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-50 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-colors"
+                    aria-label="Imagen anterior"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                )}
+
+                {/* Imagen */}
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <Image
+                    src={selectedAlbum.images[selectedImageIndex].imageUrl}
+                    alt={selectedAlbum.images[selectedImageIndex].caption || 'Imagen de galería'}
+                    fill
+                    className="object-contain"
+                    sizes="100vw"
+                    priority
+                  />
+                </div>
+
+                {/* Botón siguiente */}
+                {selectedAlbum.images.length > 1 && (
+                  <button
+                    onClick={() => navigateImage('next')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-50 bg-black/50 hover:bg-black/70 text-white rounded-full p-3 transition-colors"
+                    aria-label="Imagen siguiente"
+                  >
+                    <ChevronRight className="h-6 w-6" />
+                  </button>
+                )}
+
+                {/* Contador de imágenes */}
+                {selectedAlbum.images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black/50 text-white px-4 py-2 rounded-full text-sm">
+                    {selectedImageIndex + 1} / {selectedAlbum.images.length}
+                  </div>
+                )}
+
+                {/* Captión */}
+                {selectedAlbum.images[selectedImageIndex].caption && (
+                  <div className="absolute bottom-4 left-4 right-4 z-50 bg-black/70 text-white p-4 rounded-lg max-w-2xl mx-auto">
+                    <p className="text-sm md:text-base">{selectedAlbum.images[selectedImageIndex].caption}</p>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </DialogContent>
       </Dialog>

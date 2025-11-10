@@ -283,7 +283,7 @@ const InteractiveMap: React.FC = () => {
       )}
        <MapContainer
          center={mapCenter} // Centro fijo en Oruro, Bolivia
-         zoom={11} // Zoom apropiado para Oruro y sus alrededores
+         zoom={13} // Zoom apropiado para Oruro y sus alrededores
          style={{ height: '100%', width: '100%' }}
          className="z-0"
          scrollWheelZoom={false}

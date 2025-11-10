@@ -33,7 +33,7 @@ interface TransparencyDocument {
   fileUrl: string;
   fileSize?: number;
   fileType?: string;
-  category: 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS';
+  category: 'ACCOUNTABILITY' | 'ANNUAL_REPORTS' | 'AUDIT_REPORTS';
   year?: number;
   isActive: boolean;
   isFeatured: boolean;
@@ -47,33 +47,26 @@ interface TransparencyDocument {
 }
 
 const categoryInfo = {
-  DOCUMENT_CENTER: {
-    title: 'Centro de Documentos',
-    description: 'Documentos institucionales, políticas, procedimientos y normativas',
-    icon: FolderOpen,
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    bgColor: 'bg-blue-50 dark:bg-blue-950'
-  },
   ACCOUNTABILITY: {
     title: 'Rendición de Cuentas',
     description: 'Informes financieros, auditorías y reportes de gestión',
     icon: BarChart3,
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 hover:text-green-900 dark:hover:bg-green-800 dark:hover:text-green-100 transition-colors duration-200 cursor-default',
     bgColor: 'bg-green-50 dark:bg-green-950'
-  },
-  FINANCIERS_AND_ALLIES: {
-    title: 'Financiadores y Aliados',
-    description: 'Información sobre nuestros socios estratégicos y financiadores',
-    icon: Users,
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-    bgColor: 'bg-purple-50 dark:bg-purple-950'
   },
   ANNUAL_REPORTS: {
     title: 'Informes Anuales',
     description: 'Reportes anuales de actividades, logros y resultados',
     icon: FileText,
-    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 hover:text-orange-900 dark:hover:bg-orange-800 dark:hover:text-orange-100 transition-colors duration-200 cursor-default',
     bgColor: 'bg-orange-50 dark:bg-orange-950'
+  },
+  AUDIT_REPORTS: {
+    title: 'Informes de Auditoría',
+    description: 'Informes de auditoría externa e interna, verificaciones y evaluaciones',
+    icon: CheckCircle,
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-100 transition-colors duration-200 cursor-default',
+    bgColor: 'bg-blue-50 dark:bg-blue-950'
   }
 };
 
@@ -145,7 +138,14 @@ export default function TransparencyPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/transparencia_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -160,8 +160,7 @@ export default function TransparencyPage() {
               DE CUENTAS
             </h1>
             <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
-              En Fundación Estrella Sur creemos en la transparencia como pilar fundamental de nuestra gestión. 
-              Aquí encontrarás todos los documentos que demuestran nuestro compromiso con la rendición de cuentas.
+              En Estrella del Sur, la transparencia es el corazón de nuestra gestión. Aquí podrás acceder a todos los documentos que reflejan nuestro compromiso con la rendición de cuentas y la confianza de quienes nos apoyan.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#documentos">
@@ -428,23 +427,23 @@ export default function TransparencyPage() {
       </section>
 
       {/* Canal de Comunicación */}
-      <section className="py-16 bg-red-600 dark:bg-red-700 text-white dark:text-white relative overflow-hidden">
+      <section className="py-16 bg-green-600 dark:bg-green-700 text-white dark:text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-red-200 rounded-full blur-2xl"></div>
-          <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-red-200 rounded-full blur-3xl"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-green-200 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-green-200 rounded-full blur-3xl"></div>
         </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-12">
-            <span className="inline-block bg-red-200 text-red-800 dark:bg-red-300 dark:text-red-900 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
+            <span className="inline-block bg-green-200 text-green-800 dark:bg-green-300 dark:text-green-900 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
               COMUNICACIÓN DIRECTA
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white dark:text-white leading-tight font-condensed">
               SI VE ALGO, DIGA ALGO
             </h2>
             <p className="text-lg text-white dark:text-white max-w-3xl mx-auto mt-4">
-              Tu observación es valiosa para mantener los más altos estándares de integridad. 
+              Tu aporte es valioso para mantener los más altos estándares de integridad. 
               Si notas algo que no parece correcto, compártelo con nosotros.
             </p>
           </div>
@@ -477,10 +476,10 @@ export default function TransparencyPage() {
             <Link href="/contacto?tab=complaint#formularios">
               <Button 
                 size="lg" 
-                className="bg-white text-red-600 hover:bg-red-50 dark:bg-white dark:text-red-600 dark:hover:bg-red-50 font-semibold px-6 py-3"
+                className="bg-white text-green-600 hover:bg-green-50 dark:bg-white dark:text-green-600 dark:hover:bg-green-50 font-semibold px-6 py-3"
               >
                 <AlertTriangle className="h-5 w-5 mr-2" />
-                COMPARTIR OBSERVACIÓN
+                Comparte tu inquietud
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
             </Link>

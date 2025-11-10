@@ -18,16 +18,12 @@ export function useMandatoryPasswordChange(): MandatoryPasswordChangeState {
   })
 
   useEffect(() => {
-    console.log('🔄 Hook ejecutándose:', { status, session: !!session })
-    
     if (status === 'loading') {
-      console.log('⏳ Estado: Cargando...')
       setState(prev => ({ ...prev, isLoading: true }))
       return
     }
 
     if (status === 'unauthenticated') {
-      console.log('❌ Estado: No autenticado')
       setState({
         needsPasswordChange: false,
         isLoading: false,
@@ -38,15 +34,7 @@ export function useMandatoryPasswordChange(): MandatoryPasswordChangeState {
 
     if (session?.user) {
       // Verificar si el usuario necesita cambiar su contraseña
-      console.log('🔍 Verificando sesión del usuario:', {
-        email: session.user.email,
-        name: session.user.name,
-        mustChangePassword: (session.user as any)?.mustChangePassword,
-        fullUser: session.user
-      })
-      
       const needsChange = (session.user as any)?.mustChangePassword === true
-      console.log('🔐 Usuario necesita cambiar contraseña:', needsChange)
       
       setState({
         needsPasswordChange: needsChange,
@@ -54,7 +42,6 @@ export function useMandatoryPasswordChange(): MandatoryPasswordChangeState {
         userName: session.user.name || undefined
       })
     } else {
-      console.log('⚠️ Sesión existe pero no hay usuario')
       setState({
         needsPasswordChange: false,
         isLoading: false,
@@ -63,6 +50,5 @@ export function useMandatoryPasswordChange(): MandatoryPasswordChangeState {
     }
   }, [session, status])
 
-  console.log('📤 Hook retornando estado:', state)
   return state
 }

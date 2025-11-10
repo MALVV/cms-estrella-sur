@@ -381,7 +381,7 @@ export function EditConvocatoriaDialog({ convocatoria, open, onOpenChange, onSuc
           </div>
 
           <div>
-            <Label htmlFor="requirements">Requisitos del Voluntariado (uno por línea)</Label>
+            <Label htmlFor="requirements">Requisitos del Voluntariado/Pasantía (uno por línea)</Label>
             <Textarea id="requirements" name="requirements" value={formData.requirements} onChange={handleInputChange} rows={6} placeholder="Ejemplo:&#10;Experiencia mínima de 3 años en educación&#10;Disponibilidad de tiempo completo&#10;Licencia de conducir válida&#10;..." />
           </div>
 
@@ -608,27 +608,7 @@ export function EditConvocatoriaDialog({ convocatoria, open, onOpenChange, onSuc
                     Cancelar eliminación
                   </Button>
                 )}
-                <label htmlFor="edit-convocatoria-image-input-replace" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Cambiar imagen
-                  </Button>
-                  <Input
-                    id="edit-convocatoria-image-input-replace"
-                    name="image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleFileUpload(file);
-                        setImageMarkedForDeletion(false);
-                      }
-                    }}
-                    disabled={uploading || loading}
-                  />
-                </label>
+                {/* Botón "Cambiar imagen" eliminado - usar botón "Eliminar" para quitar la imagen y luego subir una nueva */}
               </div>
             )}
           </div>

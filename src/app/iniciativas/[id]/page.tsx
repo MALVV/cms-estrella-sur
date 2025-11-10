@@ -97,16 +97,35 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
   const getCategoryColor = (sector: string) => {
     switch (sector) {
       case 'EDUCATION':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-100';
       case 'HEALTH':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 hover:bg-red-200 hover:text-red-900 dark:hover:bg-red-800 dark:hover:text-red-100';
       case 'PROTECTION':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 hover:text-green-900 dark:hover:bg-green-800 dark:hover:text-green-100';
       case 'SUSTAINABILITY':
-        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+        return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 hover:bg-emerald-200 hover:text-emerald-900 dark:hover:bg-emerald-800 dark:hover:text-emerald-100';
+      case 'LIVELIHOODS':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 hover:bg-purple-200 hover:text-purple-900 dark:hover:bg-purple-800 dark:hover:text-purple-100';
+      case 'EARLY_CHILD_DEVELOPMENT':
+        return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 hover:bg-pink-200 hover:text-pink-900 dark:hover:bg-pink-800 dark:hover:text-pink-100';
+      case 'CHILDREN_IN_CRISIS':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 hover:text-orange-900 dark:hover:bg-orange-800 dark:hover:text-orange-100';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100';
     }
+  };
+
+  const translateSector = (sector: string) => {
+    const translations: Record<string, string> = {
+      'EDUCATION': 'EDUCACIÓN',
+      'HEALTH': 'SALUD',
+      'PROTECTION': 'PROTECCIÓN',
+      'SUSTAINABILITY': 'SOSTENIBILIDAD',
+      'LIVELIHOODS': 'MEDIOS DE VIDA',
+      'EARLY_CHILD_DEVELOPMENT': 'DESARROLLO INFANTIL TEMPRANO',
+      'CHILDREN_IN_CRISIS': 'NIÑEZ EN CRISIS'
+    };
+    return translations[sector] || sector;
   };
 
   const getInitiativeIcon = () => {
@@ -165,8 +184,8 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
               <div className="flex items-center gap-2">
                 {getInitiativeIcon()}
                 {initiative.sectors && initiative.sectors.length > 0 && (
-                  <Badge className={getCategoryColor(initiative.sectors[0])}>
-                    {initiative.sectors[0]}
+                  <Badge className={`${getCategoryColor(initiative.sectors[0])} transition-colors duration-200 cursor-default`}>
+                    {translateSector(initiative.sectors[0])}
                   </Badge>
                 )}
               </div>
@@ -305,8 +324,15 @@ export default function InitiativeDetailPage({ params }: InitiativeDetailPagePro
                     <BookOpen className="h-5 w-5 text-primary" />
                     Sectores
                   </h3>
-                  <div className="text-sm text-text-secondary-light dark:text-text-secondary-dark leading-relaxed">
-                    {initiative.sectors.join(', ')}
+                  <div className="flex flex-wrap gap-2">
+                    {initiative.sectors.map((sector, index) => (
+                      <Badge 
+                        key={index} 
+                        className={`${getCategoryColor(sector)} transition-colors duration-200 cursor-default`}
+                      >
+                        {translateSector(sector)}
+                      </Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

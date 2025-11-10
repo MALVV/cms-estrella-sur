@@ -6,10 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Calendar,
-  User,
   Share2,
-  Heart,
-  Clock,
   ExternalLink,
   Newspaper
 } from 'lucide-react'
@@ -22,7 +19,6 @@ interface NewsDetail {
   id: string
   title: string
   content: string
-  excerpt?: string
   imageUrl?: string
   imageAlt?: string
   category: string
@@ -86,19 +82,13 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
     })
   }
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
 
   const handleShare = async () => {
     if (navigator.share && news) {
       try {
         await navigator.share({
           title: news.title,
-          text: news.excerpt || news.content.substring(0, 200),
+          text: news.content.substring(0, 200),
           url: window.location.href,
         })
       } catch (err) {
@@ -198,18 +188,6 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
                 <Calendar className="h-4 w-4" />
                 <span>Publicado: {formatDate(news.publishedAt)}</span>
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{formatTime(news.publishedAt)}</span>
-              </div>
-              
-              {news.author && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Por {news.author.name}</span>
-                </div>
-              )}
             </div>
 
             {/* Botones de acción */}
@@ -250,26 +228,10 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
           {/* Contenido principal */}
           <article className="prose prose-lg max-w-none">
             <div className="space-y-8">
-              {/* Resumen */}
-              {news.excerpt && (
-                <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm border-l-4 border-primary">
-                  <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">
-                    Resumen de la Noticia
-                  </h2>
-                  <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                    {news.excerpt.split('\n').map((paragraph, index) => (
-                      <p key={index} className="mb-4 last:mb-0">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Contenido completo */}
               <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
                 <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
-                  Contenido Completo
+                  Contenido
                 </h2>
                 <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
                   {news.content.split('\n').map((paragraph, index) => (

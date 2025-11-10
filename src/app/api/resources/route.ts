@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
       description,
       fileName,
       fileUrl,
-      fileType,
       category,
       subcategory,
       thumbnailUrl,
@@ -130,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // Validar subcategoría si se proporciona
     if (subcategory) {
-      const validSubcategories = ['VIDEOS', 'AUDIOS', 'DIGITAL_LIBRARY', 'DOWNLOADABLE_GUIDES', 'MANUALS'];
+      const validSubcategories = ['VIDEOS', 'AUDIOS', 'INVESTIGATIONS', 'METHODOLOGICAL_RESOURCES', 'SYSTEMATIZATION_DOCUMENTS'];
       if (!validSubcategories.includes(subcategory)) {
         return NextResponse.json(
           { error: 'Subcategoría inválida' },
@@ -145,7 +144,6 @@ export async function POST(request: NextRequest) {
         description,
         fileName,
         fileUrl,
-        fileType,
         category,
         subcategory,
         thumbnailUrl,

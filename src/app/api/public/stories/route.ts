@@ -28,7 +28,6 @@ export async function GET() {
       id: story.id,
       title: story.title,
       content: story.content,
-      summary: story.summary,
       imageUrl: story.imageUrl,
       imageAlt: story.imageAlt,
       createdAt: story.createdAt.toISOString().split('T')[0],

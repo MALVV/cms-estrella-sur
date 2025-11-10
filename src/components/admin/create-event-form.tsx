@@ -22,7 +22,7 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string>('');
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
+    content: '',
     imageUrl: '',
     imageAlt: '',
     eventDate: '',
@@ -36,10 +36,10 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.description.trim() || !formData.eventDate) {
+    if (!formData.title.trim() || !formData.content.trim() || !formData.eventDate) {
       toast({
         title: 'Error',
-        description: 'El título, descripción y fecha son obligatorios',
+        description: 'El título, contenido y fecha son obligatorios',
         variant: 'destructive',
       });
       return;
@@ -125,7 +125,7 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
       // Reset form
       setFormData({
         title: '',
-        description: '',
+        content: '',
         imageUrl: '',
         imageAlt: '',
         eventDate: '',
@@ -208,7 +208,7 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
         setImagePreviewUrl('');
         setFormData({
           title: '',
-          description: '',
+          content: '',
           imageUrl: '',
           imageAlt: '',
           eventDate: '',
@@ -241,12 +241,12 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
           </div>
 
           <div>
-            <label className="text-sm font-medium">Descripción *</label>
+            <label className="text-sm font-medium">Contenido *</label>
             <Textarea
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Descripción breve del evento"
-              rows={3}
+              value={formData.content}
+              onChange={(e) => handleChange('content', e.target.value)}
+              placeholder="Contenido completo del evento"
+              rows={6}
               required
             />
           </div>
@@ -330,24 +330,6 @@ export const CreateEventForm: React.FC<CreateEventFormProps> = ({ onEventCreated
                       Eliminar
                     </Button>
                   </div>
-                  <label htmlFor="file-upload-event-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                    </Button>
-                    <input
-                      id="file-upload-event-replace"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      disabled={uploading || loading}
-                    />
-                  </label>
                 </div>
               )}
             </div>

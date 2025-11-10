@@ -1083,7 +1083,7 @@ export default function ContactoPage() {
                       {/* Imagen de la sección */}
                       <div className="mb-6">
                         <img 
-                          src="/static-images/sections/seccion-childfund.jpg" 
+                          src="/static-images/heroes/transparencia_hero.jpg" 
                           alt="Importancia de reportar irregularidades"
                           className="w-full h-64 object-cover rounded-lg shadow-md"
                         />

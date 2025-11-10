@@ -10,7 +10,7 @@ import Link from 'next/link';
 interface RelatedNews {
   id: string;
   title: string;
-  excerpt?: string;
+  content?: string;
   imageUrl?: string;
   imageAlt?: string;
   publishedAt: string;
@@ -171,9 +171,9 @@ export function RelatedNewsCarousel({
               </div>
 
               {/* Descripción */}
-              {article.excerpt && (
+              {article.content && (
                 <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed">
-                  {article.excerpt}
+                  {article.content.length > 150 ? article.content.substring(0, 150) + '...' : article.content}
                 </p>
               )}
 

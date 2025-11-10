@@ -18,8 +18,11 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Special+Gothic+Condensed:wght@400;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body
         className={`font-display antialiased bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark`}

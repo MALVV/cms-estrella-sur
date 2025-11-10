@@ -93,7 +93,6 @@ export async function PUT(
     const {
       title,
       content,
-      excerpt,
       imageUrl,
       imageAlt,
       isFeatured,
@@ -199,7 +198,6 @@ export async function PUT(
       data: {
         title: title ?? existingNews.title,
         content: content ?? existingNews.content,
-        excerpt: excerpt === undefined ? existingNews.excerpt : excerpt,
         imageUrl: imageUrl === undefined ? normalizeImageUrlForSave(existingNews.imageUrl) : normalizeImageUrlForSave(imageUrl),
         imageAlt: imageAlt === undefined ? existingNews.imageAlt : (imageAlt || null),
         isFeatured: isFeatured ?? existingNews.isFeatured,

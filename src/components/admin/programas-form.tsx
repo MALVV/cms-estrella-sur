@@ -447,13 +447,6 @@ export function ProgramasForm({ programa, onClose, onProgramaCreated }: Programa
                           }
                         }}>Eliminar</Button>
                       </div>
-                      <label htmlFor="file-upload-program-replace" className="cursor-pointer">
-                        <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                        </Button>
-                        <input id="file-upload-program-replace" name="file-upload" type="file" className="sr-only" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} disabled={uploading || loading} />
-                      </label>
                     </div>
                   )}
                   <div className="space-y-2">

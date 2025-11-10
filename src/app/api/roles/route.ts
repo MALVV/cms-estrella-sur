@@ -17,7 +17,8 @@ export const GET = withRole(UserRole.ADMINISTRATOR)(async (request: NextRequest)
       roles,
       hierarchy: [
         { role: UserRole.ADMINISTRATOR, level: 1, description: 'Máximo privilegio - Gestión completa' },
-        { role: UserRole.MANAGER, level: 2, description: 'Gestión de contenido' }
+        { role: UserRole.MANAGER, level: 2, description: 'Gestión de contenido' },
+        { role: UserRole.CONSULTANT, level: 3, description: 'Especialista en donaciones' }
       ]
     })
 

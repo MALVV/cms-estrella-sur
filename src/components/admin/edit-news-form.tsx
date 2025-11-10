@@ -15,7 +15,6 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
   category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
@@ -57,7 +56,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    excerpt: '',
     imageUrl: '',
     imageAlt: '',
     isActive: true,
@@ -74,7 +72,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
       setFormData({
         title: news.title,
         content: news.content,
-        excerpt: news.excerpt || '',
         imageUrl: news.imageUrl || '',
         imageAlt: news.imageAlt || '',
         isActive: news.isActive,
@@ -100,7 +97,10 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         });
         if (programasResponse.ok) {
           const programasData = await programasResponse.json();
-          setProgramas(programasData.programas || []);
+          const programasArray = programasData.programas || [];
+          // Eliminar duplicados por ID
+          const uniqueProgramas = Array.from(new Map(programasArray.map((p: any) => [p.id, p])).values());
+          setProgramas(uniqueProgramas);
         }
 
         // Cargar proyectos
@@ -110,7 +110,10 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         });
         if (projectsResponse.ok) {
           const projectsData = await projectsResponse.json();
-          setProjects(projectsData.projects || []);
+          const projectsArray = projectsData.projects || [];
+          // Eliminar duplicados por ID
+          const uniqueProjects = Array.from(new Map(projectsArray.map((p: any) => [p.id, p])).values());
+          setProjects(uniqueProjects);
         }
 
         // Cargar iniciativas
@@ -120,7 +123,10 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         });
         if (methodologiesResponse.ok) {
           const methodologiesData = await methodologiesResponse.json();
-          setMethodologies(methodologiesData.methodologies || []);
+          const methodologiesArray = methodologiesData.methodologies || [];
+          // Eliminar duplicados por ID
+          const uniqueMethodologies = Array.from(new Map(methodologiesArray.map((m: any) => [m.id, m])).values());
+          setMethodologies(uniqueMethodologies);
         }
       } catch (error) {
         console.error('Error cargando datos:', error);
@@ -128,6 +134,10 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
     };
 
     if (isOpen) {
+      // Limpiar estados antes de cargar nuevos datos
+      setProgramas([]);
+      setProjects([]);
+      setMethodologies([]);
       fetchData();
     }
   }, [isOpen]);
@@ -342,7 +352,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
         setFormData({
           title: news.title,
           content: news.content,
-          excerpt: news.excerpt || '',
           imageUrl: news.imageUrl || '',
           imageAlt: news.imageAlt || '',
           isActive: news.isActive,
@@ -380,16 +389,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
               placeholder="Contenido completo de la noticia"
               rows={6}
               required
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Resumen</label>
-            <Textarea
-              value={formData.excerpt}
-              onChange={(e) => handleChange('excerpt', e.target.value)}
-              placeholder="Resumen breve de la noticia"
-              rows={3}
             />
           </div>
 
@@ -452,24 +451,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
                       Eliminar
                     </Button>
                   </div>
-                  <label htmlFor="file-upload-edit-news-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                    </Button>
-                    <input
-                      id="file-upload-edit-news-replace"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      disabled={uploading || loading}
-                    />
-                  </label>
                 </div>
               )}
             </div>
@@ -572,7 +553,6 @@ export const EditNewsForm: React.FC<EditNewsFormProps> = ({ news, onNewsUpdated,
               setFormData({
                 title: news.title,
                 content: news.content,
-                excerpt: news.excerpt || '',
                 imageUrl: news.imageUrl || '',
                 imageAlt: news.imageAlt || '',
                 isActive: news.isActive,

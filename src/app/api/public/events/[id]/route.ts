@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const formattedEvent = {
       id: event.id,
       title: event.title,
-      description: event.description,
+      content: event.content,
       imageUrl: event.imageUrl,
       imageAlt: event.imageAlt,
       eventDate: event.eventDate.toISOString(),

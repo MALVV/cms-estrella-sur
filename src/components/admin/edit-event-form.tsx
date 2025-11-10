@@ -13,7 +13,7 @@ import Image from 'next/image';
 interface EventItem {
   id: string;
   title: string;
-  description: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -50,7 +50,7 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
   // Inicializar el estado con los valores del event desde el inicio
   const [formData, setFormData] = useState({
     title: event?.title || '',
-    description: event?.description || '',
+    content: event?.content || '',
     imageUrl: event?.imageUrl || '',
     imageAlt: event?.imageAlt || '',
     eventDate: event ? getLocalDateTime(event.eventDate) : '',
@@ -70,7 +70,7 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
 
       setFormData({
         title: event.title || '',
-        description: event.description || '',
+        content: event.content || '',
         imageUrl: event.imageUrl || '',
         imageAlt: event.imageAlt || '',
         eventDate: localDateTime || '',
@@ -87,10 +87,10 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.description.trim() || !formData.eventDate) {
+    if (!formData.title.trim() || !formData.content.trim() || !formData.eventDate) {
       toast({
         title: 'Error',
-        description: 'El título, descripción y fecha son obligatorios',
+        description: 'El título, contenido y fecha son obligatorios',
         variant: 'destructive',
       });
       return;
@@ -293,7 +293,7 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
           .slice(0, 16);
         setFormData({
           title: event.title || '',
-          description: event.description || '',
+          content: event.content || '',
           imageUrl: event.imageUrl || '',
           imageAlt: event.imageAlt || '',
           eventDate: localDateTime || '',
@@ -323,12 +323,12 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
           </div>
 
           <div>
-            <label className="text-sm font-medium">Descripción *</label>
+            <label className="text-sm font-medium">Contenido *</label>
             <Textarea
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Descripción breve del evento"
-              rows={3}
+              value={formData.content}
+              onChange={(e) => handleChange('content', e.target.value)}
+              placeholder="Contenido completo del evento"
+              rows={6}
               required
             />
           </div>
@@ -413,24 +413,6 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
                       Eliminar
                     </Button>
                   </div>
-                  <label htmlFor="file-upload-edit-event-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                    </Button>
-                    <input
-                      id="file-upload-edit-event-replace"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      disabled={uploading || loading}
-                    />
-                  </label>
                 </div>
               )}
             </div>
@@ -479,7 +461,7 @@ export const EditEventForm: React.FC<EditEventFormProps> = ({ event, onEventUpda
                 .slice(0, 16);
               setFormData({
                 title: event.title || '',
-                description: event.description || '',
+                content: event.content || '',
                 imageUrl: event.imageUrl || '',
                 imageAlt: event.imageAlt || '',
                 eventDate: localDateTime || '',

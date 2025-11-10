@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       bucket: process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET,
       isPublic: true,
       contentType: file.type,
-      prefix: 'volunteer-applications/' // Prefijo específico para documentos de aplicaciones de voluntariado
+      prefix: 'volunteer-applications/' // Prefijo específico para documentos de aplicaciones de voluntariado/pasantía
     });
 
     return NextResponse.json({
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       size: upload.size
     });
   } catch (error) {
-    console.error('Error al subir documento de aplicación de voluntariado:', error);
+    console.error('Error al subir documento de aplicación de voluntariado/pasantía:', error);
     return NextResponse.json({ error: 'Error interno del servidor al subir archivo' }, { status: 500 });
   }
 }

@@ -15,8 +15,7 @@ import { EventCardWrapper } from '@/components/admin/event-card-wrapper';
 interface EventItem {
   id: string;
   title: string;
-  description: string;
-  content?: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -101,6 +100,10 @@ export const EventsManagement: React.FC = () => {
     } else {
       setSelectedItems(filteredEvents.map(item => item.id));
     }
+  };
+
+  const handleClearSelection = () => {
+    setSelectedItems([]);
   };
 
   const handleBulkToggleStatus = async (isActive: boolean) => {
@@ -307,35 +310,40 @@ export const EventsManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Acciones en lote */}
-      {selectedItems.length > 0 && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-900">
-              {selectedItems.length} evento(s) seleccionado(s)
-            </span>
-            <div className="flex items-center space-x-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(true)}>
-                Activar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(false)}>
-                Desactivar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setSelectedItems([])}>
-                Limpiar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Pestañas */}
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">Todos ({filteredEvents.length})</TabsTrigger>
-          <TabsTrigger value="active">Activos ({activeEvents.length})</TabsTrigger>
-          <TabsTrigger value="inactive">Inactivos ({inactiveEvents.length})</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center">
+          <TabsList>
+            <TabsTrigger value="all">Todos ({filteredEvents.length})</TabsTrigger>
+            <TabsTrigger value="active">Activos ({activeEvents.length})</TabsTrigger>
+            <TabsTrigger value="inactive">Inactivos ({inactiveEvents.length})</TabsTrigger>
+          </TabsList>
+          
+          {/* Acciones en lote */}
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(true)}
+              >
+                Activar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(false)}
+              >
+                Desactivar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleClearSelection}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Limpiar Selección
+              </Button>
+            </div>
+          )}
+        </div>
 
         <TabsContent value="all">
           <EventsList 

@@ -88,7 +88,14 @@ export default function ProjectsPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/proyectos_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -118,20 +125,6 @@ export default function ProjectsPage() {
       </div>
 
       <main className="container mx-auto px-4 py-8" id="proyectos">
-        {/* Introducción */}
-        <div className="text-center mb-12">
-              <span className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4">
-                PROYECTOS DE IMPACTO
-              </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark leading-tight mb-6">
-            Proyectos Estratégicos de Desarrollo
-          </h2>
-          <p className="text-lg text-text-secondary-light dark:text-text-secondary-dark max-w-4xl mx-auto">
-            Descubre nuestros proyectos específicos diseñados para abordar desafíos concretos en las comunidades. 
-            Cada proyecto está estructurado para generar impacto medible y transformador.
-              </p>
-            </div>
-
         {projects.length === 0 ? (
           <div className="text-center py-12">
             <Target className="h-16 w-16 text-gray-400 mx-auto mb-4" />

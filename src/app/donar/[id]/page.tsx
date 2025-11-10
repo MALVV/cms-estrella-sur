@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Heart, DollarSign, Calendar, Target, Users, ArrowLeft, QrCode, CreditCard, CheckCircle, XCircle } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
@@ -227,15 +226,22 @@ export default function DonateToProjectPage({ params }: { params: Promise<{ id: 
               </p>
             </div>
 
-            {(donationProject.referenceImageUrl) && (
+            {donationProject.referenceImageUrl && donationProject.referenceImageUrl.trim() !== '' ? (
               <div className="relative h-64 rounded-lg overflow-hidden">
-                  <Image
-                  src={donationProject.referenceImageUrl || ''}
+                <img
+                  src={donationProject.referenceImageUrl}
                   alt={donationProject.referenceImageAlt || donationProject.title}
-                    fill
-                    className="object-cover"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800';
+                  }}
                   />
                 </div>
+            ) : (
+              <div className="relative h-64 rounded-lg overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                <Heart className="h-16 w-16 text-primary/50" />
+              </div>
               )}
 
             {/* Progreso del Proyecto */}
@@ -500,25 +506,29 @@ export default function DonateToProjectPage({ params }: { params: Promise<{ id: 
             </div>
 
             {/* Código QR */}
-            {donationProject?.qrImageUrl && (
+            {donationProject?.qrImageUrl && donationProject.qrImageUrl.trim() !== '' ? (
               <div className="text-center space-y-2">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                   Código QR para Pago
                 </h3>
                 <div className="inline-block p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border">
-                  <Image
+                  <img
                     src={donationProject.qrImageUrl}
                     alt={donationProject.qrImageAlt || 'Código QR para pago'}
                     width={180}
                     height={180}
                     className="rounded"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
                   />
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
                   Escanea el código QR con tu aplicación bancaria
                 </p>
               </div>
-            )}
+            ) : null}
 
             {/* Instrucciones */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2">

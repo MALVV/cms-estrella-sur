@@ -278,7 +278,7 @@ const getNavSections = (userRole: string) => {
           ]
         },
         {
-          title: "Voluntariados",
+          title: "Voluntariados/Pasantías",
           icon: Users,
           showFor: ["ADMINISTRATOR", "MANAGER"],
           items: [

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { UserRole } from '@/lib/roles'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 import { generateTemporaryPassword } from '@/lib/temp-password'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -81,6 +81,7 @@ export function SimpleCreateUserForm({ onUserCreated, onCancel }: SimpleCreateUs
     switch (role) {
       case UserRole.ADMINISTRATOR: return <Crown className="h-4 w-4 text-red-500" />
       case UserRole.MANAGER: return <Briefcase className="h-4 w-4 text-blue-500" />
+      case UserRole.CONSULTANT: return <User className="h-4 w-4 text-blue-500" />
       default: return <User className="h-4 w-4 text-gray-500" />
     }
   }
@@ -89,6 +90,7 @@ export function SimpleCreateUserForm({ onUserCreated, onCancel }: SimpleCreateUs
     switch (role) {
       case UserRole.ADMINISTRATOR: return 'Acceso completo al sistema y gestión de usuarios, proyectos, innovaciones y programas'
       case UserRole.MANAGER: return 'Gestión de contenido: noticias, iniciativas, historias, recursos y demás secciones'
+      case UserRole.CONSULTANT: return 'Especialista en donaciones - Gestión completa de proyectos de donación, aprobación de donaciones y metas anuales'
       default: return ''
     }
   }
@@ -279,7 +281,7 @@ export function SimpleCreateUserForm({ onUserCreated, onCancel }: SimpleCreateUs
                     <SelectItem key={role} value={role}>
                       <div className="flex items-center gap-2">
                         {getRoleIcon(role)}
-                        <span className="capitalize">{role.toLowerCase()}</span>
+                        <span>{getRoleDisplayName(role)}</span>
                       </div>
                     </SelectItem>
                   ))}

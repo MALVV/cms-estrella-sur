@@ -207,6 +207,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
                 <SelectContent>
                   <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
                   <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
+                  <SelectItem value="CONSULTANT">CONSULTANT</SelectItem>
                 </SelectContent>
               </Select>
             </div>

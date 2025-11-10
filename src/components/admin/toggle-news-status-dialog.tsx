@@ -1,11 +1,10 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/components/ui/use-toast';
-import { useSession } from 'next-auth/react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface NewsItem {
   id: string;
@@ -25,19 +24,20 @@ export const ToggleNewsStatusDialog: React.FC<ToggleNewsStatusDialogProps> = ({
   children 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-  const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const isActivating = !news.isActive;
+  const action = isActivating ? 'activar' : 'desactivar';
+  const actionCapitalized = isActivating ? 'Activar' : 'Desactivar';
 
   const handleToggleStatus = async () => {
+    setIsLoading(true);
+
     try {
-      setLoading(true);
-      
       const response = await fetch(`/api/news/${news.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.customToken}`,
         },
         body: JSON.stringify({
           isActive: !news.isActive,
@@ -45,25 +45,18 @@ export const ToggleNewsStatusDialog: React.FC<ToggleNewsStatusDialogProps> = ({
       });
 
       if (!response.ok) {
-        throw new Error('Error al cambiar estado');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al cambiar estado de la noticia');
       }
 
-      toast({
-        title: 'Éxito',
-        description: `Noticia ${!news.isActive ? 'activada' : 'desactivada'} exitosamente`,
-      });
-
+      toast.success(`Noticia ${action} exitosamente`);
       setIsOpen(false);
       onStatusChanged(news.id, !news.isActive);
     } catch (error) {
-      console.error('Error al cambiar estado:', error);
-      toast({
-        title: 'Error',
-        description: 'Error al cambiar el estado de la noticia',
-        variant: 'destructive',
-      });
+      console.error('Error toggling news status:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al cambiar estado de la noticia');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -74,30 +67,34 @@ export const ToggleNewsStatusDialog: React.FC<ToggleNewsStatusDialogProps> = ({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {news.isActive ? 'Desactivar Noticia' : 'Activar Noticia'}
-          </DialogTitle>
+          <DialogTitle>{actionCapitalized} Noticia</DialogTitle>
+          <DialogDescription>
+            ¿Estás seguro de que quieres {action} la noticia "{news.title}"?
+            {isActivating 
+              ? ' La noticia será visible en la página pública.' 
+              : ' La noticia ya no será visible en la página pública.'
+            }
+          </DialogDescription>
         </DialogHeader>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            ¿Estás seguro de que quieres {news.isActive ? 'desactivar' : 'activar'} la noticia 
-            <strong> "{news.title}"</strong>?
-          </p>
-          
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleToggleStatus} 
-              disabled={loading}
-              variant={news.isActive ? 'destructive' : 'default'}
-            >
-              {loading ? 'Procesando...' : (news.isActive ? 'Desactivar' : 'Activar')}
-            </Button>
-          </div>
-        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
+            Cancelar
+          </Button>
+          <Button 
+            variant={isActivating ? "default" : "destructive"}
+            onClick={handleToggleStatus}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Procesando...
+              </>
+            ) : (
+              actionCapitalized
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

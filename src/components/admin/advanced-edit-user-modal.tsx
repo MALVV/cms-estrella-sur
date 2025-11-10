@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { UserRole } from '@/lib/roles'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -88,6 +88,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
     switch (role) {
       case UserRole.ADMINISTRATOR: return <Crown className="h-4 w-4 text-red-500" />
       case UserRole.MANAGER: return <Briefcase className="h-4 w-4 text-green-500" />
+      case UserRole.CONSULTANT: return <User className="h-4 w-4 text-blue-500" />
       default: return <User className="h-4 w-4 text-gray-500" />
     }
   }
@@ -96,6 +97,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
     switch (role) {
       case UserRole.ADMINISTRATOR: return 'Acceso completo al sistema'
       case UserRole.MANAGER: return 'Gestión de contenido - Noticias, iniciativas, historias, recursos y demás secciones'
+      case UserRole.CONSULTANT: return 'Acceso de consulta y visualización'
       default: return ''
     }
   }
@@ -255,7 +257,7 @@ export function AdvancedEditUserModal({ user, isOpen, onClose, onUserUpdated }: 
                               <div className="flex items-center gap-2">
                                 {getRoleIcon(role)}
                                 <div>
-                                  <div className="font-medium">{role}</div>
+                                  <div className="font-medium">{getRoleDisplayName(role)}</div>
                                   <div className="text-xs text-muted-foreground">
                                     {getRoleDescription(role)}
                                   </div>

@@ -4,17 +4,17 @@ import Image from 'next/image';
 export const Hero: React.FC = () => {
   return (
     <main className="relative overflow-hidden min-h-screen">
-      {/* Imagen de fondo en blanco y negro */}
+      {/* Imagen de fondo a color */}
       <div className="absolute top-0 left-0 w-full h-full z-0">
         <Image
           src="/static-images/heroes/hero-home.jpg"
           alt="Niños sonriendo de Estrella del Sur"
           fill
-          className="object-cover object-center grayscale"
+          className="object-cover object-center"
           priority
         />
-        {/* Overlay más oscuro para mejor contraste del texto */}
-        <div className="absolute inset-0 bg-black/50"></div>
+        {/* Overlay de color casi transparente similar a banners de NOSOTROS */}
+        <div className="absolute inset-0 bg-primary/30 dark:bg-primary/40"></div>
         {/* Splatters de color en el lado derecho */}
         <div className="absolute top-20 right-10 w-20 h-20 bg-yellow-400 rounded-full opacity-60 blur-sm"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-orange-400 rounded-full opacity-50 blur-sm"></div>
@@ -27,14 +27,14 @@ export const Hero: React.FC = () => {
             <div className="max-w-4xl text-center">
               {/* Título principal */}
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight mb-6 font-condensed">
-                <span className="font-black text-blue-400">ESTRELLA DEL SUR</span>,<br/>
+                <span className="font-black text-blue-400">ESTRELLA DEL SUR</span><br/>
                 <span className="font-black">ILUMINANDO</span> vidas,<br/>
                 <span className="font-black">PROTEGIENDO</span> sueños.
               </h1>
               
               {/* Descripción */}
               <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
-                Transformamos comunidades vulnerables a través de programas integrales que abordan las causas raíz de los problemas sociales.
+                Transformamos la vida de niñas, niños, adolescentes y sus familias, construyendo comunidades más fuertes y llenas de oportunidades.
               </p>
               
               {/* Botón de llamada a la acción */}

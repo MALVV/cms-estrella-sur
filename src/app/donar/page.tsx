@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Target, Users, Calendar, DollarSign, ExternalLink, ArrowRight, Share2 } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
@@ -267,14 +266,31 @@ export default function DonarPage() {
                 <Card key={donationProject.id} className={`overflow-hidden hover:shadow-lg transition-shadow duration-300 ${
                   donationProject.isCompleted ? 'ring-1 ring-green-300/50 dark:ring-green-600/50' : ''
                 }`}>
-                  {(donationProject.referenceImageUrl) && (
+                  {donationProject.referenceImageUrl && donationProject.referenceImageUrl.trim() !== '' ? (
                     <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={donationProject.referenceImageUrl || ''}
+                      <img
+                        src={donationProject.referenceImageUrl}
                         alt={donationProject.referenceImageAlt || donationProject.title}
-                        fill
-                        className="object-cover"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800';
+                        }}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      {donationProject.isCompleted ? (
+                        <Badge className="absolute top-4 right-4 bg-green-500/90 text-white text-xs">
+                          Meta Alcanzada
+                        </Badge>
+                      ) : donationProject.isFeatured ? (
+                      <Badge className="absolute top-4 right-4 bg-primary text-white">
+                        Destacado
+                      </Badge>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                      <Heart className="h-16 w-16 text-primary/50" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                       {donationProject.isCompleted ? (
                         <Badge className="absolute top-4 right-4 bg-green-500/90 text-white text-xs">

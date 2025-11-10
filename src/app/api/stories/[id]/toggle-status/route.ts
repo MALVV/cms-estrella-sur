@@ -37,7 +37,6 @@ export async function PATCH(
     const formattedStory = {
       id: updatedStory.id,
       title: updatedStory.title,
-      summary: updatedStory.summary,
       imageUrl: updatedStory.imageUrl,
       imageAlt: updatedStory.imageAlt,
       status: updatedStory.isActive ? 'ACTIVE' : 'INACTIVE',

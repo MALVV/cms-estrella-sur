@@ -94,6 +94,71 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const body = await request.json();
+
+    const { status } = body;
+
+    // Validar que el status sea válido
+    const validStatuses = ['DRAFT', 'ACTIVE', 'UPCOMING', 'CLOSED'];
+    if (status && !validStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Estado inválido' },
+        { status: 400 }
+      );
+    }
+
+    // Verificar que la convocatoria existe
+    const existingConvocatoria = await prisma.convocatoria.findUnique({
+      where: { id },
+    });
+
+    if (!existingConvocatoria) {
+      return NextResponse.json(
+        { error: 'Convocatoria no encontrada' },
+        { status: 404 }
+      );
+    }
+
+    // Actualizar solo el estado
+    const convocatoria = await prisma.convocatoria.update({
+      where: { id },
+      data: {
+        status: status || existingConvocatoria.status,
+      },
+      include: {
+        creator: {
+          select: { id: true, name: true, email: true }
+        },
+        _count: {
+          select: {
+            applications: true
+          }
+        }
+      }
+    });
+
+    return NextResponse.json(convocatoria);
+  } catch (error) {
+    console.error('Error updating convocatoria status:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

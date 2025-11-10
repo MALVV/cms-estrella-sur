@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { SiteHeader } from '@/components/layout/site-header';
 import { SiteFooter } from '@/components/layout/site-footer';
 
@@ -25,7 +26,6 @@ interface Story {
   id: string;
   title: string;
   content?: string;
-  summary?: string;
   imageUrl: string;
   imageAlt: string;
   createdAt: string;
@@ -58,6 +58,8 @@ export default function HistoriasImpactoPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMonth, setSelectedMonth] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
+  const [selectedVideo, setSelectedVideo] = useState<VideoTestimonial | null>(null);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -102,17 +104,77 @@ export default function HistoriasImpactoPage() {
     });
   };
 
-  // Extraer ID del video de YouTube
-  const getYouTubeVideoId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+  // Función para extraer el ID de YouTube de una URL
+  const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
+      /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    
+    return null;
+  };
+
+  // Función para extraer el ID de archivo de Google Drive de una URL
+  const getGoogleDriveFileId = (url: string): string | null => {
+    if (!url) return null;
+    
+    const patterns = [
+      /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,
+      /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/,
+      /docs\.google\.com\/.*\/d\/([a-zA-Z0-9_-]+)/,
+    ];
+    
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match && match[1]) {
+        return match[1];
+      }
+    }
+    
+    return null;
+  };
+
+  // Función para detectar si es un video de Facebook
+  const isFacebookVideo = (url: string): boolean => {
+    if (!url) return false;
+    
+    const patterns = [
+      /facebook\.com\/.*\/videos\//,
+      /facebook\.com\/watch/,
+      /fb\.watch\//,
+      /facebook\.com\/.*\/videos\/\d+/,
+    ];
+    
+    return patterns.some(pattern => pattern.test(url));
+  };
+
+  // Función para detectar el tipo de enlace
+  const getVideoType = (url: string): 'youtube' | 'googledrive' | 'facebook' | null => {
+    if (getYouTubeVideoId(url)) return 'youtube';
+    if (getGoogleDriveFileId(url)) return 'googledrive';
+    if (isFacebookVideo(url)) return 'facebook';
+    return null;
   };
 
   // Generar URL de miniatura de YouTube
   const getYouTubeThumbnail = (url: string) => {
     const videoId = getYouTubeVideoId(url);
     return videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null;
+  };
+
+  // Función para abrir el dialog de video
+  const openVideoDialog = (video: VideoTestimonial) => {
+    setSelectedVideo(video);
+    setIsVideoDialogOpen(true);
   };
 
   // Formatear duración
@@ -127,7 +189,7 @@ export default function HistoriasImpactoPage() {
   const filteredStories = stories.filter(story => {
     const storyDate = new Date(story.createdAt);
     const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (story.summary && story.summary.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (story.content && story.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (story.content && story.content.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesMonth = !selectedMonth || storyDate.getMonth() + 1 === parseInt(selectedMonth);
@@ -249,7 +311,7 @@ export default function HistoriasImpactoPage() {
             <img 
               alt="Voluntarios distribuyendo ayuda comunitaria" 
               className="w-full h-full object-cover object-center rounded-xl shadow-lg" 
-              src="/static-images/heroes/hero-historias.jpg"
+              src="/static-images/heroes/historias_hero.jpg"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-xl"></div>
           </div>
@@ -380,7 +442,11 @@ export default function HistoriasImpactoPage() {
                               <Button
                                 size="lg"
                                 className="bg-red-600 hover:bg-red-700 text-white rounded-full p-4"
-                                onClick={() => window.open(video.youtubeUrl, '_blank')}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  openVideoDialog(video);
+                                }}
                               >
                                 <Play className="h-6 w-6" />
                               </Button>
@@ -424,10 +490,14 @@ export default function HistoriasImpactoPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => window.open(video.youtubeUrl, '_blank')}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  openVideoDialog(video);
+                                }}
                               className="text-primary hover:opacity-80"
                               >
-                                Ver en YouTube
+                                Ver Video
                               <ArrowRight className="ml-1 h-3 w-3" />
                               </Button>
                           </div>
@@ -478,7 +548,7 @@ export default function HistoriasImpactoPage() {
                               {story.title}
                             </h3>
                           <p className="text-sm text-subtext-light dark:text-subtext-dark line-clamp-3 flex-grow">
-                              {story.summary || 'No hay resumen disponible.'}
+                              {story.content ? (story.content.length > 150 ? story.content.substring(0, 150) + '...' : story.content) : 'No hay contenido disponible.'}
                             </p>
                           <div className="mt-3 flex justify-end">
                               <Button
@@ -501,6 +571,93 @@ export default function HistoriasImpactoPage() {
 
         </div>
       </section>
+
+      {/* Dialog para reproducir video */}
+      <Dialog open={isVideoDialogOpen} onOpenChange={(open) => {
+        setIsVideoDialogOpen(open);
+        if (!open) {
+          setSelectedVideo(null);
+        }
+      }}>
+        <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-1">
+            <DialogTitle className="text-2xl">{selectedVideo?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedVideo && (() => {
+            const videoType = getVideoType(selectedVideo.youtubeUrl);
+            
+            if (!videoType) {
+              return (
+                <div className="px-6 pb-6">
+                  <p className="text-center text-muted-foreground py-8">
+                    URL de video no válida. Por favor, verifica que sea una URL de YouTube, Google Drive o Facebook.
+                  </p>
+                </div>
+              );
+            }
+
+            if (videoType === 'youtube') {
+              const videoId = getYouTubeVideoId(selectedVideo.youtubeUrl);
+              if (!videoId) return null;
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                      title={selectedVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            if (videoType === 'googledrive') {
+              const fileId = getGoogleDriveFileId(selectedVideo.youtubeUrl);
+              if (!fileId) return null;
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://drive.google.com/file/d/${fileId}/preview`}
+                      title={selectedVideo.title}
+                      allow="autoplay"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            if (videoType === 'facebook') {
+              const encodedUrl = encodeURIComponent(selectedVideo.youtubeUrl);
+              
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=560&height=315`}
+                      title={selectedVideo.title}
+                      allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                      allowFullScreen
+                      scrolling="no"
+                      frameBorder="0"
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            return null;
+          })()}
+        </DialogContent>
+      </Dialog>
       
       <SiteFooter />
     </div>

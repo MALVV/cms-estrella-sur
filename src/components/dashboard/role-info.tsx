@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useSession } from 'next-auth/react'
-import { UserRole, getRoleDescription, getRolePermissions } from '@/lib/roles'
+import { UserRole, getRoleDescription, getRolePermissions, getRoleDisplayName } from '@/lib/roles'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
@@ -56,7 +56,7 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ className }) => {
           <div className="flex items-center gap-2 mb-2">
             <span className="text-sm font-medium">Rol Actual:</span>
             <Badge className={getRoleColor(userRole)}>
-              {userRole}
+              {getRoleDisplayName(userRole)}
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">{description}</p>

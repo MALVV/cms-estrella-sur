@@ -74,7 +74,6 @@ export async function PUT(
     const body = await request.json();
     const {
       title,
-      description,
       content,
       imageUrl,
       imageAlt,
@@ -102,7 +101,6 @@ export async function PUT(
     // Preparar datos para actualizar
     const updateData: any = {};
     if (title) updateData.title = title;
-    if (description) updateData.description = description;
     if (content !== undefined) updateData.content = content;
     if (imageUrl !== undefined) updateData.imageUrl = normalizeImageUrlForSave(imageUrl);
     if (imageAlt !== undefined) updateData.imageAlt = imageAlt || null;

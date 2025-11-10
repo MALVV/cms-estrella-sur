@@ -81,7 +81,6 @@ export default function NewsEventsPublicPage() {
           featuredNews={featuredNews ? {
             id: featuredNews.id,
             title: featuredNews.title,
-            excerpt: featuredNews.excerpt || featuredNews.content.substring(0, 150) + '...',
             content: featuredNews.content,
             imageUrl: featuredNews.imageUrl,
             imageAlt: featuredNews.imageAlt,
@@ -92,7 +91,7 @@ export default function NewsEventsPublicPage() {
           newsItems={news.map(item => ({
             id: item.id,
             title: item.title,
-            excerpt: item.excerpt || item.content.substring(0, 100) + '...',
+            content: item.content,
             imageUrl: item.imageUrl,
             imageAlt: item.imageAlt,
             publishedAt: item.publishedAt,
@@ -102,7 +101,7 @@ export default function NewsEventsPublicPage() {
           eventItems={events.map(event => ({
             id: event.id,
             title: event.title,
-            description: event.description,
+            content: event.content,
             imageUrl: event.imageUrl,
             imageAlt: event.imageAlt,
             eventDate: event.eventDate,

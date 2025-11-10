@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { 
         success: true,
-        message: 'Tu solicitud de voluntariado ha sido enviada exitosamente',
+        message: 'Tu solicitud de voluntariado/pasantía ha sido enviada exitosamente',
         application 
       },
       { status: 201 }

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Heart, Lightbulb, Shield, Target, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import { Users, Heart, Lightbulb, Shield, Target, Calendar, ArrowRight, CheckCircle, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { SiteHeader } from '@/components/layout/site-header';
@@ -17,7 +17,7 @@ interface Initiative {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  category: 'EDUCACION' | 'SALUD' | 'SOCIAL' | 'AMBIENTAL';
+  sectors: string[]; // Cambiado de category a sectors (array)
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -32,35 +32,72 @@ export default function InitiativesPage() {
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   const [selectedInitiative, setSelectedInitiative] = useState<Initiative | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSector, setSelectedSector] = useState<string>('all');
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchInitiatives = async () => {
+  // Mapeo de sectores enum a español para mostrar
+  const sectorLabels: Record<string, string> = {
+    'HEALTH': 'SALUD',
+    'EDUCATION': 'EDUCACION',
+    'LIVELIHOODS': 'MEDIOS_DE_VIDA',
+    'PROTECTION': 'PROTECCION',
+    'SUSTAINABILITY': 'SOSTENIBILIDAD',
+    'EARLY_CHILD_DEVELOPMENT': 'DESARROLLO_INFANTIL_TEMPRANO',
+    'CHILDREN_IN_CRISIS': 'NINEZ_EN_CRISIS',
+  };
+
+  const sectorDisplayNames: Record<string, string> = {
+    'all': 'TODAS',
+    'SALUD': 'SALUD',
+    'EDUCACION': 'EDUCACIÓN',
+    'MEDIOS_DE_VIDA': 'MEDIOS DE VIDA',
+    'PROTECCION': 'PROTECCIÓN',
+    'SOSTENIBILIDAD': 'SOSTENIBILIDAD',
+    'DESARROLLO_INFANTIL_TEMPRANO': 'DESARROLLO INFANTIL TEMPRANO',
+    'NINEZ_EN_CRISIS': 'NIÑEZ EN CRISIS',
+  };
+
+  const fetchInitiatives = async (sector?: string, search?: string) => {
     try {
       setLoading(true);
-      console.log('🔄 Cargando iniciativas...');
-      const response = await fetch('/api/public/methodologies');
-      console.log('📡 Respuesta recibida:', response.status);
+      
+      const params = new URLSearchParams();
+      if (sector && sector !== 'all') {
+        // El API espera el formato español (SALUD, EDUCACION, etc.)
+        params.append('sectors', sector);
+      }
+      if (search && search.trim()) {
+        params.append('search', search.trim());
+      }
+      
+      const url = `/api/public/methodologies${params.toString() ? `?${params.toString()}` : ''}`;
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(`Error al cargar iniciativas: ${response.status}`);
       }
       const data = await response.json();
-      console.log('📊 Datos recibidos:', data);
-      console.log('📊 Cantidad de iniciativas:', data.length);
       setInitiatives(data);
     } catch (error) {
       console.error('❌ Error al cargar iniciativas:', error);
-      // En caso de error, mantener iniciativas vacías para mostrar mensaje de error
       setInitiatives([]);
     } finally {
       setLoading(false);
     }
   };
 
+  // Efecto combinado para sector y búsqueda
   useEffect(() => {
-    fetchInitiatives();
-  }, []);
+    const timer = setTimeout(() => {
+      fetchInitiatives(selectedSector, searchTerm);
+    }, searchTerm ? 500 : 0); // Debounce solo para búsqueda, no para cambio de sector
+
+    return () => clearTimeout(timer);
+  }, [selectedSector, searchTerm]);
 
   // Cleanup timeout al desmontar el componente
   useEffect(() => {
@@ -104,109 +141,64 @@ export default function InitiativesPage() {
     setSelectedInitiative(null);
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
+  const getCategoryIcon = (sectors: string[]) => {
+    // Usar el primer sector para el ícono
+    const sector = sectors && sectors.length > 0 ? sectors[0] : '';
+    const sectorSpanish = sectorLabels[sector] || sector;
+    
+    switch (sectorSpanish) {
       case 'EDUCACION':
         return <Lightbulb className="h-6 w-6 text-blue-500" />;
       case 'SALUD':
         return <Heart className="h-6 w-6 text-red-500" />;
-      case 'SOCIAL':
-        return <Users className="h-6 w-6 text-green-500" />;
-      case 'AMBIENTAL':
+      case 'MEDIOS_DE_VIDA':
+        return <Users className="h-6 w-6 text-purple-500" />;
+      case 'PROTECCION':
+        return <Shield className="h-6 w-6 text-green-500" />;
+      case 'SOSTENIBILIDAD':
         return <Shield className="h-6 w-6 text-emerald-500" />;
+      case 'DESARROLLO_INFANTIL_TEMPRANO':
+        return <Heart className="h-6 w-6 text-pink-500" />;
+      case 'NINEZ_EN_CRISIS':
+        return <Target className="h-6 w-6 text-orange-500" />;
       default:
         return <Target className="h-6 w-6 text-gray-500" />;
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
+  const getCategoryColor = (sectors: string[]) => {
+    // Usar el primer sector para el color
+    const sector = sectors && sectors.length > 0 ? sectors[0] : '';
+    const sectorSpanish = sectorLabels[sector] || sector;
+    
+    switch (sectorSpanish) {
       case 'EDUCACION':
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
       case 'SALUD':
         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'SOCIAL':
+      case 'MEDIOS_DE_VIDA':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'PROTECCION':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'AMBIENTAL':
+      case 'SOSTENIBILIDAD':
         return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200';
+      case 'DESARROLLO_INFANTIL_TEMPRANO':
+        return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200';
+      case 'NINEZ_EN_CRISIS':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
-  // Datos de ejemplo para la demostración
-  const exampleInitiatives: Initiative[] = [
-    {
-      id: '1',
-      title: 'Aprendizaje Basado en Proyectos',
-      description: 'Iniciativa educativa que involucra a los estudiantes en proyectos del mundo real para desarrollar habilidades del siglo XXI.',
-      shortDescription: 'Desarrollo de habilidades a través de proyectos reales',
-      ageGroup: '6-12 años',
-      category: 'EDUCACION',
-      targetAudience: 'Estudiantes de primaria',
-      objectives: 'Fomentar el pensamiento crítico y la colaboración',
-      implementation: 'Proyectos interdisciplinarios de 8 semanas',
-      results: 'Mejora del 40% en habilidades de resolución de problemas',
-      imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800',
-      imageAlt: 'Estudiantes trabajando en proyectos colaborativos',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '2',
-      title: 'Salud Comunitaria Preventiva',
-      description: 'Programa integral de salud que empodera a las comunidades para prevenir enfermedades y promover estilos de vida saludables.',
-      shortDescription: 'Prevención y promoción de salud comunitaria',
-      ageGroup: 'Todas las edades',
-      category: 'SALUD',
-      targetAudience: 'Comunidades rurales',
-      objectives: 'Reducir enfermedades prevenibles en un 60%',
-      implementation: 'Talleres mensuales y seguimiento personalizado',
-      results: 'Reducción del 45% en consultas por enfermedades prevenibles',
-      imageUrl: 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
-      imageAlt: 'Profesionales de salud trabajando con la comunidad',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '3',
-      title: 'Desarrollo Comunitario Participativo',
-      description: 'Iniciativa que involucra activamente a los miembros de la comunidad en la identificación y solución de sus propios problemas.',
-      shortDescription: 'Participación activa de la comunidad en su desarrollo',
-      ageGroup: 'Adultos',
-      category: 'SOCIAL',
-      targetAudience: 'Líderes comunitarios',
-      objectives: 'Fortalecer la organización comunitaria',
-      implementation: 'Talleres participativos y planificación conjunta',
-      results: 'Formación de 15 organizaciones comunitarias',
-      imageUrl: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800',
-      imageAlt: 'Reunión comunitaria participativa',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: '4',
-      title: 'Conservación Ambiental Participativa',
-      description: 'Programa que involucra a las comunidades en la protección y conservación de sus recursos naturales locales.',
-      shortDescription: 'Protección participativa del medio ambiente',
-      ageGroup: 'Todas las edades',
-      category: 'AMBIENTAL',
-      targetAudience: 'Comunidades rurales',
-      objectives: 'Conservar 500 hectáreas de bosque',
-      implementation: 'Monitoreo comunitario y reforestación',
-      results: 'Conservación de 300 hectáreas en el primer año',
-      imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',
-      imageAlt: 'Comunidad participando en conservación ambiental',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-  ];
+  const getSectorDisplayName = (sectors: string[]) => {
+    if (!sectors || sectors.length === 0) return 'Sin sector';
+    const sector = sectors[0];
+    const sectorSpanish = sectorLabels[sector] || sector;
+    return sectorDisplayNames[sectorSpanish] || sectorSpanish;
+  };
 
-  // Siempre mostrar las iniciativas reales de la base de datos
+  // Mostrar las iniciativas filtradas
   const initiativesToShow = initiatives;
 
   if (loading) {
@@ -227,7 +219,14 @@ export default function InitiativesPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero-iniciativas">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/iniciativas_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -242,7 +241,7 @@ export default function InitiativesPage() {
               SOCIAL
             </h1>
             <p className="text-lg md:text-xl text-gray-200 max-w-3xl mx-auto mb-8">
-              Iniciativas innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios.
+              Proyectamos y ejecutamos iniciativas innovadoras de alcance masivo a través de Unidades Educativas y Centros de Salud, diseñadas para diferentes grupos etarios.
             </p>
             <div className="mt-8">
               <a className="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg text-base font-bold hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl font-condensed" href="#iniciativas">
@@ -259,16 +258,52 @@ export default function InitiativesPage() {
       {/* Ruta de Iniciativas */}
       <section id="iniciativas" className="py-20 bg-background-light dark:bg-background-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <span className="inline-block bg-green-200 text-green-800 text-xs font-semibold px-3 py-1 rounded-full mb-4 font-condensed">
-              RUTA DE INNOVACIÓN
-            </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-text-light dark:text-text-dark mb-3 font-condensed">
-              INICIATIVAS POR GRUPOS ETARIOS
-            </h2>
-            <p className="text-xl text-text-secondary-light dark:text-text-secondary-dark max-w-3xl mx-auto">
-              Explora nuestras iniciativas innovadoras organizadas por grupos de edad. Pasa el mouse sobre cada iniciativa para conocer más detalles.
-            </p>
+          {/* Searchbar y Tabs por Sectores */}
+          <div className="mb-12 space-y-6">
+            {/* Barra de búsqueda */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary-light dark:text-text-secondary-dark h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Buscar iniciativas..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-border-light dark:border-border-dark rounded-lg bg-card-light dark:bg-card-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs por sectores */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedSector('all')}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  selectedSector === 'all'
+                    ? 'bg-primary text-white shadow-lg'
+                    : 'bg-card-light dark:bg-card-dark text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                TODAS
+              </button>
+              {Object.entries(sectorDisplayNames)
+                .filter(([key]) => key !== 'all')
+                .map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedSector(key)}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                      selectedSector === key
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-card-light dark:bg-card-dark text-text-light dark:text-text-dark hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+            </div>
           </div>
 
           {/* Línea de Tiempo Recta */}
@@ -283,9 +318,7 @@ export default function InitiativesPage() {
                 <article key={initiative.id} className="relative">
                   {/* Bullet numerado en la línea central */}
                   <div 
-                    className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-primary ring-8 ring-background-light dark:ring-background-dark flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-300 group"
-                    onMouseEnter={() => handleInitiativeHover(initiative)}
-                    onMouseLeave={handleInitiativeLeave}
+                    className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-primary ring-8 ring-background-light dark:ring-background-dark flex items-center justify-center transition-transform duration-300"
                   >
                     <span className="text-white font-bold text-lg font-condensed">{index + 1}</span>
                   </div>
@@ -293,18 +326,22 @@ export default function InitiativesPage() {
                   {/* Contenido alternando izquierda/derecha */}
                   <div className={`flex flex-col md:flex-row items-center w-full ${index % 2 === 1 ? 'md:flex-row-reverse' : ''}`}>
                     {/* Imagen */}
-                    <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'}`}>
-                      <div className="bg-card-light dark:bg-card-dark shadow-lg rounded-lg overflow-hidden">
+                    <div 
+                      className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'} cursor-pointer group`}
+                      onMouseEnter={() => handleInitiativeHover(initiative)}
+                      onMouseLeave={handleInitiativeLeave}
+                    >
+                      <div className="bg-card-light dark:bg-card-dark shadow-lg rounded-lg overflow-hidden group-hover:shadow-xl transition-shadow duration-300">
                         {initiative.imageUrl ? (
                           <Image
                             src={initiative.imageUrl}
                             alt={initiative.imageAlt || initiative.title}
                             width={400}
                             height={300}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : (
-                          <div className="w-full h-64 bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-800 dark:to-blue-800 flex items-center justify-center">
+                          <div className="w-full h-64 bg-gradient-to-br from-emerald-200 to-blue-200 dark:from-emerald-800 dark:to-blue-800 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
                             <div className="text-center">
                               <span className="material-symbols-outlined text-6xl text-emerald-600 dark:text-emerald-400 mb-4">science</span>
                               <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300 font-condensed">Iniciativa</p>
@@ -317,11 +354,16 @@ export default function InitiativesPage() {
                     {/* Información */}
                     <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pl-8' : 'md:pr-8'} mt-6 md:mt-0`}>
                       <div className="bg-card-light dark:bg-card-dark shadow-lg rounded-lg p-8">
-                        <div className="flex items-center gap-2 mb-4">
-                          {getCategoryIcon(initiative.category)}
-                          <Badge className={`${getCategoryColor(initiative.category)} text-xs`}>
-                            {initiative.category}
-                          </Badge>
+                        <div className="flex items-center gap-2 mb-4 flex-wrap">
+                          {getCategoryIcon(initiative.sectors || [])}
+                          {(initiative.sectors || []).map((sector, idx) => {
+                            const sectorSpanish = sectorLabels[sector] || sector;
+                            return (
+                              <Badge key={idx} className={`${getCategoryColor([sector])} text-xs`}>
+                                {sectorDisplayNames[sectorSpanish] || sectorSpanish}
+                              </Badge>
+                            );
+                          })}
                         </div>
                         
                         <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark mb-2">
@@ -413,10 +455,15 @@ export default function InitiativesPage() {
                       </div>
                     </div>
                   )}
-                  <div className="absolute top-4 right-4">
-                    <Badge className={`${getCategoryColor(selectedInitiative.category)} text-sm px-3 py-1`}>
-                      {selectedInitiative.category}
-                    </Badge>
+                  <div className="absolute top-4 right-4 flex flex-wrap gap-2">
+                    {(selectedInitiative.sectors || []).map((sector, idx) => {
+                      const sectorSpanish = sectorLabels[sector] || sector;
+                      return (
+                        <Badge key={idx} className={`${getCategoryColor([sector])} text-sm px-3 py-1`}>
+                          {sectorDisplayNames[sectorSpanish] || sectorSpanish}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 </div>
                 
@@ -424,8 +471,8 @@ export default function InitiativesPage() {
                   {selectedInitiative.title}
                 </h2>
                 
-                <div className="flex items-center gap-4 mb-4">
-                  {getCategoryIcon(selectedInitiative.category)}
+                <div className="flex items-center gap-4 mb-4 flex-wrap">
+                  {getCategoryIcon(selectedInitiative.sectors || [])}
                   <span className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
                     <Users className="h-4 w-4 inline mr-1" />
                     {selectedInitiative.ageGroup}

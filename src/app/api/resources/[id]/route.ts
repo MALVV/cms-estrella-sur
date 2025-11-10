@@ -70,7 +70,6 @@ export async function PUT(
       description,
       fileName,
       fileUrl,
-      fileType,
       category,
       subcategory,
       thumbnailUrl,
@@ -189,7 +188,6 @@ export async function PUT(
         ...(description !== undefined && { description }),
         ...(fileName && { fileName }),
         ...(fileUrl !== undefined && fileUrl !== '' && fileUrl !== null && { fileUrl }),
-        ...(fileType && { fileType }),
         ...(category && { category }),
         ...(subcategory !== undefined && { subcategory }),
         ...(thumbnailUrl !== undefined && { thumbnailUrl: thumbnailUrl === null || thumbnailUrl === '' ? null : thumbnailUrl }),
@@ -296,9 +294,19 @@ export async function DELETE(
     }
 
     // Eliminar el recurso de la base de datos
-    await prisma.resource.delete({
-      where: { id },
-    });
+    try {
+      await prisma.resource.delete({
+        where: { id },
+      });
+    } catch (deleteError: any) {
+      // Si el recurso ya no existe (P2025), considerarlo como éxito idempotente
+      if (deleteError?.code === 'P2025') {
+        console.log(`[Resources][DELETE] Recurso ${id} ya no existe, considerando eliminación exitosa`);
+        return NextResponse.json({ message: 'Recurso eliminado exitosamente' }, { status: 200 });
+      }
+      // Si es otro error, relanzarlo para que se maneje en el catch general
+      throw deleteError;
+    }
 
     return NextResponse.json({ message: 'Recurso eliminado exitosamente' }, { status: 200 });
   } catch (error) {

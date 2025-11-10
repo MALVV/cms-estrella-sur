@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Users, Search, Filter, MoreHorizontal, Edit, Trash2, Eye, UserCheck, UserX, Settings } from 'lucide-react'
+import { Users, Search, Filter, MoreHorizontal, Edit, Trash2, UserCheck, UserX, Settings } from 'lucide-react'
 import { CreateUserForm } from '@/components/admin/create-user-form'
 import { ToggleUserStatusDialog } from '@/components/admin/toggle-user-status-dialog'
 import { EditUserModal } from '@/components/admin/edit-user-modal'
+import { DeleteUserDialog } from '@/components/admin/delete-user-dialog'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 
 interface User {
   id: string
@@ -139,27 +141,11 @@ export default function UsersPage() {
     ))
   }
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.')) {
-      return
-    }
-
-    try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setUsers(prev => prev.filter(user => user.id !== userId))
-        setSelectedUsers(prev => prev.filter(id => id !== userId))
-      } else {
-        const errorData = await response.json()
-        alert(errorData.message || 'Error al eliminar usuario')
-      }
-    } catch (error) {
-      console.error('Error deleting user:', error)
-      alert('Error al eliminar usuario')
-    }
+  const handleDeleteUser = (userId: string) => {
+    // Esta función ahora solo actualiza el estado local
+    // La confirmación y eliminación se manejan en DeleteUserDialog
+    setUsers(prev => prev.filter(user => user.id !== userId))
+    setSelectedUsers(prev => prev.filter(id => id !== userId))
   }
 
   const handleEditUser = async (userId: string, userData: { name: string, email: string, role: string, isActive: boolean }) => {
@@ -313,7 +299,7 @@ export default function UsersPage() {
               <Settings className="h-4 w-4 text-muted-foreground" />
               <div className="ml-2">
                 <p className="text-sm font-medium text-muted-foreground">Roles</p>
-                <p className="text-2xl font-bold">{new Set(users.map(u => u.role)).size}</p>
+                <p className="text-2xl font-bold">{Object.values(UserRole).length}</p>
               </div>
             </div>
           </CardContent>
@@ -368,9 +354,9 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Todos los roles</SelectItem>
-                  <SelectItem value="ADMINISTRATOR">ADMINISTRATOR</SelectItem>
-                  <SelectItem value="MANAGER">MANAGER de Contenido</SelectItem>
-                  <SelectItem value="CONSULTANT">CONSULTANT de Donaciones</SelectItem>
+                  <SelectItem value={UserRole.ADMINISTRATOR}>{getRoleDisplayName(UserRole.ADMINISTRATOR)}</SelectItem>
+                  <SelectItem value={UserRole.MANAGER}>{getRoleDisplayName(UserRole.MANAGER)}</SelectItem>
+                  <SelectItem value={UserRole.CONSULTANT}>{getRoleDisplayName(UserRole.CONSULTANT)}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -593,10 +579,6 @@ function UserList({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver detalles
-                    </DropdownMenuItem>
                     {canEditUsers() && (
                       <DropdownMenuItem onClick={() => onOpenEditModal(user)}>
                         <Edit className="mr-2 h-4 w-4" />
@@ -622,13 +604,18 @@ function UserList({
                       </DropdownMenuItem>
                     </ToggleUserStatusDialog>
                     {canDeleteUsers() && (
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => onDeleteUser(user.id)}
+                      <DeleteUserDialog
+                        user={user}
+                        onUserDeleted={onDeleteUser}
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
-                      </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DeleteUserDialog>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -642,7 +629,7 @@ function UserList({
                 )}
                 <div className="flex items-center space-x-2 mt-2">
                   <Badge variant={getRoleBadgeVariant(user.role)}>
-                    {user.role}
+                    {getRoleDisplayName(user.role)}
                   </Badge>
                   <Badge variant={getStatusBadgeVariant(user.status)}>
                     {user.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
@@ -710,9 +697,6 @@ function UserList({
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <Eye className="h-4 w-4" />
-                </Button>
                 {canEditUsers() && (
                   <Button 
                     variant="ghost" 
@@ -739,14 +723,18 @@ function UserList({
                   </Button>
                 </ToggleUserStatusDialog>
                 {canDeleteUsers() && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-destructive"
-                    onClick={() => onDeleteUser(user.id)}
+                  <DeleteUserDialog
+                    user={user}
+                    onUserDeleted={onDeleteUser}
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </DeleteUserDialog>
                 )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -755,10 +743,6 @@ function UserList({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Eye className="mr-2 h-4 w-4" />
-                      Ver detalles
-                    </DropdownMenuItem>
                     {canEditUsers() && (
                       <DropdownMenuItem onClick={() => onOpenEditModal(user)}>
                         <Edit className="mr-2 h-4 w-4" />
@@ -784,13 +768,18 @@ function UserList({
                       </DropdownMenuItem>
                     </ToggleUserStatusDialog>
                     {canDeleteUsers() && (
-                      <DropdownMenuItem 
-                        className="text-destructive"
-                        onClick={() => onDeleteUser(user.id)}
+                      <DeleteUserDialog
+                        user={user}
+                        onUserDeleted={onDeleteUser}
                       >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Eliminar
-                      </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-destructive"
+                          onSelect={(e) => e.preventDefault()}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DeleteUserDialog>
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>

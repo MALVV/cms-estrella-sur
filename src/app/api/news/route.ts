@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         { content: { contains: search, mode: 'insensitive' } },
-        { excerpt: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -125,7 +124,6 @@ export async function POST(request: NextRequest) {
     const {
       title,
       content,
-      excerpt,
       imageUrl,
       imageAlt,
       isFeatured = false,
@@ -153,7 +151,6 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         content,
-        excerpt,
         imageUrl: normalizeImageUrlForSave(imageUrl),
         imageAlt: imageAlt || null,
         isFeatured,

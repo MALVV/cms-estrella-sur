@@ -126,7 +126,7 @@ export function SiteFooter() {
             </p>
             
             <p className="text-sm leading-relaxed">
-              El usuario que acceda al contenido del sitio Web y pueda compartir información cuando el sitio le solicite, valora la privacidad y seguridad de los datos personales de los participantes, miembros, donantes, voluntarios y personal de la organización, por lo que la información solicitada será estrictamente de uso de la organización evitando la divulgación por otros medios conforme a la ley N° 164 de Telecomunicaciones y Tecnología, información y Comunicación. De esta manera, posteriormente los datos podrán ser eliminados de los usuarios o convertirlos en anónimos de manera segura en los sistemas de almacenamiento de la organización. La organización no vende la información de los usuarios que acceden al sitio.
+              El usuario que acceda al contenido del sitio Web y pueda compartir información cuando el sitio le solicite, valora la privacidad y seguridad de los datos personales de los participantes, miembros, donantes, voluntarios y pasantes y personal de la organización, por lo que la información solicitada será estrictamente de uso de la organización evitando la divulgación por otros medios conforme a la ley N° 164 de Telecomunicaciones y Tecnología, información y Comunicación. De esta manera, posteriormente los datos podrán ser eliminados de los usuarios o convertirlos en anónimos de manera segura en los sistemas de almacenamiento de la organización. La organización no vende la información de los usuarios que acceden al sitio.
             </p>
 
             <p className="text-sm leading-relaxed">
@@ -166,7 +166,7 @@ export function SiteFooter() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">INFORMACIÓN GENERAL</h3>
               <p className="text-sm leading-relaxed">
-                El sitio web de la organización tiene como propósito: Informar sobre los proyectos, programas y actividades de la organización, permite facilitar la participación y visualización de las mismas a voluntarios, participantes y donantes. Tiene por objetivo la transparencia institucional y la difusión de materiales educativos, sociales y/o culturales.
+                El sitio web de la organización tiene como propósito: Informar sobre los proyectos, programas y actividades de la organización, permite facilitar la participación y visualización de las mismas a voluntarios y pasantes, participantes y donantes. Tiene por objetivo la transparencia institucional y la difusión de materiales educativos, sociales y/o culturales.
               </p>
 
               <p className="text-sm leading-relaxed font-semibold">

@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Play, Image as ImageIcon, Target, Users, BookOpen, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -28,7 +29,7 @@ interface Programa {
   news: Array<{
     id: string;
     title: string;
-    excerpt: string;
+    content: string;
     publishedAt: string;
   }>;
   imageLibrary: Array<{
@@ -44,10 +45,24 @@ interface Programa {
   };
 }
 
+// Función para extraer el ID de YouTube de una URL
 function extractYouTubeId(url: string): string | null {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
-  const match = url.match(regex);
-  return match ? match[1] : null;
+  if (!url) return null;
+  
+  // Patrones comunes de URLs de YouTube
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([^&\n?#]+)/,
+    /youtube\.com\/watch\?.*v=([^&\n?#]+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null;
 }
 
 export default function ProgramaDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -55,6 +70,7 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
   const [programa, setPrograma] = useState<Programa | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPrograma = async () => {
@@ -187,11 +203,9 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                   <CardContent>
                     {youtubeId ? (
                       <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                        <a 
-                          href={programa.presentationVideo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block relative group"
+                        <button
+                          onClick={() => setIsVideoDialogOpen(true)}
+                          className="block relative group w-full h-full cursor-pointer"
                         >
                           <img
                             src={`https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`}
@@ -203,20 +217,17 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
                               <Play className="h-12 w-12" />
                             </div>
                           </div>
-                        </a>
+                        </button>
                       </div>
                     ) : (
-                      <a 
-                        href={programa.presentationVideo}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
+                      <Button 
+                        className="w-full" 
+                        variant="default"
+                        onClick={() => setIsVideoDialogOpen(true)}
                       >
-                        <Button className="w-full" variant="default">
-                          <Play className="h-4 w-4 mr-2" />
-                          Ver Video de Presentación
-                        </Button>
-                      </a>
+                        <Play className="h-4 w-4 mr-2" />
+                        Ver Video de Presentación
+                      </Button>
                     )}
                   </CardContent>
                 </Card>
@@ -396,6 +407,43 @@ export default function ProgramaDetailPage({ params }: { params: Promise<{ id: s
         />
         </div>
       </div>
+
+      {/* Dialog para reproducir video de YouTube */}
+      {programa.presentationVideo && (
+        <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+          <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+            <DialogHeader className="px-6 pt-6 pb-1">
+              <DialogTitle className="text-2xl">Video de Presentación - {programa.sectorName}</DialogTitle>
+            </DialogHeader>
+            {(() => {
+              const videoId = extractYouTubeId(programa.presentationVideo!);
+              if (!videoId) {
+                return (
+                  <div className="px-6 pb-6">
+                    <p className="text-center text-muted-foreground py-8">
+                      URL de video no válida. Por favor, verifica que sea una URL de YouTube.
+                    </p>
+                  </div>
+                );
+              }
+              return (
+                <div className="px-6 pt-2 pb-12 mb-4">
+                  <div className="relative w-full bg-black rounded-lg overflow-hidden shadow-lg" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute top-0 left-0 w-full h-full"
+                      src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+                      title={`Video de ${programa.sectorName}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+          </DialogContent>
+        </Dialog>
+      )}
+
       <SiteFooter />
     </div>
   );

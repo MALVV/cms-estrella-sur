@@ -125,7 +125,35 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Si la donación está actualmente aprobada y se va a cambiar a otro estado, revertir el monto
+    // Guardar el ID del proyecto antes de actualizar la donación
+    const projectId = existingDonation.donationProject?.id;
+
+    // Helper para extraer bucket y key de una URL
+    const extractBucketAndKey = (url: string): { bucket: string | null; key: string | null } => {
+      try {
+        if (!url) return { bucket: null, key: null };
+        const publicBase = (process.env.AWS_S3_PUBLIC_URL || process.env.AWS_URL || '').replace(/\/$/, '');
+        const endpoint = (process.env.AWS_S3_ENDPOINT || process.env.AWS_ENDPOINT || '').replace(/\/$/, '');
+        const envBucket = process.env.AWS_S3_BUCKET || process.env.AWS_BUCKET || '';
+        const vhMatch = url.match(/^https?:\/\/([^\.]+)\.[^\/]+digitaloceanspaces\.com\/(.+)$/);
+        if (vhMatch) return { bucket: vhMatch[1], key: vhMatch[2] };
+        const awsVhMatch = url.match(/^https?:\/\/([^\.]+)\.s3\.[^\/]+\.amazonaws\.com\/(.+)$/);
+        if (awsVhMatch) return { bucket: awsVhMatch[1], key: awsVhMatch[2] };
+        if (endpoint && url.startsWith(endpoint + '/')) {
+          const rest = url.substring((endpoint + '/').length);
+          const idx = rest.indexOf('/');
+          if (idx > 0) return { bucket: rest.substring(0, idx), key: rest.substring(idx + 1) };
+        }
+        if (publicBase && url.startsWith(publicBase + '/')) {
+          return { bucket: envBucket || null, key: url.substring((publicBase + '/').length) };
+        }
+        return { bucket: envBucket || null, key: null };
+      } catch {
+        return { bucket: null, key: null };
+      }
+    };
+
+    // Si la donación está actualmente aprobada y se va a cambiar a otro estado, revertir el monto y eliminar comprobante
     if (existingDonation.status === 'APPROVED' && existingDonation.donationProject && status !== 'APPROVED') {
       await prisma.donationProject.update({
         where: { id: existingDonation.donationProject.id },
@@ -136,20 +164,46 @@ export async function PATCH(request: NextRequest) {
         }
       });
 
-      // Verificar si el proyecto sigue completado
-      await checkAndUpdateProjectCompletion(existingDonation.donationProject.id);
+      // Eliminar comprobante del bucket si existe
+      if (existingDonation.bankTransferImage) {
+        const { bucket, key } = extractBucketAndKey(existingDonation.bankTransferImage);
+        if (bucket && key) {
+          try {
+            await storageService.deleteFile(bucket, key);
+            console.log(`[Donations][PATCH] Comprobante eliminado del bucket: ${key}`);
+          } catch (e) {
+            console.warn('[Donations][PATCH] No se pudo eliminar comprobante del bucket:', e);
+            // No fallar la operación si no se puede eliminar del bucket
+          }
+        }
+      }
     }
 
-    // Actualizar la donación PRIMERO
+    // Preparar datos para actualizar la donación
+    const updateData: any = {
+      status,
+      approvedBy: status === 'APPROVED' ? session.user.id : existingDonation.approvedBy,
+      approvedAt: status === 'APPROVED' ? new Date() : existingDonation.approvedAt,
+    };
+
+    // Si se está aprobando, usar la nueva imagen o mantener la existente
+    if (status === 'APPROVED') {
+      updateData.bankTransferImage = bankTransferImage || existingDonation.bankTransferImage;
+      updateData.bankTransferImageAlt = bankTransferImageAlt || existingDonation.bankTransferImageAlt;
+    } else if (existingDonation.status === 'APPROVED' && status !== 'APPROVED') {
+      // Si se está desaprobando, limpiar los campos del comprobante
+      updateData.bankTransferImage = null;
+      updateData.bankTransferImageAlt = null;
+    } else {
+      // Para otros casos, mantener los valores existentes
+      updateData.bankTransferImage = existingDonation.bankTransferImage;
+      updateData.bankTransferImageAlt = existingDonation.bankTransferImageAlt;
+    }
+
+    // Actualizar la donación PRIMERO (para que el status esté actualizado en la BD)
     const updatedDonation = await prisma.donation.update({
       where: { id: donationId },
-      data: {
-        status,
-        approvedBy: status === 'APPROVED' ? session.user.id : existingDonation.approvedBy,
-        approvedAt: status === 'APPROVED' ? new Date() : existingDonation.approvedAt,
-        bankTransferImage: bankTransferImage || existingDonation.bankTransferImage,
-        bankTransferImageAlt: bankTransferImageAlt || existingDonation.bankTransferImageAlt
-      },
+      data: updateData,
       include: {
         donationProject: true,
         approver: {
@@ -175,6 +229,12 @@ export async function PATCH(request: NextRequest) {
 
       // Verificar automáticamente si se alcanzó la meta y marcar como completado
       await checkAndUpdateProjectCompletion(existingDonation.donationProject.id);
+    }
+
+    // Si la donación estaba aprobada y se cambió a otro estado, verificar si el proyecto sigue completado
+    // IMPORTANTE: Esto debe hacerse DESPUÉS de actualizar el status de la donación
+    if (existingDonation.status === 'APPROVED' && status !== 'APPROVED' && projectId) {
+      await checkAndUpdateProjectCompletion(projectId);
     }
 
     // Actualizar la meta anual DESPUÉS de actualizar la donación (para que el status ya esté actualizado en la BD)

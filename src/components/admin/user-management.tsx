@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { UserRole } from '@/lib/roles'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -257,7 +257,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ className }) => 
                           <h3 className="font-medium">{user.name || 'Sin nombre'}</h3>
                           {getRoleIcon(user.role)}
                           <Badge className={getRoleColor(user.role)}>
-                            {user.role}
+                            {getRoleDisplayName(user.role)}
                           </Badge>
                           <Badge variant={user.isActive ? 'default' : 'secondary'}>
                             {user.isActive ? 'Activo' : 'Inactivo'}

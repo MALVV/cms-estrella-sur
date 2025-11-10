@@ -33,7 +33,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       id: story.id,
       title: story.title,
       content: story.content,
-      summary: story.summary,
       imageUrl: story.imageUrl,
       imageAlt: story.imageAlt,
       createdAt: story.createdAt.toISOString(),

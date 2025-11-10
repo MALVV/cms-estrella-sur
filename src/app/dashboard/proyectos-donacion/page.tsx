@@ -699,24 +699,6 @@ export default function ProyectosDonacionDashboardPage() {
                             Eliminar
                           </Button>
                         </div>
-                        <label htmlFor="create-qr-file-input-replace" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                            <Upload className="mr-2 h-4 w-4" />
-                            {uploading ? 'Subiendo...' : 'Cambiar imagen QR'}
-                          </Button>
-                          <Input
-                            id="create-qr-file-input-replace"
-                            name="file-upload"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleQrFileUpload(file);
-                            }}
-                            disabled={uploading}
-                          />
-                        </label>
                       </div>
                     )}
                   </div>
@@ -787,24 +769,6 @@ export default function ProyectosDonacionDashboardPage() {
                             Eliminar
                           </Button>
                         </div>
-                        <label htmlFor="create-reference-file-input-replace" className="cursor-pointer">
-                          <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                            <Upload className="mr-2 h-4 w-4" />
-                            {uploading ? 'Subiendo...' : 'Cambiar imagen de referencia'}
-                          </Button>
-                          <Input
-                            id="create-reference-file-input-replace"
-                            name="file-upload"
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleReferenceFileUpload(file);
-                            }}
-                            disabled={uploading}
-                          />
-                        </label>
                       </div>
                     )}
                   </div>
@@ -1152,27 +1116,6 @@ export default function ProyectosDonacionDashboardPage() {
                         Cancelar eliminación
                       </Button>
                     )}
-                    <label htmlFor="edit-qr-file-input-replace" className="cursor-pointer">
-                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                        <Upload className="mr-2 h-4 w-4" />
-                        {uploading ? 'Subiendo...' : 'Cambiar imagen QR'}
-                      </Button>
-                  <Input
-                        id="edit-qr-file-input-replace"
-                        name="file-upload"
-                    type="file"
-                        className="sr-only"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleQrFileUpload(file);
-                        setQrMarkedForDeletion(false);
-                      }
-                    }}
-                        disabled={uploading}
-                      />
-                    </label>
                   </div>
                   )}
                 </div>
@@ -1265,27 +1208,6 @@ export default function ProyectosDonacionDashboardPage() {
                         Cancelar eliminación
                       </Button>
                     )}
-                    <label htmlFor="edit-reference-file-input-replace" className="cursor-pointer">
-                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                        <Upload className="mr-2 h-4 w-4" />
-                        {uploading ? 'Subiendo...' : 'Cambiar imagen de referencia'}
-                      </Button>
-                  <Input
-                        id="edit-reference-file-input-replace"
-                        name="file-upload"
-                    type="file"
-                        className="sr-only"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        handleReferenceFileUpload(file);
-                        setReferenceMarkedForDeletion(false);
-                      }
-                    }}
-                        disabled={uploading}
-                      />
-                    </label>
                   </div>
                   )}
                 </div>

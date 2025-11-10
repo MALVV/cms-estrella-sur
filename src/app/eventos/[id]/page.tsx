@@ -6,15 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Calendar,
-  User,
   Share2,
-  Heart,
-  Clock,
   MapPin,
   CalendarDays,
-  BookOpen,
   ArrowRight,
-  PartyPopper
+  PartyPopper,
+  Clock
 } from 'lucide-react'
 import Image from 'next/image'
 import { SiteHeader } from '@/components/layout/site-header'
@@ -25,8 +22,7 @@ import Link from 'next/link'
 interface EventDetail {
   id: string
   title: string
-  description: string
-  content?: string
+  content: string
   imageUrl?: string
   imageAlt?: string
   eventDate: string
@@ -91,17 +87,17 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString('es-ES', {
       hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
+      minute: '2-digit'
     })
   }
+
 
   const handleShare = async () => {
     if (navigator.share && event) {
       try {
         await navigator.share({
           title: event.title,
-          text: event.description,
+          text: event.content ? event.content.substring(0, 200) : '',
           url: window.location.href,
         })
       } catch (err) {
@@ -189,22 +185,10 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 <span>Fecha: {formatDate(event.eventDate)}</span>
               </div>
               
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{formatTime(event.eventDate)}</span>
-              </div>
-              
               {event.location && (
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
                   <span>{event.location}</span>
-                </div>
-              )}
-              
-              {event.organizer && (
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span>Por {event.organizer.name}</span>
                 </div>
               )}
             </div>
@@ -239,38 +223,84 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
             </div>
           )}
 
+          {/* Tarjetas destacadas con información del evento */}
+          <div className={`mb-8 grid gap-4 ${event.location ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+            {/* Tarjeta de Fecha */}
+            <Card className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary/20 dark:bg-primary/30 p-3 rounded-lg flex-shrink-0">
+                    <Calendar className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                      Fecha
+                    </p>
+                    <p className="text-xl font-bold text-text-light dark:text-text-dark">
+                      {formatDate(event.eventDate)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tarjeta de Hora */}
+            <Card className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-md hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="bg-primary/20 dark:bg-primary/30 p-3 rounded-lg flex-shrink-0">
+                    <Clock className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                      Hora
+                    </p>
+                    <p className="text-xl font-bold text-text-light dark:text-text-dark">
+                      {formatTime(event.eventDate)}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tarjeta de Lugar */}
+            {event.location && (
+              <Card className="bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark shadow-md hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-primary/20 dark:bg-primary/30 p-3 rounded-lg flex-shrink-0">
+                      <MapPin className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark mb-2">
+                        Lugar
+                      </p>
+                      <p className="text-xl font-bold text-text-light dark:text-text-dark break-words">
+                        {event.location}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
           {/* Contenido principal */}
           <article className="prose prose-lg max-w-none">
             <div className="space-y-8">
-              {/* Descripción */}
-              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm border-l-4 border-primary">
-                <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">
-                  Descripción del Evento
+              {/* Contenido completo */}
+              <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
+                <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
+                  Descripción
                 </h2>
                 <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                  {event.description.split('\n').map((paragraph, index) => (
+                  {(event.content || '').split('\n').map((paragraph, index) => (
                     <p key={index} className="mb-4 last:mb-0">
                       {paragraph}
                     </p>
                   ))}
                 </div>
               </div>
-
-              {/* Contenido completo */}
-              {event.description && (
-                <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
-                  <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
-                    Información Adicional
-                  </h2>
-                  <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                    {event.description.split('\n').map((paragraph, index) => (
-                      <p key={index} className="mb-4 last:mb-0">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </article>
 

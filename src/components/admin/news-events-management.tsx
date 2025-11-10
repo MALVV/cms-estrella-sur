@@ -19,7 +19,6 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
   isActive: boolean;
@@ -34,8 +33,7 @@ interface NewsItem {
 interface EventItem {
   id: string;
   title: string;
-  description: string;
-  content?: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -72,13 +70,11 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    excerpt: '',
     imageUrl: '',
     imageAlt: '',
     isFeatured: false,
     isActive: true,
     // Event specific
-    description: '',
     eventDate: '',
     location: '',
   });
@@ -119,12 +115,10 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
     setFormData({
       title: '',
       content: '',
-      excerpt: '',
       imageUrl: '',
       imageAlt: '',
       isFeatured: false,
       isActive: true,
-      description: '',
       eventDate: '',
       location: '',
     });
@@ -178,14 +172,13 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
         ? {
             title: formData.title,
             content: formData.content,
-            excerpt: formData.excerpt,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             isFeatured: formData.isFeatured,
           }
         : {
             title: formData.title,
-            description: formData.description,
+            content: formData.content,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             eventDate: formData.eventDate,
@@ -230,7 +223,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
         ? {
             title: formData.title,
             content: formData.content,
-            excerpt: formData.excerpt,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             isFeatured: formData.isFeatured,
@@ -238,7 +230,7 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
           }
         : {
             title: formData.title,
-            description: formData.description,
+            content: formData.content,
             imageUrl: formData.imageUrl,
             imageAlt: formData.imageAlt,
             eventDate: formData.eventDate,
@@ -384,8 +376,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
     setFormData({
       title: item.title,
       content: 'content' in item ? item.content || '' : '',
-      excerpt: 'excerpt' in item ? item.excerpt || '' : '',
-      description: 'description' in item ? item.description : '',
       imageUrl: item.imageUrl || '',
       imageAlt: item.imageAlt || '',
       isFeatured: item.isFeatured,
@@ -464,25 +454,16 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                       rows={6}
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Resumen</label>
-                    <Textarea
-                      value={formData.excerpt}
-                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                      placeholder="Resumen breve"
-                      rows={3}
-                    />
-                  </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium mb-2">Descripción</label>
+                    <label className="block text-sm font-medium mb-2">Contenido</label>
                     <Textarea
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Descripción del evento"
-                      rows={4}
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder="Contenido del evento"
+                      rows={6}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -554,24 +535,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                           Eliminar
                         </Button>
                       </div>
-                      <label htmlFor={`file-upload-replace-create-${activeTab}`} className="cursor-pointer">
-                        <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                          <Upload className="mr-2 h-4 w-4" />
-                          {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                        </Button>
-                        <input
-                          id={`file-upload-replace-create-${activeTab}`}
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload(file);
-                          }}
-                          disabled={uploading}
-                        />
-                      </label>
                     </div>
                   )}
                 </div>
@@ -636,7 +599,31 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
             Eventos ({events.length})
           </Button>
         </div>
-        <div className="flex items-center space-x-2">
+        
+        <div className="flex items-center gap-2">
+          {selectedItems.length > 0 && (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(true)}
+              >
+                Activar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(false)}
+              >
+                Desactivar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedItems([])}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Limpiar Selección
+              </Button>
+            </>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -655,30 +642,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
           </Button>
         </div>
       </div>
-
-      {/* Acciones en lote */}
-      {selectedItems.length > 0 && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-900">
-              {selectedItems.length} {activeTab === 'news' ? 'noticia(s)' : 'evento(s)'} seleccionado(s)
-            </span>
-            <div className="flex items-center space-x-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(true)}>
-                <Eye className="mr-1 h-3 w-3" />
-                Activar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(false)}>
-                <EyeOff className="mr-1 h-3 w-3" />
-                Desactivar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setSelectedItems([])}>
-                Limpiar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Content */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -717,7 +680,7 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                 </div>
               </div>
               <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                {'excerpt' in item ? item.excerpt : 'description' in item ? item.description : ''}
+                {'content' in item ? (item.content.length > 150 ? item.content.substring(0, 150) + '...' : item.content) : ''}
               </p>
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <div className="flex items-center gap-1">
@@ -788,25 +751,16 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                     rows={6}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">Resumen</label>
-                  <Textarea
-                    value={formData.excerpt}
-                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-                    placeholder="Resumen breve"
-                    rows={3}
-                  />
-                </div>
               </>
             ) : (
               <>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Descripción</label>
+                  <label className="block text-sm font-medium mb-2">Contenido</label>
                   <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Descripción del evento"
-                    rows={4}
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    placeholder="Contenido del evento"
+                    rows={6}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -878,24 +832,6 @@ export const NewsEventsManagement: React.FC<NewsEventsManagementProps> = ({ defa
                         Eliminar
                       </Button>
                     </div>
-                    <label htmlFor={`file-upload-replace-edit-${activeTab}`} className="cursor-pointer">
-                      <Button type="button" variant="outline" className="w-full" disabled={uploading}>
-                        <Upload className="mr-2 h-4 w-4" />
-                        {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                      </Button>
-                      <input
-                        id={`file-upload-replace-edit-${activeTab}`}
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(file);
-                        }}
-                        disabled={uploading}
-                      />
-                    </label>
                   </div>
                 )}
               </div>

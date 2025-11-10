@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     // Obtener todos los aliados activos para la página de aliados estratégicos
-    const allies = await (prisma as any).allies.findMany({
+    const allies = await prisma.ally.findMany({
       where: {
         isActive: true
       },
@@ -12,7 +12,7 @@ export async function GET() {
         createdAt: 'desc'
       },
       include: {
-        users: {
+        creator: {
           select: {
             id: true,
             name: true,
@@ -23,7 +23,7 @@ export async function GET() {
       }
     })
 
-    const formattedAllies = allies.map((ally: any) => ({
+    const formattedAllies = allies.map((ally) => ({
       id: ally.id,
       name: ally.name,
       role: ally.role,
@@ -32,11 +32,11 @@ export async function GET() {
       imageAlt: ally.imageAlt,
       isFeatured: ally.isFeatured || false,
       createdAt: ally.createdAt.toISOString().split('T')[0],
-      author: ally.users ? {
-        id: ally.users.id,
-        name: ally.users.name,
-        email: ally.users.email,
-        role: ally.users.role
+      author: ally.creator ? {
+        id: ally.creator.id,
+        name: ally.creator.name,
+        email: ally.creator.email,
+        role: ally.creator.role
       } : null
     }))
 

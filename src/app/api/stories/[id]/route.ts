@@ -93,7 +93,7 @@ export async function PUT(
     const resolvedParams = await params;
     const { id } = resolvedParams
     const body = await request.json()
-    const { title, content, summary, imageUrl, imageAlt, isActive } = body
+    const { title, content, imageUrl, imageAlt, isActive } = body
 
     // Verificar que la story existe
     const existingStory = await prisma.story.findUnique({
@@ -108,9 +108,9 @@ export async function PUT(
     }
 
     // Validar datos requeridos
-    if (!title || !content || !summary) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Título, contenido y resumen son requeridos' },
+        { error: 'Título y contenido son requeridos' },
         { status: 400 }
       )
     }
@@ -165,7 +165,6 @@ export async function PUT(
       data: {
         title,
         content,
-        summary,
         imageUrl: imageUrl !== undefined ? normalizeImageUrlForSave(imageUrl) : normalizeImageUrlForSave(existingStory.imageUrl),
         imageAlt: imageAlt !== undefined ? (imageAlt || null) : existingStory.imageAlt,
         isActive: isActive !== undefined ? isActive : existingStory.isActive
@@ -194,7 +193,6 @@ export async function PUT(
       id: updatedStory.id,
       title: updatedStory.title,
       content: updatedStory.content,
-      summary: updatedStory.summary,
       imageUrl: normalizeImageUrl(updatedStory.imageUrl),
       imageAlt: updatedStory.imageAlt || null,
       status: updatedStory.isActive ? 'ACTIVE' : 'INACTIVE',

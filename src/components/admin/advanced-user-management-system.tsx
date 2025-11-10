@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
-import { UserRole } from '@/lib/roles'
+import { UserRole, getRoleDisplayName } from '@/lib/roles'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -240,6 +240,7 @@ export function AdvancedUserManagementSystem() {
     switch (role) {
       case UserRole.ADMINISTRATOR: return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300'
       case UserRole.MANAGER: return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300'
+      case UserRole.CONSULTANT: return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
     }
   }
@@ -248,6 +249,7 @@ export function AdvancedUserManagementSystem() {
     switch (role) {
       case UserRole.ADMINISTRATOR: return <Crown className="h-4 w-4 text-red-500" />
       case UserRole.MANAGER: return <Briefcase className="h-4 w-4 text-green-500" />
+      case UserRole.CONSULTANT: return <Users className="h-4 w-4 text-blue-500" />
       default: return <Users className="h-4 w-4 text-gray-500" />
     }
   }
@@ -359,7 +361,7 @@ export function AdvancedUserManagementSystem() {
               <SelectContent>
                 <SelectItem value="all">Todos los Roles</SelectItem>
                 {Object.values(UserRole).map(role => (
-                  <SelectItem key={role} value={role}>{role}</SelectItem>
+                  <SelectItem key={role} value={role}>{getRoleDisplayName(role)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -460,7 +462,7 @@ export function AdvancedUserManagementSystem() {
                   <div className="flex items-center gap-2">
                     {getRoleIcon(user.role)}
                     <Badge className={getRoleColor(user.role)}>
-                      {user.role}
+                      {getRoleDisplayName(user.role)}
                     </Badge>
                     {user.mustChangePassword && (
                       <Badge variant="outline" className="text-orange-600 border-orange-600">

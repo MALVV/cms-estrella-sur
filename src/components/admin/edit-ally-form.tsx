@@ -392,24 +392,6 @@ export const EditAllyForm: React.FC<EditAllyFormProps> = ({ ally, onSuccess, chi
                     Eliminar
                   </Button>
                 </div>
-                <label htmlFor="file-upload-ally-replace-edit" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full" disabled={uploading || isLoading}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                  </Button>
-                  <input
-                    id="file-upload-ally-replace-edit"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(file);
-                    }}
-                    disabled={uploading || isLoading}
-                  />
-                </label>
               </div>
             )}
             <div className="space-y-2">

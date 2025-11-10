@@ -89,16 +89,33 @@ export async function POST(request: NextRequest) {
     // Validaciones básicas
     if (!title || !description || !youtubeUrl) {
       return NextResponse.json(
-        { error: 'Título, descripción y URL de YouTube son requeridos' },
+        { error: 'Título, descripción y URL del video son requeridos' },
         { status: 400 }
       )
     }
 
-    // Validar URL de YouTube - expresión regular mejorada
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/
-    if (!youtubeRegex.test(youtubeUrl)) {
+    // Validar URL de video (YouTube, Google Drive o Facebook)
+    const validateVideoUrl = (url: string): boolean => {
+      if (!url) return false
+      
+      // YouTube
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/)[\w-]+/
+      if (youtubeRegex.test(url)) return true
+      
+      // Google Drive
+      const driveRegex = /drive\.google\.com\/(file\/d\/|open\?id=)[a-zA-Z0-9_-]+/
+      if (driveRegex.test(url)) return true
+      
+      // Facebook
+      const facebookRegex = /(facebook\.com\/.*\/videos\/|facebook\.com\/watch|fb\.watch\/)/
+      if (facebookRegex.test(url)) return true
+      
+      return false
+    }
+
+    if (!validateVideoUrl(youtubeUrl)) {
       return NextResponse.json(
-        { error: 'URL de YouTube inválida. Formatos válidos: https://www.youtube.com/watch?v=..., https://youtu.be/..., https://www.youtube.com/embed/...' },
+        { error: 'URL inválida. Formatos válidos: YouTube, Google Drive o Facebook' },
         { status: 400 }
       )
     }

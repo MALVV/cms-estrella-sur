@@ -21,7 +21,7 @@ interface Methodology {
   imageUrl?: string;
   imageAlt?: string;
   ageGroup: string;
-  sectors: ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[];
+  sectors: string[]; // Puede venir en formato enum (HEALTH, EDUCATION) o español (SALUD, EDUCACION)
   targetAudience: string;
   objectives: string;
   implementation: string;
@@ -59,6 +59,35 @@ interface MethodologyFormData {
 
 export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMethodologyFormProps) {
   const { toast } = useToast();
+  
+  // Mapeo inverso: del enum de Prisma al formato español del formulario
+  const enumToSpanishMap: Record<string, 'SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS'> = {
+    'HEALTH': 'SALUD',
+    'EDUCATION': 'EDUCACION',
+    'LIVELIHOODS': 'MEDIOS_DE_VIDA',
+    'PROTECTION': 'PROTECCION',
+    'SUSTAINABILITY': 'SOSTENIBILIDAD',
+    'EARLY_CHILD_DEVELOPMENT': 'DESARROLLO_INFANTIL_TEMPRANO',
+    'CHILDREN_IN_CRISIS': 'NINEZ_EN_CRISIS',
+  };
+
+  // Convertir sectores del formato enum al formato español
+  const mapSectorsToSpanish = (sectors: string[]): ('SALUD' | 'EDUCACION' | 'MEDIOS_DE_VIDA' | 'PROTECCION' | 'SOSTENIBILIDAD' | 'DESARROLLO_INFANTIL_TEMPRANO' | 'NINEZ_EN_CRISIS')[] => {
+    const validSpanishSectors = ['SALUD', 'EDUCACION', 'MEDIOS_DE_VIDA', 'PROTECCION', 'SOSTENIBILIDAD', 'DESARROLLO_INFANTIL_TEMPRANO', 'NINEZ_EN_CRISIS'] as const;
+    type SpanishSector = typeof validSpanishSectors[number];
+    
+    return sectors
+      .map((sector): SpanishSector | undefined => {
+        // Si ya está en formato español, mantenerlo
+        if (validSpanishSectors.includes(sector as SpanishSector)) {
+          return sector as SpanishSector;
+        }
+        // Si está en formato enum, mapearlo al español
+        return enumToSpanishMap[sector];
+      })
+      .filter((sector): sector is SpanishSector => sector !== undefined);
+  };
+
   const [formData, setFormData] = useState<MethodologyFormData>({
     title: methodology.title,
     description: methodology.description,
@@ -66,7 +95,7 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
     imageUrl: methodology.imageUrl || '',
     imageAlt: methodology.imageAlt || '',
     ageGroup: methodology.ageGroup,
-    sectors: methodology.sectors || [],
+    sectors: mapSectorsToSpanish(methodology.sectors || []),
     targetAudience: methodology.targetAudience,
     objectives: methodology.objectives,
     implementation: methodology.implementation,
@@ -622,24 +651,6 @@ export function EditMethodologyForm({ methodology, onSuccess, onCancel }: EditMe
                     Eliminar
                   </Button>
                 </div>
-                <label htmlFor="file-upload-methodology-replace-edit" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full" disabled={uploading || isLoading}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                  </Button>
-                  <input
-                    id="file-upload-methodology-replace-edit"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(file);
-                    }}
-                    disabled={uploading || isLoading}
-                  />
-                </label>
               </div>
             )}
             <div className="space-y-2">

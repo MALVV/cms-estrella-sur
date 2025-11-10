@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 
@@ -74,9 +75,14 @@ function SignInForm() {
           <div className="text-center">
             {/* Logo horizontal de Estrella del Sur */}
             <div className="flex justify-center mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold text-text-light dark:text-text-dark font-condensed">
-                <span className="text-primary">Estrella del Sur</span>
-              </h1>
+              <Image
+                src="/static-images/logos/logo_horizontal_estrella.png"
+                alt="Estrella del Sur"
+                width={300}
+                height={100}
+                className="h-auto w-auto max-w-[300px]"
+                priority
+              />
             </div>
           </div>
           
@@ -179,9 +185,16 @@ export default function SignInPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-background-light dark:bg-background-dark flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-text-light dark:text-text-dark font-condensed mb-4">
-            <span className="text-primary">Estrella del Sur</span>
-          </h1>
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/static-images/logos/logo_horizontal_estrella.png"
+              alt="Estrella del Sur"
+              width={300}
+              height={100}
+              className="h-auto w-auto max-w-[300px]"
+              priority
+            />
+          </div>
           <p className="text-text-light dark:text-text-dark">Cargando...</p>
         </div>
       </div>

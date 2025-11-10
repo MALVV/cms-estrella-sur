@@ -17,7 +17,6 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
   category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
@@ -352,37 +351,40 @@ export const NewsManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Acciones en lote */}
-      {selectedItems.length > 0 && (
-        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-blue-900">
-              {selectedItems.length} noticia(s) seleccionada(s)
-            </span>
-            <div className="flex items-center space-x-2">
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(true)}>
-                <Eye className="mr-1 h-3 w-3" />
-                Activar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => handleBulkToggleStatus(false)}>
-                <EyeOff className="mr-1 h-3 w-3" />
-                Desactivar
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setSelectedItems([])}>
-                Limpiar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Pestañas */}
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">Todas ({filteredNews.length})</TabsTrigger>
-          <TabsTrigger value="active">Activas ({activeNews.length})</TabsTrigger>
-          <TabsTrigger value="inactive">Inactivas ({inactiveNews.length})</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center">
+          <TabsList>
+            <TabsTrigger value="all">Todas ({filteredNews.length})</TabsTrigger>
+            <TabsTrigger value="active">Activas ({activeNews.length})</TabsTrigger>
+            <TabsTrigger value="inactive">Inactivas ({inactiveNews.length})</TabsTrigger>
+          </TabsList>
+          
+          {/* Acciones en lote */}
+          {selectedItems.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(true)}
+              >
+                Activar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => handleBulkToggleStatus(false)}
+              >
+                Desactivar Seleccionados ({selectedItems.length})
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleClearSelection}
+                className="text-gray-600 hover:text-gray-800"
+              >
+                Limpiar Selección
+              </Button>
+            </div>
+          )}
+        </div>
 
         <TabsContent value="all">
           <NewsList 

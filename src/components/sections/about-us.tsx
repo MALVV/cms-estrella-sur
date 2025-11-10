@@ -47,7 +47,7 @@ export const AboutUs: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              Desde 2004, Estrella del Sur trabaja en Oruro fortaleciendo las capacidades de niñas, niños, adolescentes, jóvenes, mujeres y sus familias, promoviendo su bienestar y protección. Implementamos metodologías lúdicas, participativas e inclusivas, validadas y escaladas en unidades educativas y centros de salud, con la visión de expandir nuestro impacto a otras regiones del país.
+              Somos una organización no gubernamental que, desde el 2004, trabajamos impulsando el desarrollo integral de niñas, niños, adolescentes y sus familias, construyendo oportunidades para un futuro con bienestar y esperanza.
             </motion.p>
 
             {/* Key Initiatives */}
@@ -169,7 +169,7 @@ export const AboutUs: React.FC = () => {
                      <Image 
                        alt="Niña sonriente de Estrella del Sur" 
                        className="w-full h-full object-cover"
-                       src="https://images.pexels.com/photos/9037236/pexels-photo-9037236.jpeg"
+                       src="/static-images/sections/quienes_somos_section.jpg"
                        width={600}
                        height={700}
                      />
@@ -183,21 +183,21 @@ export const AboutUs: React.FC = () => {
                 viewport={{ once: true }}
               >
                 <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed mb-4 italic">
-                  "Creemos en empoderar y equipar a líderes locales. Ayudamos a personas que ayudan a personas."
+                  "Nuestro compromiso es proteger la niñez y garantizar que crezcan libres de violencia, con cuidado y respeto en cada paso"
                 </p>
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-primary overflow-hidden">
                     <Image 
-                      alt="Fundadora de Estrella del Sur"
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0DKGKMYw36YxwT9YsJXl1eVtdB-GCWJZ_4WjzDxUdML2vGmj6xbZ9_DwGHVQvh1D0lRny2Gki7pbHQWxUau_Inz0RHWtE6GevDh5_mykpglJ_LQSgxeGtCVCdHkXj_urWqkI8DkcmEH4EBrDXR-5153a4nN5xOuPvOr4Vs2y0Ii2HOYhPTuOpXEheDFlaSvA3XCpWfhe04uSO1aOu70z8qif64ppIm4lQWU2hWjlhHF-fSMDaXrbvE9MC_5dHxtbxBKygXs0JoO0"
+                      alt="Gerente General de Estrella del Sur"
+                      src="/static-images/team/ALVARO VARGAS.jpg"
                       width={40}
                       height={40}
                       className="w-full h-full object-cover"
                     />
                 </div>
                 <div>
-                    <p className="text-gray-800 dark:text-gray-200 font-semibold text-sm">María González</p>
-                    <p className="text-gray-600 dark:text-gray-400 text-xs">Fundadora</p>
+                    <p className="text-gray-800 dark:text-gray-200 font-semibold text-sm">Álvaro Vargas Martínez</p>
+                    <p className="text-gray-600 dark:text-gray-400 text-xs">Gerente General</p>
                   </div>
                 </div>
               </motion.div>

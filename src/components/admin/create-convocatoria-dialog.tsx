@@ -325,24 +325,6 @@ export function CreateConvocatoriaDialog({ open, onOpenChange, onSuccess }: Crea
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                <label htmlFor="convocatoria-image-input-replace" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Cambiar imagen
-                  </Button>
-                  <Input
-                    id="convocatoria-image-input-replace"
-                    name="image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload(file);
-                    }}
-                    disabled={uploading || loading}
-                  />
-                </label>
               </div>
             )}
           </div>
@@ -363,7 +345,7 @@ export function CreateConvocatoriaDialog({ open, onOpenChange, onSuccess }: Crea
           </div>
 
           <div>
-            <Label htmlFor="requirements">Requisitos del Voluntariado (uno por línea)</Label>
+            <Label htmlFor="requirements">Requisitos del Voluntariado/Pasantía (uno por línea)</Label>
             <Textarea id="requirements" name="requirements" value={formData.requirements} onChange={handleInputChange} rows={6} placeholder="Ejemplo:&#10;Experiencia mínima de 3 años en educación&#10;Disponibilidad de tiempo completo&#10;Licencia de conducir válida&#10;..." />
           </div>
 

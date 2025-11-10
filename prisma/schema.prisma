@@ -67,7 +67,6 @@ model Story {
   updatedAt DateTime @updatedAt
   createdBy String?
   content   String   @default("")
-  summary   String   @default("")
   creator   User?    @relation(fields: [createdBy], references: [id])
 
   @@map("stories")
@@ -94,7 +93,6 @@ model News {
   id            String       @id @default(cuid())
   title         String
   content       String
-  excerpt       String?
   imageUrl      String?
   imageAlt      String?
   isActive      Boolean      @default(true)
@@ -117,7 +115,7 @@ model News {
 model Event {
   id          String   @id @default(cuid())
   title       String
-  description String
+  content     String
   imageUrl    String?
   imageAlt    String?
   eventDate   DateTime
@@ -207,7 +205,6 @@ model Resource {
   description   String?
   fileName      String
   fileUrl       String
-  fileType      String?
   category      ResourceCategory
   subcategory   ResourceSubcategory?
   thumbnailUrl  String?
@@ -305,16 +302,16 @@ model Album {
 }
 
 model GalleryImage {
-  id          String   @id @default(cuid())
-  imageUrl    String
-  caption     String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  createdBy   String?
-  albumId     String
-  creator     User?    @relation("GalleryImageCreator", fields: [createdBy], references: [id])
-  album       Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  imageUrl  String
+  caption   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+  albumId   String
+  creator   User?    @relation("GalleryImageCreator", fields: [createdBy], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
 
   @@map("gallery_images")
 }
@@ -418,24 +415,24 @@ model Complaint {
 }
 
 model Convocatoria {
-  id               String                    @id @default(cuid())
-  title            String
-  description      String
-  fullDescription  String
-  imageUrl         String
-  imageAlt         String?
-  startDate        DateTime
-  endDate          DateTime
-  requirements     Json
-  documents        Json
-  status           ConvocatoriaStatus        @default(DRAFT)
-  isActive         Boolean                   @default(true)
-  isFeatured       Boolean                   @default(false)
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
-  createdBy        String?
-  creator          User?                     @relation("ConvocatoriaCreator", fields: [createdBy], references: [id])
-  applications     ConvocatoriaApplication[]
+  id              String                    @id @default(cuid())
+  title           String
+  description     String
+  fullDescription String
+  imageUrl        String
+  imageAlt        String?
+  startDate       DateTime
+  endDate         DateTime
+  requirements    Json
+  documents       Json
+  status          ConvocatoriaStatus        @default(DRAFT)
+  isActive        Boolean                   @default(true)
+  isFeatured      Boolean                   @default(false)
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  createdBy       String?
+  creator         User?                     @relation("ConvocatoriaCreator", fields: [createdBy], references: [id])
+  applications    ConvocatoriaApplication[]
 
   @@map("convocatorias")
 }
@@ -493,10 +490,9 @@ enum ProgrammaticSector {
 }
 
 enum TransparencyCategory {
-  DOCUMENT_CENTER
   ACCOUNTABILITY
-  FINANCIERS_AND_ALLIES
   ANNUAL_REPORTS
+  AUDIT_REPORTS
 }
 
 enum ResourceCategory {
@@ -507,9 +503,9 @@ enum ResourceCategory {
 enum ResourceSubcategory {
   VIDEOS
   AUDIOS
-  DIGITAL_LIBRARY
-  DOWNLOADABLE_GUIDES
-  MANUALS
+  INVESTIGATIONS
+  METHODOLOGICAL_RESOURCES
+  SYSTEMATIZATION_DOCUMENTS
 }
 
 enum DonationType {

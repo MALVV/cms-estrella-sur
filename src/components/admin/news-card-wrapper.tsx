@@ -10,7 +10,6 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
   category: 'NOTICIAS' | 'FUNDRAISING' | 'COMPAÑIA' | 'SIN_CATEGORIA';
@@ -102,7 +101,7 @@ export const NewsCardWrapper: React.FC<NewsCardWrapperProps> = ({
       <UnifiedCard
         id={news.id}
         title={news.title}
-        description={news.excerpt || news.content}
+        description={news.content.length > 150 ? news.content.substring(0, 150) + '...' : news.content}
         imageUrl={news.imageUrl}
         imageAlt={news.imageAlt}
         isActive={news.isActive}

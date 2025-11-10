@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { content: { contains: search, mode: 'insensitive' } },
-        { summary: { contains: search, mode: 'insensitive' } }
+        { content: { contains: search, mode: 'insensitive' } }
       ]
     }
 
@@ -62,7 +61,6 @@ export async function GET(request: NextRequest) {
       id: story.id,
       title: story.title,
       content: story.content,
-      summary: story.summary,
       imageUrl: normalizeImageUrl(story.imageUrl),
       imageAlt: story.imageAlt || null,
       status: story.isActive ? 'ACTIVE' : 'INACTIVE',
@@ -103,11 +101,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, content, summary, imageUrl, imageAlt } = body
+    const { title, content, imageUrl, imageAlt } = body
 
-    if (!title || !content || !summary) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Título, contenido y resumen son requeridos' },
+        { error: 'Título y contenido son requeridos' },
         { status: 400 }
       )
     }
@@ -134,7 +132,6 @@ export async function POST(request: NextRequest) {
         id: storyId,
         title,
         content,
-        summary,
         imageUrl: imageUrl || null,
         imageAlt: imageAlt || null,
         isActive: true,
@@ -164,7 +161,6 @@ export async function POST(request: NextRequest) {
       id: newStory.id,
       title: newStory.title,
       content: newStory.content,
-      summary: newStory.summary,
       imageUrl: normalizeImageUrl(newStory.imageUrl),
       imageAlt: newStory.imageAlt || null,
       status: newStory.isActive ? 'ACTIVE' : 'INACTIVE',

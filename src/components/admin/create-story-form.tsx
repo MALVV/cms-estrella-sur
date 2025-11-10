@@ -12,7 +12,6 @@ interface Story {
   id: string;
   title: string;
   content: string;
-  summary: string;
   imageUrl: string;
   imageAlt: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -30,7 +29,6 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    summary: '',
     imageUrl: '',
     imageAlt: ''
   })
@@ -101,7 +99,6 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
         body: JSON.stringify({
           title: formData.title,
           content: formData.content,
-          summary: formData.summary,
           imageUrl: finalImageUrl || null,
           imageAlt: finalImageAlt || formData.title
         }),
@@ -122,7 +119,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
       // Cerrar el popup de creación y abrir el de éxito
       setIsOpen(false)
       setShowSuccessDialog(true)
-      setFormData({ title: '', content: '', summary: '', imageUrl: '', imageAlt: '' })
+      setFormData({ title: '', content: '', imageUrl: '', imageAlt: '' })
       setSelectedImageFile(null)
       setImagePreviewUrl('')
       
@@ -138,20 +135,6 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
   }
 
   const handleInputChange = (field: string, value: string) => {
-    // Definir límites de caracteres
-    const limits = {
-      title: 100,
-      content: 2000,
-      summary: 300,
-      imageUrl: 200,
-      imageAlt: 100
-    }
-    
-    // Verificar si el valor excede el límite
-    if (limits[field as keyof typeof limits] && value.length > limits[field as keyof typeof limits]) {
-      return // No actualizar si excede el límite
-    }
-    
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -210,7 +193,7 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
         // Si se cierra sin guardar, resetear el estado
         setSelectedImageFile(null);
         setImagePreviewUrl('');
-        setFormData({ title: '', content: '', summary: '', imageUrl: '', imageAlt: '' });
+        setFormData({ title: '', content: '', imageUrl: '', imageAlt: '' });
       }
     }}>
       <DialogTrigger asChild>
@@ -231,44 +214,27 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
           <div className="grid gap-4">
             <div className="space-y-2">
               <label htmlFor="title" className="text-sm font-medium">
-                Título * <span className="text-xs text-gray-500">({formData.title.length}/100)</span>
+                Título *
               </label>
               <Input
                 id="title"
                 placeholder="Ingresa el título de la historia"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                maxLength={100}
                 required
               />
             </div>
 
             <div className="space-y-2">
               <label htmlFor="content" className="text-sm font-medium">
-                Contenido * <span className="text-xs text-gray-500">({formData.content.length}/2000)</span>
+                Contenido *
               </label>
               <textarea
                 id="content"
                 placeholder="Escribe el contenido completo de la historia..."
                 value={formData.content}
                 onChange={(e) => handleInputChange('content', e.target.value)}
-                maxLength={2000}
                 className="w-full min-h-[200px] px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="summary" className="text-sm font-medium">
-                Resumen * <span className="text-xs text-gray-500">({formData.summary.length}/300)</span>
-              </label>
-              <textarea
-                id="summary"
-                placeholder="Escribe un resumen breve de la historia..."
-                value={formData.summary}
-                onChange={(e) => handleInputChange('summary', e.target.value)}
-                maxLength={300}
-                className="w-full min-h-[100px] px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
               />
             </div>
@@ -324,36 +290,17 @@ export function CreateStoryForm({ onStoryCreated }: CreateStoryFormProps) {
                       Eliminar
                     </Button>
                   </div>
-                  <label htmlFor="file-upload-story-replace-create" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                    </Button>
-                    <input
-                      id="file-upload-story-replace-create"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      disabled={uploading || loading}
-                    />
-                  </label>
                 </div>
               )}
               <div className="space-y-2">
                 <label htmlFor="imageAlt" className="text-sm font-medium">
-                  Texto Alternativo <span className="text-xs text-gray-500">({formData.imageAlt.length}/100)</span>
+                  Texto Alternativo
                 </label>
                 <Input
                   id="imageAlt"
                   placeholder="Descripción de la imagen"
                   value={formData.imageAlt}
                   onChange={(e) => handleInputChange('imageAlt', e.target.value)}
-                  maxLength={100}
                 />
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { createPortal } from 'react-dom';
@@ -16,17 +16,45 @@ export const Navbar: React.FC = () => {
   const [isTransparenciaOpen, setIsTransparenciaOpen] = useState(false);
   const [isRecursosOpen, setIsRecursosOpen] = useState(false);
   
-  const [blogButtonRef, setBlogButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [programasButtonRef, setProgramasButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [nosotrosButtonRef, setNosotrosButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [historiasButtonRef, setHistoriasButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [participarButtonRef, setParticiparButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [transparenciaButtonRef, setTransparenciaButtonRef] = useState<HTMLButtonElement | null>(null);
-  const [recursosButtonRef, setRecursosButtonRef] = useState<HTMLButtonElement | null>(null);
+  const [blogButtonRef, setBlogButtonRef] = useState<HTMLElement | null>(null);
+  const [programasButtonRef, setProgramasButtonRef] = useState<HTMLElement | null>(null);
+  const [nosotrosButtonRef, setNosotrosButtonRef] = useState<HTMLElement | null>(null);
+  const [historiasButtonRef, setHistoriasButtonRef] = useState<HTMLElement | null>(null);
+  const [participarButtonRef, setParticiparButtonRef] = useState<HTMLElement | null>(null);
+  const [transparenciaButtonRef, setTransparenciaButtonRef] = useState<HTMLElement | null>(null);
+  const [recursosButtonRef, setRecursosButtonRef] = useState<HTMLElement | null>(null);
+
+  // Refs para los timeouts de cierre
+  const closeTimeouts = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  // Función helper para manejar el hover con delay
+  const handleMouseEnter = (setter: (value: boolean) => void, key: string) => {
+    // Cancelar cualquier timeout de cierre pendiente
+    if (closeTimeouts.current[key]) {
+      clearTimeout(closeTimeouts.current[key]);
+      delete closeTimeouts.current[key];
+    }
+    setter(true);
+  };
+
+  const handleMouseLeave = (setter: (value: boolean) => void, key: string) => {
+    // Agregar un delay más largo antes de cerrar para permitir movimiento del mouse
+    closeTimeouts.current[key] = setTimeout(() => {
+      setter(false);
+      delete closeTimeouts.current[key];
+    }, 300);
+  };
+
+  // Limpiar timeouts al desmontar
+  useEffect(() => {
+    return () => {
+      Object.values(closeTimeouts.current).forEach(timeout => clearTimeout(timeout));
+    };
+  }, []);
 
   return (
     <nav className="bg-background-light dark:bg-background-dark relative z-50">
@@ -43,51 +71,59 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Nosotros (hover) */}
             <div className="relative nosotros-dropdown">
-              <button
+              <div
                 ref={setNosotrosButtonRef}
-                onMouseEnter={() => setIsNosotrosOpen(true)}
-                onMouseLeave={() => setIsNosotrosOpen(false)}
-                onClick={() => {
-                  setIsNosotrosOpen(false);
-                  window.location.href = '/nosotros';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsNosotrosOpen, 'nosotros')}
+                onMouseLeave={() => handleMouseLeave(setIsNosotrosOpen, 'nosotros')}
+                className="inline-block"
               >
-                Nosotros
-                <span className={`ml-1 transition-transform duration-200 ${isNosotrosOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/nosotros"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isNosotrosOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Nosotros
+                  <span className={`ml-1 transition-transform duration-200 ${isNosotrosOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isNosotrosOpen && nosotrosButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
                   style={{
                     top: nosotrosButtonRef.getBoundingClientRect().bottom + 4,
-                    left: nosotrosButtonRef.getBoundingClientRect().left + (nosotrosButtonRef.getBoundingClientRect().width / 2) - 80,
+                    left: nosotrosButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsNosotrosOpen(true)}
-                  onMouseLeave={() => setIsNosotrosOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsNosotrosOpen, 'nosotros')}
+                  onMouseLeave={() => handleMouseLeave(setIsNosotrosOpen, 'nosotros')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/nosotros"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsNosotrosOpen(false);
-                        window.location.href = '/nosotros';
                       }}
                     >
                       Quiénes Somos
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/equipo"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsNosotrosOpen(false);
-                        window.location.href = '/equipo';
                       }}
                     >
                       Nuestro Equipo
-                    </button>
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -96,19 +132,26 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Impacto (hover) */}
             <div className="relative impacto-dropdown">
-              <button
+              <div
                 ref={setProgramasButtonRef}
-                onMouseEnter={() => setIsProgramasOpen(true)}
-                onMouseLeave={() => setIsProgramasOpen(false)}
-                onClick={() => {
-                  setIsProgramasOpen(false);
-                  window.location.href = '/impacto';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsProgramasOpen, 'programas')}
+                onMouseLeave={() => handleMouseLeave(setIsProgramasOpen, 'programas')}
+                className="inline-block"
               >
-                Impacto
-                <span className={`ml-1 transition-transform duration-200 ${isProgramasOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/impacto"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isProgramasOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Impacto
+                  <span className={`ml-1 transition-transform duration-200 ${isProgramasOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isProgramasOpen && programasButtonRef && typeof window !== 'undefined' && createPortal(
@@ -116,49 +159,50 @@ export const Navbar: React.FC = () => {
                   className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[200px]"
                   style={{
                     top: programasButtonRef.getBoundingClientRect().bottom + 4,
-                    left: programasButtonRef.getBoundingClientRect().left + (programasButtonRef.getBoundingClientRect().width / 2) - 100,
+                    left: programasButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsProgramasOpen(true)}
-                  onMouseLeave={() => setIsProgramasOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsProgramasOpen, 'programas')}
+                  onMouseLeave={() => handleMouseLeave(setIsProgramasOpen, 'programas')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/impacto"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/impacto';
                       }}
                     >
                       Todo el Impacto
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/programas"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/programas';
                       }}
                     >
                       Programas
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/proyectos"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/proyectos';
                       }}
                     >
                       Proyectos
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/iniciativas"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsProgramasOpen(false);
-                        window.location.href = '/iniciativas';
                       }}
                     >
                       Iniciativas
-                    </button>
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -167,51 +211,50 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Transparencia (hover) */}
             <div className="relative transparencia-dropdown">
-              <button
+              <div
                 ref={setTransparenciaButtonRef}
-                onMouseEnter={() => setIsTransparenciaOpen(true)}
-                onMouseLeave={() => setIsTransparenciaOpen(false)}
-                onClick={() => {
-                  setIsTransparenciaOpen(false);
-                  window.location.href = '/transparencia';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsTransparenciaOpen, 'transparencia')}
+                onMouseLeave={() => handleMouseLeave(setIsTransparenciaOpen, 'transparencia')}
+                className="inline-block"
               >
-                Transparencia
-                <span className={`ml-1 transition-transform duration-200 ${isTransparenciaOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/transparencia"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isTransparenciaOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Transparencia
+                  <span className={`ml-1 transition-transform duration-200 ${isTransparenciaOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isTransparenciaOpen && transparenciaButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[220px]"
                   style={{
                     top: transparenciaButtonRef.getBoundingClientRect().bottom + 4,
-                    left: transparenciaButtonRef.getBoundingClientRect().left + (transparenciaButtonRef.getBoundingClientRect().width / 2) - 90,
+                    left: transparenciaButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsTransparenciaOpen(true)}
-                  onMouseLeave={() => setIsTransparenciaOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsTransparenciaOpen, 'transparencia')}
+                  onMouseLeave={() => handleMouseLeave(setIsTransparenciaOpen, 'transparencia')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/transparencia"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsTransparenciaOpen(false);
-                        window.location.href = '/transparencia';
                       }}
                     >
                       Información Institucional
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsTransparenciaOpen(false);
-                        window.location.href = '/recursos';
-                      }}
-                    >
-                      Documentos
-                    </button>
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -220,51 +263,59 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Recursos (hover) */}
             <div className="relative recursos-dropdown">
-              <button
+              <div
                 ref={setRecursosButtonRef}
-                onMouseEnter={() => setIsRecursosOpen(true)}
-                onMouseLeave={() => setIsRecursosOpen(false)}
-                onClick={() => {
-                  setIsRecursosOpen(false);
-                  window.location.href = '/recursos';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsRecursosOpen, 'recursos')}
+                onMouseLeave={() => handleMouseLeave(setIsRecursosOpen, 'recursos')}
+                className="inline-block"
               >
-                Recursos
-                <span className={`ml-1 transition-transform duration-200 ${isRecursosOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/recursos"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isRecursosOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Recursos
+                  <span className={`ml-1 transition-transform duration-200 ${isRecursosOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isRecursosOpen && recursosButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[200px]"
                   style={{
                     top: recursosButtonRef.getBoundingClientRect().bottom + 4,
-                    left: recursosButtonRef.getBoundingClientRect().left + (recursosButtonRef.getBoundingClientRect().width / 2) - 80,
+                    left: recursosButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsRecursosOpen(true)}
-                  onMouseLeave={() => setIsRecursosOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsRecursosOpen, 'recursos')}
+                  onMouseLeave={() => handleMouseLeave(setIsRecursosOpen, 'recursos')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/recursos"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsRecursosOpen(false);
-                        window.location.href = '/recursos';
                       }}
                     >
                       Biblioteca Digital
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/videos-testimoniales"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsRecursosOpen(false);
-                        window.location.href = '/videos-testimoniales';
                       }}
                     >
-                      Videos
-                    </button>
+                      Videos Testimoniales
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -273,60 +324,68 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Participar (hover) */}
             <div className="relative participar-dropdown">
-              <button
+              <div
                 ref={setParticiparButtonRef}
-                onMouseEnter={() => setIsParticiparOpen(true)}
-                onMouseLeave={() => setIsParticiparOpen(false)}
-                onClick={() => {
-                  setIsParticiparOpen(false);
-                  window.location.href = '/participar';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsParticiparOpen, 'participar')}
+                onMouseLeave={() => handleMouseLeave(setIsParticiparOpen, 'participar')}
+                className="inline-block"
               >
-                Participar
-                <span className={`ml-1 transition-transform duration-200 ${isParticiparOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/participar"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isParticiparOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Participar
+                  <span className={`ml-1 transition-transform duration-200 ${isParticiparOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isParticiparOpen && participarButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[200px]"
                   style={{
                     top: participarButtonRef.getBoundingClientRect().bottom + 4,
-                    left: participarButtonRef.getBoundingClientRect().left + (participarButtonRef.getBoundingClientRect().width / 2) - 80,
+                    left: participarButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsParticiparOpen(true)}
-                  onMouseLeave={() => setIsParticiparOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsParticiparOpen, 'participar')}
+                  onMouseLeave={() => handleMouseLeave(setIsParticiparOpen, 'participar')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/participar"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsParticiparOpen(false);
-                        window.location.href = '/participar';
                       }}
                     >
                       Cómo Participar
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/voluntariados"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsParticiparOpen(false);
-                        window.location.href = '/voluntariados';
                       }}
                     >
-                      Voluntariados
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                      Voluntariados/Pasantías
+                    </Link>
+                    <Link 
+                      href="/convocatorias"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsParticiparOpen(false);
-                        window.location.href = '/convocatorias';
                       }}
                     >
                       Convocatorias
-                    </button>
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -335,51 +394,59 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Historias (hover) */}
             <div className="relative historias-dropdown">
-              <button
+              <div
                 ref={setHistoriasButtonRef}
-                onMouseEnter={() => setIsHistoriasOpen(true)}
-                onMouseLeave={() => setIsHistoriasOpen(false)}
-                onClick={() => {
-                  setIsHistoriasOpen(false);
-                  window.location.href = '/historias-impacto';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsHistoriasOpen, 'historias')}
+                onMouseLeave={() => handleMouseLeave(setIsHistoriasOpen, 'historias')}
+                className="inline-block"
               >
-                Historias
-                <span className={`ml-1 transition-transform duration-200 ${isHistoriasOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/historias-impacto"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isHistoriasOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Historias
+                  <span className={`ml-1 transition-transform duration-200 ${isHistoriasOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isHistoriasOpen && historiasButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[200px]"
                   style={{
                     top: historiasButtonRef.getBoundingClientRect().bottom + 4,
-                    left: historiasButtonRef.getBoundingClientRect().left + (historiasButtonRef.getBoundingClientRect().width / 2) - 90,
+                    left: historiasButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsHistoriasOpen(true)}
-                  onMouseLeave={() => setIsHistoriasOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsHistoriasOpen, 'historias')}
+                  onMouseLeave={() => handleMouseLeave(setIsHistoriasOpen, 'historias')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/historias-impacto"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsHistoriasOpen(false);
-                        window.location.href = '/historias-impacto';
                       }}
                     >
                       Historias de Impacto
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    </Link>
+                    <Link 
+                      href="/historias"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsHistoriasOpen(false);
-                        window.location.href = '/historias';
                       }}
                     >
-                      Historias
-                    </button>
+                      Todas las Historias
+                    </Link>
                   </div>
                 </div>,
                 document.body
@@ -388,51 +455,50 @@ export const Navbar: React.FC = () => {
             
             {/* Menú desplegable de Blog (hover) */}
             <div className="relative blog-dropdown">
-              <button
+              <div
                 ref={setBlogButtonRef}
-                onMouseEnter={() => setIsBlogOpen(true)}
-                onMouseLeave={() => setIsBlogOpen(false)}
-                onClick={() => {
-                  setIsBlogOpen(false);
-                  window.location.href = '/noticias-eventos';
-                }}
-                className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                onMouseEnter={() => handleMouseEnter(setIsBlogOpen, 'blog')}
+                onMouseLeave={() => handleMouseLeave(setIsBlogOpen, 'blog')}
+                className="inline-block"
               >
-                Blog
-                <span className={`ml-1 transition-transform duration-200 ${isBlogOpen ? 'rotate-45' : ''}`}>+</span>
-              </button>
+                <Link
+                  href="/noticias-eventos"
+                  className="hover:text-primary dark:hover:text-primary font-bold uppercase flex items-center text-sm"
+                  onClick={(e) => {
+                    // Si el dropdown está abierto, prevenir la navegación para permitir acceso a subsecciones
+                    if (isBlogOpen) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  Blog
+                  <span className={`ml-1 transition-transform duration-200 ${isBlogOpen ? 'rotate-45' : ''}`}>+</span>
+                </Link>
+              </div>
               
               {/* Dropdown con portal para evitar cortes */}
               {isBlogOpen && blogButtonRef && typeof window !== 'undefined' && createPortal(
                 <div 
-                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[160px]"
+                  className="fixed bg-background-light dark:bg-background-dark border border-border-light dark:border-border-dark rounded-md shadow-lg z-[9999] min-w-[180px]"
                   style={{
                     top: blogButtonRef.getBoundingClientRect().bottom + 4,
-                    left: blogButtonRef.getBoundingClientRect().left + (blogButtonRef.getBoundingClientRect().width / 2) - 80,
+                    left: blogButtonRef.getBoundingClientRect().left,
                   }}
-                  onMouseEnter={() => setIsBlogOpen(true)}
-                  onMouseLeave={() => setIsBlogOpen(false)}
+                  onMouseEnter={() => handleMouseEnter(setIsBlogOpen, 'blog')}
+                  onMouseLeave={() => handleMouseLeave(setIsBlogOpen, 'blog')}
                   onClick={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.preventDefault()}
                 >
                   <div className="py-1">
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
+                    <Link 
+                      href="/noticias-eventos"
+                      className="block w-full text-left px-4 py-2 text-xs hover:text-primary dark:hover:text-primary hover:bg-gray-100 dark:hover:bg-gray-800 font-bold uppercase transition-colors cursor-pointer"
                       onClick={() => {
                         setIsBlogOpen(false);
-                        window.location.href = '/noticias-eventos';
                       }}
                     >
-                      Noticias
-                    </button>
-                    <button 
-                      className="block w-full text-left px-3 py-2 text-xs hover:text-primary dark:hover:text-primary font-bold uppercase transition-colors cursor-pointer"
-                      onClick={() => {
-                        setIsBlogOpen(false);
-                        window.location.href = '/noticias-eventos';
-                      }}
-                    >
-                      Eventos
-                    </button>
+                      Noticias y Eventos
+                    </Link>
                   </div>
                 </div>,
                 document.body

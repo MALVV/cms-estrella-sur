@@ -9,8 +9,7 @@ import { DeleteEventDialog } from '@/components/admin/delete-event-dialog';
 interface EventItem {
   id: string;
   title: string;
-  description: string;
-  content?: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -57,7 +56,7 @@ export const EventCardWrapper: React.FC<EventCardWrapperProps> = ({
       <UnifiedCard
         id={event.id}
         title={event.title}
-        description={event.description || event.content}
+        description={event.content.length > 150 ? event.content.substring(0, 150) + '...' : event.content}
         imageUrl={event.imageUrl}
         imageAlt={event.imageAlt}
         isActive={event.isActive}

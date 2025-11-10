@@ -42,7 +42,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    excerpt: '',
     imageUrl: '',
     imageAlt: '',
     isActive: true,
@@ -65,7 +64,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         });
         if (programasResponse.ok) {
           const programasData = await programasResponse.json();
-          setProgramas(programasData.programas || []);
+          const programasArray = programasData.programas || [];
+          // Eliminar duplicados por ID
+          const uniqueProgramas = Array.from(new Map(programasArray.map((p: any) => [p.id, p])).values()) as Programa[];
+          setProgramas(uniqueProgramas);
         }
 
         // Cargar proyectos
@@ -75,7 +77,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         });
         if (projectsResponse.ok) {
           const projectsData = await projectsResponse.json();
-          setProjects(projectsData.projects || []);
+          const projectsArray = projectsData.projects || [];
+          // Eliminar duplicados por ID
+          const uniqueProjects = Array.from(new Map(projectsArray.map((p: any) => [p.id, p])).values()) as Project[];
+          setProjects(uniqueProjects);
         }
 
         // Cargar iniciativas
@@ -85,7 +90,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         });
         if (methodologiesResponse.ok) {
           const methodologiesData = await methodologiesResponse.json();
-          setMethodologies(methodologiesData.methodologies || []);
+          const methodologiesArray = methodologiesData.methodologies || [];
+          // Eliminar duplicados por ID
+          const uniqueMethodologies = Array.from(new Map(methodologiesArray.map((m: any) => [m.id, m])).values()) as Methodology[];
+          setMethodologies(uniqueMethodologies);
         }
       } catch (error) {
         console.error('Error cargando datos:', error);
@@ -93,6 +101,10 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
     };
 
     if (isOpen) {
+      // Limpiar estados antes de cargar nuevos datos
+      setProgramas([]);
+      setProjects([]);
+      setMethodologies([]);
       fetchData();
     }
   }, [isOpen]);
@@ -193,7 +205,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
       setFormData({
         title: '',
         content: '',
-        excerpt: '',
         imageUrl: '',
         imageAlt: '',
         isActive: true,
@@ -278,7 +289,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
         setFormData({
           title: '',
           content: '',
-          excerpt: '',
           imageUrl: '',
           imageAlt: '',
           isActive: true,
@@ -319,16 +329,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
               placeholder="Contenido completo de la noticia"
               rows={6}
               required
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium">Resumen</label>
-            <Textarea
-              value={formData.excerpt}
-              onChange={(e) => handleChange('excerpt', e.target.value)}
-              placeholder="Resumen breve de la noticia"
-              rows={3}
             />
           </div>
 
@@ -390,24 +390,6 @@ export const CreateNewsForm: React.FC<CreateNewsFormProps> = ({ onNewsCreated })
                       Eliminar
                     </Button>
                   </div>
-                  <label htmlFor="file-upload-news-replace" className="cursor-pointer">
-                    <Button type="button" variant="outline" className="w-full" disabled={uploading || loading}>
-                      <Upload className="mr-2 h-4 w-4" />
-                      {uploading ? 'Subiendo...' : 'Cambiar imagen'}
-                    </Button>
-                    <input
-                      id="file-upload-news-replace"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload(file);
-                      }}
-                      disabled={uploading || loading}
-                    />
-                  </label>
                 </div>
               )}
             </div>

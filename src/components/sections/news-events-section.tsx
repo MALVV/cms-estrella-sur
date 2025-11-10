@@ -12,8 +12,7 @@ import { MapPin, ArrowRight, Search, Star } from 'lucide-react';
 interface NewsItem {
   id: string;
   title: string;
-  excerpt: string;
-  content?: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   publishedAt: string;
@@ -24,7 +23,7 @@ interface NewsItem {
 interface EventItem {
   id: string;
   title: string;
-  description: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
@@ -59,12 +58,12 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
       if (activeTab === 'news') {
         items = (items as NewsItem[]).filter(item => 
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (item.excerpt && item.excerpt.toLowerCase().includes(searchTerm.toLowerCase()))
+          (item.content && item.content.toLowerCase().includes(searchTerm.toLowerCase()))
         );
       } else {
         items = (items as EventItem[]).filter(item => 
           item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+          (item.content && item.content.toLowerCase().includes(searchTerm.toLowerCase()))
         );
       }
     }
@@ -311,7 +310,7 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
                           {newsItem.title}
                         </h3>
                         <p className="text-sm text-subtext-light dark:text-subtext-dark line-clamp-3 flex-grow">
-                          {newsItem.excerpt}
+                          {newsItem.content.length > 150 ? newsItem.content.substring(0, 150) + '...' : newsItem.content}
                         </p>
                         <div className="mt-3 flex justify-end">
                           <Button variant="ghost" size="sm" className="text-primary hover:opacity-80">
@@ -367,7 +366,7 @@ export const NewsEventsSection: React.FC<NewsEventsSectionProps> = ({
                         {eventItem.title}
                       </h3>
                       <p className="text-sm text-subtext-light dark:text-subtext-dark line-clamp-3 flex-grow">
-                        {eventItem.description}
+                        {eventItem.content.length > 150 ? eventItem.content.substring(0, 150) + '...' : eventItem.content}
                       </p>
                       <div className="mt-3 flex justify-end">
                         <Button variant="ghost" size="sm" className="text-primary hover:opacity-80">

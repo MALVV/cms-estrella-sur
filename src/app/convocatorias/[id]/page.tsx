@@ -380,11 +380,11 @@ export default function ConvocatoriaDetailPage({ params }: { params: Promise<{ i
               </CardContent>
             </Card>
 
-            {/* Requisitos del Voluntariado */}
+            {/* Requisitos del Voluntariado/Pasantía */}
             {Array.isArray(convocatoria.requirements) && convocatoria.requirements.length > 0 && (
             <Card>
               <CardHeader>
-                  <CardTitle>Requisitos del Voluntariado</CardTitle>
+                  <CardTitle>Requisitos del Voluntariado/Pasantía</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">

@@ -323,7 +323,7 @@ export default function VoluntariadosPage() {
           <div className="max-w-4xl text-white text-center">
             <div className="mb-6">
               <span className="inline-block bg-orange-400 text-gray-900 text-sm font-bold uppercase px-4 py-2 tracking-wider rounded">
-                Voluntariado
+                Voluntariado/Pasantía
               </span>
             </div>
             <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-tight text-white mb-6">
@@ -435,7 +435,7 @@ export default function VoluntariadosPage() {
               </div>
               <div>
                 <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Te ofrecemos un programa integral de desarrollo y apoyo durante tu experiencia como voluntario, con beneficios únicos que potencian tu crecimiento personal y profesional.
+                  Te ofrecemos un programa integral de desarrollo y apoyo durante tu experiencia como voluntario/pasante, con beneficios únicos que potencian tu crecimiento personal y profesional.
                 </p>
               </div>
             </div>
@@ -701,10 +701,10 @@ export default function VoluntariadosPage() {
                   </div>
                 </div>
 
-                {/* Información de Voluntariado */}
+                {/* Información de Voluntariado/Pasantía */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-text-light dark:text-text-dark border-b border-gray-200 dark:border-gray-700 pb-2">
-                    Información de Voluntariado
+                    Información de Voluntariado/Pasantía
                   </h3>
 
                   <div className="grid md:grid-cols-2 gap-4">
@@ -747,13 +747,13 @@ export default function VoluntariadosPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-text-light dark:text-text-dark mb-2">
-                      ¿Por qué quieres ser voluntario/a? *
+                      ¿Por qué quieres ser voluntario/a o pasante? *
                     </label>
                     <textarea
                       name="motivation"
                       value={formData.motivation}
                       onChange={handleInputChange}
-                      placeholder="Cuéntanos qué te motiva a ser voluntario/a y qué esperas lograr..."
+                      placeholder="Cuéntanos qué te motiva a ser voluntario/a o pasante y qué esperas lograr..."
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                       required
@@ -768,7 +768,7 @@ export default function VoluntariadosPage() {
                       name="experience"
                       value={formData.experience}
                       onChange={handleInputChange}
-                      placeholder="Describe cualquier experiencia previa en voluntariado, trabajo social, o habilidades relevantes..."
+                      placeholder="Describe cualquier experiencia previa en voluntariado/pasantía, trabajo social, o habilidades relevantes..."
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                     />
@@ -900,7 +900,7 @@ export default function VoluntariadosPage() {
                       required
                     />
                     <label className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                      Declaro que reconozco las políticas de voluntariado de la organización, 
+                      Declaro que reconozco las políticas de voluntariado/pasantía de la organización, 
                       incluyendo el código de conducta, políticas de confidencialidad y 
                       procedimientos de seguridad. Acepto participar de manera responsable 
                       y comprometida con los valores y objetivos de la institución. *
@@ -921,7 +921,7 @@ export default function VoluntariadosPage() {
                   ) : (
                     <>
                       <Send className="mr-2 h-5 w-5" />
-                      Enviar Solicitud de Voluntariado
+                      Enviar Solicitud de Voluntariado/Pasantía
                     </>
                   )}
                 </Button>
@@ -944,7 +944,7 @@ export default function VoluntariadosPage() {
               </div>
               <div>
                 <p className="text-gray-600 dark:text-gray-300 text-lg">
-                  Conoce el proceso que seguiremos después de recibir tu solicitud para integrarte a nuestro equipo de voluntarios.
+                  Conoce el proceso que seguiremos después de recibir tu solicitud para integrarte a nuestro equipo de voluntarios y pasantes.
                 </p>
               </div>
             </div>
@@ -985,7 +985,7 @@ export default function VoluntariadosPage() {
           </DialogHeader>
           <div className="text-muted-foreground text-base py-4">
             <p className="mb-4">
-              Tu solicitud de voluntariado ha sido enviada exitosamente. Nuestro equipo la revisará y te contactaremos pronto por correo electrónico para coordinar tu participación.
+              Tu solicitud de voluntariado/pasantía ha sido enviada exitosamente. Nuestro equipo la revisará y te contactaremos pronto por correo electrónico para coordinar tu participación.
             </p>
             <p className="font-semibold text-primary">
               ¡Gracias por tu interés en ser parte de nuestro equipo!

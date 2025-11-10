@@ -152,6 +152,46 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       }
     }
 
+    // Mapear sectores del formato español al enum de Prisma y validar
+    const sectorMap: Record<string, 'HEALTH' | 'EDUCATION' | 'LIVELIHOODS' | 'PROTECTION' | 'SUSTAINABILITY' | 'EARLY_CHILD_DEVELOPMENT' | 'CHILDREN_IN_CRISIS'> = {
+      'SALUD': 'HEALTH',
+      'EDUCACION': 'EDUCATION',
+      'MEDIOS_DE_VIDA': 'LIVELIHOODS',
+      'PROTECCION': 'PROTECTION',
+      'SOSTENIBILIDAD': 'SUSTAINABILITY',
+      'DESARROLLO_INFANTIL_TEMPRANO': 'EARLY_CHILD_DEVELOPMENT',
+      'NINEZ_EN_CRISIS': 'CHILDREN_IN_CRISIS',
+    };
+
+    // Valores válidos del enum de Prisma
+    const validSectors = ['HEALTH', 'EDUCATION', 'LIVELIHOODS', 'PROTECTION', 'SUSTAINABILITY', 'EARLY_CHILD_DEVELOPMENT', 'CHILDREN_IN_CRISIS'] as const;
+    type ValidSector = typeof validSectors[number];
+
+    // Función tipo guard para validar sectores
+    const isValidSector = (s: string): s is ValidSector => {
+      return validSectors.includes(s as ValidSector);
+    };
+
+    // Mapear y validar sectores
+    let mappedSectors: Array<ValidSector> = [];
+    if (sectors && Array.isArray(sectors)) {
+      mappedSectors = sectors
+        .map((s: string): ValidSector | null => {
+          // Si ya está en formato enum, validar que sea válido
+          if (isValidSector(s)) {
+            return s;
+          }
+          // Si está en formato español, mapearlo
+          if (sectorMap[s]) {
+            return sectorMap[s];
+          }
+          // Si no coincide con ninguno, retornar null para filtrarlo
+          console.warn(`[Methodologies][PUT] Sector inválido ignorado: ${s}`);
+          return null;
+        })
+        .filter((s): s is ValidSector => s !== null);
+    }
+
     const updatedMethodology = await prisma.methodology.update({
       where: { id },
       data: {
@@ -161,7 +201,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         imageUrl: imageUrl === undefined ? methodology.imageUrl : (imageUrl || null),
         imageAlt: imageAlt === undefined ? methodology.imageAlt : (imageAlt || null),
         ageGroup,
-        sectors,
+        sectors: sectors !== undefined ? mappedSectors : undefined,
         targetAudience,
         objectives,
         implementation,

@@ -17,18 +17,12 @@ export function MandatoryPasswordChangeWrapper({ children }: MandatoryPasswordCh
 
   // Mostrar el modal cuando el usuario necesita cambiar su contraseña
   React.useEffect(() => {
-    console.log('🔄 Estado del wrapper:', { isLoading, needsPasswordChange, userName })
-    
     if (!isLoading && needsPasswordChange) {
-      console.log('🚨 Mostrando modal de cambio de contraseña obligatorio')
       setShowModal(true)
-    } else if (!isLoading && !needsPasswordChange) {
-      console.log('✅ Usuario no necesita cambiar contraseña, permitiendo acceso')
     }
-  }, [needsPasswordChange, isLoading]) // Removido userName de las dependencias
+  }, [needsPasswordChange, isLoading])
 
   const handlePasswordChanged = async () => {
-    console.log('🔄 Contraseña cambiada exitosamente, cerrando modal...')
     setShowModal(false)
     
     // Refrescar la sesión con datos actualizados
@@ -39,20 +33,14 @@ export function MandatoryPasswordChangeWrapper({ children }: MandatoryPasswordCh
       })
       
       if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json()
-        console.log('✅ Sesión refrescada:', refreshData.user)
-        
-        // Actualizar la sesión local
         await getSession()
-        console.log('✅ Sesión local actualizada')
       }
     } catch (error) {
-      console.error('❌ Error refrescando sesión:', error)
+      // Error silencioso - el usuario puede continuar
     }
     
     // Recargar la página para actualizar el estado del hook
     setTimeout(() => {
-      console.log('🔄 Recargando página para actualizar estado')
       window.location.reload()
     }, 500)
   }
@@ -71,7 +59,6 @@ export function MandatoryPasswordChangeWrapper({ children }: MandatoryPasswordCh
 
   // Si necesita cambiar contraseña, mostrar el modal
   if (needsPasswordChange) {
-    console.log('🚨 Renderizando modal de cambio de contraseña')
     return (
       <>
         {/* Overlay de fondo para bloquear el acceso */}

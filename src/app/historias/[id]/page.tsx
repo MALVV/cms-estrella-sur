@@ -8,7 +8,6 @@ import {
   Calendar,
   User,
   Share2,
-  Clock,
   ExternalLink,
   Heart,
   BookOpen
@@ -23,7 +22,6 @@ interface Story {
   id: string;
   title: string;
   content?: string;
-  summary?: string;
   imageUrl: string;
   imageAlt: string;
   createdAt: string;
@@ -82,19 +80,12 @@ export default function StoryDetailPage({ params }: StoryDetailPageProps) {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const handleShare = async () => {
     if (navigator.share && story) {
       try {
         await navigator.share({
           title: story.title,
-          text: story.summary || story.content || story.title,
+          text: story.content ? story.content.substring(0, 200) : story.title,
           url: window.location.href,
         });
       } catch (err) {
@@ -187,11 +178,6 @@ export default function StoryDetailPage({ params }: StoryDetailPageProps) {
                 <span>Publicado: {formatDate(story.createdAt)}</span>
               </div>
               
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{formatTime(story.createdAt)}</span>
-              </div>
-              
               {story.author && (
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
@@ -231,30 +217,14 @@ export default function StoryDetailPage({ params }: StoryDetailPageProps) {
           {/* Contenido principal */}
           <article className="prose prose-lg max-w-none">
             <div className="space-y-8">
-              {/* Resumen */}
-              {story.summary && (
-                <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm border-l-4 border-primary">
-                  <h2 className="text-2xl font-bold mb-4 text-text-light dark:text-text-dark">
-                    Resumen de la Historia
-                  </h2>
-                  <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                    {story.summary.split('\n').map((paragraph, index) => (
-                      <p key={index} className="mb-4 last:mb-0">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Contenido completo */}
+              {/* Contenido */}
               {story.content && (
                 <div className="bg-card-light dark:bg-card-dark rounded-lg p-8 shadow-sm">
                   <h2 className="text-2xl font-bold mb-6 text-text-light dark:text-text-dark">
-                    Historia Completa
+                    Contenido
                   </h2>
                   <div className="text-lg leading-relaxed text-text-secondary-light dark:text-text-secondary-dark">
-                    {story.content.split('\n').map((paragraph, index) => (
+                    {(story.content || '').split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-4 last:mb-0">
                         {paragraph}
                       </p>

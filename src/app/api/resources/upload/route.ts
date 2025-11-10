@@ -14,6 +14,13 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     if (!file) return NextResponse.json({ error: 'No se proporcionó ningún archivo' }, { status: 400 });
 
+    // Rechazar videos
+    if (file.type.startsWith('video/')) {
+      return NextResponse.json({ 
+        error: 'No se pueden subir videos al bucket. Por favor, proporciona un enlace (URL) al video en su lugar.' 
+      }, { status: 400 });
+    }
+
     const maxMb = Number(process.env.MAX_UPLOAD_MB || 100); // 100MB por defecto para archivos
     const maxSize = maxMb * 1024 * 1024;
     if (file.size > maxSize) return NextResponse.json({ error: `El archivo es demasiado grande. Máximo ${maxMb}MB` }, { status: 400 });

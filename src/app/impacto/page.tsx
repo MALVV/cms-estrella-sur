@@ -51,7 +51,14 @@ export default function ImpactoPage() {
       <SiteHeader />
       
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center bg-hero-impacto">
+      <div 
+        className="relative min-h-screen flex items-center"
+        style={{
+          backgroundImage: "url('/static-images/heroes/impacto_hero.jpg')",
+          backgroundSize: 'cover',
+          backgroundPosition: 'top center'
+        }}
+      >
         <div className="absolute inset-0 bg-black opacity-40 dark:opacity-60"></div>
         <main className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex justify-center">
           <div className="max-w-4xl text-white text-center">
@@ -81,7 +88,7 @@ export default function ImpactoPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.6 }}
             >
-              Descubre nuestro trabajo integral que combina programas estratégicos, proyectos específicos y metodologías innovadoras para crear impacto social sostenible.
+              Ejecutamos programas estratégicos, proyectos específicos y metodologías innovadoras para crear impacto social sostenible.
             </motion.p>
             <motion.div 
               className="mt-8"
@@ -101,7 +108,7 @@ export default function ImpactoPage() {
       </div>
 
       {/* Sección Tríptico - Programas / Proyectos / Metodologías */}
-      <section className="py-12 bg-background-light dark:bg-background-dark relative overflow-hidden">
+      <section className="py-12 bg-background-light dark:bg-background-dark relative overflow-x-hidden">
         {/* Fondo decorativo sutil */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute top-20 left-10 w-32 h-32 bg-primary rounded-full blur-3xl"></div>
@@ -109,7 +116,7 @@ export default function ImpactoPage() {
           <div className="absolute bottom-20 left-1/3 w-40 h-40 bg-purple-400 rounded-full blur-3xl"></div>
         </div>
         
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 overflow-x-hidden">
           <div className="text-center mb-12">
             <motion.span 
               className="inline-block bg-primary text-white text-xs font-semibold px-3 py-1 rounded mb-4"
@@ -138,8 +145,12 @@ export default function ImpactoPage() {
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.1,
+                ease: [0.25, 0.1, 0.25, 1]
+              }}
+              viewport={{ once: true, margin: "-100px" }}
             >
               <Link href="/programas" className="group">
                 <div className="relative rounded-lg overflow-hidden group h-[28rem]">
@@ -148,9 +159,9 @@ export default function ImpactoPage() {
                       alt="Programas de Estrella del Sur"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-yellow-300/80 to-yellow-300/0">
+                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-yellow-300/80 to-yellow-300/0 overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
+                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap pointer-events-none">
                         PROGRAMAS
                       </h2>
                     </div>
@@ -167,8 +178,12 @@ export default function ImpactoPage() {
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.2,
+                ease: [0.25, 0.1, 0.25, 1]
+              }}
+              viewport={{ once: true, margin: "-100px" }}
             >
               <Link href="/proyectos" className="group">
                 <div className="relative rounded-lg overflow-hidden group h-[28rem]">
@@ -177,9 +192,9 @@ export default function ImpactoPage() {
                       alt="Proyectos de Estrella del Sur"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-emerald-400/80 to-emerald-400/0">
+                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-emerald-400/80 to-emerald-400/0 overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
+                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap pointer-events-none">
                         PROYECTOS
                       </h2>
                     </div>
@@ -196,8 +211,12 @@ export default function ImpactoPage() {
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.8, 
+                delay: 0.3,
+                ease: [0.25, 0.1, 0.25, 1]
+              }}
+              viewport={{ once: true, margin: "-100px" }}
             >
               <Link href="/iniciativas" className="group">
                 <div className="relative rounded-lg overflow-hidden group h-[28rem]">
@@ -206,9 +225,9 @@ export default function ImpactoPage() {
                       alt="Iniciativas de Estrella del Sur"
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
                   />
-                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-red-400/80 to-red-400/0">
+                  <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-red-400/80 to-red-400/0 overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 transform -translate-x-2 translate-y-4">
-                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap">
+                      <h2 className="text-white font-condensed text-5xl font-bold uppercase tracking-widest origin-bottom-right rotate-90 whitespace-nowrap pointer-events-none">
                         INICIATIVAS
                       </h2>
                     </div>

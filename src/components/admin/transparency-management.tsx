@@ -28,7 +28,8 @@ import {
   Users,
   Upload,
   X,
-  ImageIcon
+  ImageIcon,
+  CheckCircle
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -38,7 +39,7 @@ interface TransparencyDocument {
   description?: string;
   fileName: string;
   fileUrl: string;
-  category: 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS';
+  category: 'ACCOUNTABILITY' | 'ANNUAL_REPORTS' | 'AUDIT_REPORTS';
   isActive: boolean;
   isFeatured: boolean;
   createdAt: string;
@@ -51,25 +52,20 @@ interface TransparencyDocument {
 }
 
 const categoryInfo = {
-  DOCUMENT_CENTER: {
-    title: 'Centro de Documentos',
-    icon: FolderOpen,
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-  },
   ACCOUNTABILITY: {
     title: 'Rendición de Cuentas',
     icon: BarChart3,
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-  },
-  FINANCIERS_AND_ALLIES: {
-    title: 'Financiadores y Aliados',
-    icon: Users,
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 hover:bg-green-200 hover:text-green-900 dark:hover:bg-green-800 dark:hover:text-green-100 transition-colors duration-200 cursor-default'
   },
   ANNUAL_REPORTS: {
     title: 'Informes Anuales',
     icon: FileText,
-    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+    color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 hover:bg-orange-200 hover:text-orange-900 dark:hover:bg-orange-800 dark:hover:text-orange-100 transition-colors duration-200 cursor-default'
+  },
+  AUDIT_REPORTS: {
+    title: 'Informes de Auditoría',
+    icon: CheckCircle,
+    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 hover:text-blue-900 dark:hover:bg-blue-800 dark:hover:text-blue-100 transition-colors duration-200 cursor-default'
   }
 };
 
@@ -932,7 +928,7 @@ const CreateTransparencyDocumentForm: React.FC<{ onSuccess: () => void }> = ({ o
 
       <div>
         <label className="block text-sm font-medium mb-2">Categoría *</label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS' })}>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'ACCOUNTABILITY' | 'ANNUAL_REPORTS' | 'AUDIT_REPORTS' })}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar categoría" />
           </SelectTrigger>
@@ -1274,7 +1270,7 @@ const EditTransparencyDocumentForm: React.FC<{
 
       <div>
         <label className="block text-sm font-medium mb-2">Categoría *</label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'DOCUMENT_CENTER' | 'ACCOUNTABILITY' | 'FINANCIERS_AND_ALLIES' | 'ANNUAL_REPORTS' })}>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as 'ACCOUNTABILITY' | 'ANNUAL_REPORTS' | 'AUDIT_REPORTS' })}>
           <SelectTrigger>
             <SelectValue placeholder="Seleccionar categoría" />
           </SelectTrigger>

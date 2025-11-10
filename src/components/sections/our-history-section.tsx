@@ -74,11 +74,11 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Fundación</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">FUNDACIÓN</h4>
                 </div>
                 <Image
                   alt="Fundación de Estrella del Sur en 2004"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCl4gRb6qWUQu1ZQlfdSskK06VKAIf0quKjhEKQ7miQhLDxF5pkVEaGzd7duqik0KmtY-Q9DWw4MTdgIbF470nm79042kYVrjLz6soT19ygHJ9p_7Pwiy0NDRw5E2DZqkWF8joAk-Kg64mrnDVepToFbRggygpZfZ1bmNVZgjKR-CqAPoclj72cN8DwY3159EQ_0C-cLv_XEyXEwW1muxPXGhHBQeSmpFZc5jx6GzhIqKzx2VauEO6s3Nc40yL-AUrf2IsYAdNTvw"
+                  src="/static-images/sections/2004_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
@@ -104,11 +104,11 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Proyectos Familiares</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">PROYECTOS FAMILIARES</h4>
                 </div>
                 <Image
                   alt="Proyectos familiares Give and Love"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhVyW0F06mrq0FRfWYscKMm39pqF3LSd1aVapg3OgssNDXwoE2cdOybDm7IWVMk2EnZk29knmInYJSuQGT4fAdgELkOCzdJiS3QkCUvLeNggsggWDXo-dmG3_2VPeAE0v0beZcpXNzumulzu5EPqkThBW-NQiSUWjFLhzr7WVb-7piC6LPIQDc5sjTIe38efqC4VUZxLB5vD8HJs4W-HdRWOp3cAYip09KFnvt4iLTs0fP41LkppggwUIy2hEw93UHjdZ5Aorp4g"
+                  src="/static-images/sections/2010_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
@@ -134,17 +134,17 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Expansión Territorial</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">EXPANSIÓN TERRITORIAL</h4>
                 </div>
                 <Image
                   alt="Expansión de Estrella del Sur a más distritos"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhVyW0F06mrq0FRfWYscKMm39pqF3LSd1aVapg3OgssNDXwoE2cdOybDm7IWVMk2EnZk29knmInYJSuQGT4fAdgELkOCzdJiS3QkCUvLeNggsggWDXo-dmG3_2VPeAE0v0beZcpXNzumulzu5EPqkThBW-NQiSUWjFLhzr7WVb-7piC6LPIQDc5sjTIe38efqC4VUZxLB5vD8HJs4W-HdRWOp3cAYip09KFnvt4iLTs0fP41LkppggwUIy2hEw93UHjdZ5Aorp4g"
+                  src="/static-images/sections/2011_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
                 />
                 <p className="mt-4 text-subtle-light dark:text-subtle-dark">
-                  "Estrella del Sur" expandió su área de intervención hacia los distritos 1 y 4 del municipio de Oruro, incrementando así la población participante en sus programas y consolidando servicios de salud para los beneficiarios y sus familias.
+                  Estrella del Sur, expandió su área de intervención hacia los distritos 1 y 4 del municipio de Oruro, incrementando así la población participante en sus programas, además de consolidando servicios de salud para las familias beneficiarias.
                 </p>
               </div>
             </div>
@@ -164,17 +164,17 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Modelos Programáticos</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">MODELOS PROGRAMÁTICOS</h4>
                 </div>
                 <Image
                   alt="Modelos programáticos y prevención de violencia"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjr2bjaS599zFiG9syfcdwZIJ0S6JHBRK9Vb1DvLlLnDBdKP8S-EpjAmMpExgu3C3WR1lO7rl6yB9Uq1hJg4S2qQOwCRkK-bkVm9YuohjKbIsf0G7ne3y5zCl8hJg-wtSucGzFX7_3C1QZbV7xl-c-JFfY5MQzdt-gN165R5XXRZE2PK1MQco_IA14TfR_PpKXI1mXmHO6s361D2pla9aRXKZlL9yKkomD4Nbm_pYQqIWMszgYBEgUvwl3M7qk6XPnCxb-FZKP-A"
+                  src="/static-images/sections/2019_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
                 />
                 <p className="mt-4 text-subtle-light dark:text-subtle-dark">
-                  Se implementaron modelos programáticos holísticos como "Creciendo Contigo", "Niñez Segura y Protegida", "Me Quiero Me Cuido", "Participación Activa" y "Transformando Oportunidades". Se ejecutó el proyecto "Prevención de la Violencia en la Escuela" beneficiando a 4000 estudiantes de nivel secundario.
+                  Se implementaron los modelos programáticos de ChildFund: Creciendo Contigo; Niñez Segura y Protegida; Me Quiero, Me Cuido; Participación Activa y Transformando Oportunidades. Estos modelos desarrollaron conocimientos, actitudes y prácticas en diversas poblaciones, con un enfoque en la protección infantil y la prevención de toda forma de violencia hacia niños y niñas.
                 </p>
               </div>
             </div>
@@ -194,17 +194,17 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Adaptación Digital</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">ADAPTACIÓN DIGITAL</h4>
                 </div>
                 <Image
                   alt="Adaptación digital durante la pandemia"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjr2bjaS599zFiG9syfcdwZIJ0S6JHBRK9Vb1DvLlLnDBdKP8S-EpjAmMpExgu3C3WR1lO7rl6yB9Uq1hJg4S2qQOwCRkK-bkVm9YuohjKbIsf0G7ne3y5zCl8hJg-wtSucGzFX7_3C1QZbV7xl-c-JFfY5MQzdt-gN165R5XXRZE2PK1MQco_IA14TfR_PpKXI1mXmHO6s361D2pla9aRXKZlL9yKkomD4Nbm_pYQqIWMszgYBEgUvwl3M7qk6XPnCxb-FZKP-A"
+                  src="/static-images/sections/2020_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
                 />
                 <p className="mt-4 text-subtle-light dark:text-subtle-dark">
-                  La pandemia impulsó la implementación de programas virtuales y alternativos a través de redes sociales, radio y televisión, permitiendo la identificación de nuevas oportunidades y formas de llegar a la población objetivo.
+                  La llegada de la pandemia por la Covid-19, impulsó la implementación de programas alternativos a través de medios tradicionales como la radio y la televisión, así como el uso de plataformas virtuales y redes sociales, lo que permitió identificar nuevas oportunidades y formas de llegar a la población objetivo.
                 </p>
               </div>
             </div>
@@ -224,17 +224,17 @@ export default function OurHistorySection() {
               <div className="timeline-decorator md:hidden"></div>
               <div className="relative pl-8 md:pl-0">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">Innovación y Proyectos Internacionales</h4>
+                  <h4 className="text-lg font-semibold text-text-light dark:text-text-dark">INNOVACIÓN Y PROYECTOS QUE MARCARON LA DIFERENCIA</h4>
                 </div>
                 <Image
                   alt="Proyectos internacionales y metodologías innovadoras"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjr2bjaS599zFiG9syfcdwZIJ0S6JHBRK9Vb1DvLlLnDBdKP8S-EpjAmMpExgu3C3WR1lO7rl6yB9Uq1hJg4S2qQOwCRkK-bkVm9YuohjKbIsf0G7ne3y5zCl8hJg-wtSucGzFX7_3C1QZbV7xl-c-JFfY5MQzdt-gN165R5XXRZE2PK1MQco_IA14TfR_PpKXI1mXmHO6s361D2pla9aRXKZlL9yKkomD4Nbm_pYQqIWMszgYBEgUvwl3M7qk6XPnCxb-FZKP-A"
+                  src="/static-images/sections/2024_timeline.jpg"
                   width={400}
                   height={200}
                   className="w-full h-48 object-cover rounded-lg shadow-md"
                 />
                 <p className="mt-4 text-subtle-light dark:text-subtle-dark">
-                  "Estrella del Sur" extendió su cobertura a los 5 distritos de Oruro, beneficiando directamente a 5,200 niños y niñas e indirectamente a 25,000. Se fortalecieron metodologías innovadoras como "Planes de Convivencia Armónica" y se logró financiamiento para proyectos internacionales como "JUGAR PARA PREVENIR" con UEFA Foundation for Children.
+                  Se fortalecieron capacidades en docentes y personal de salud con metodologías innovadoras como los Planes de Convivencia, además de impulsar proyectos como Jugar para Prevenir, respaldado por UEFA Foundation for Children y ChildFund, que promueve la prevención a través del fútbol con un enfoque de género.
                 </p>
               </div>
             </div>

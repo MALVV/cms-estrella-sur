@@ -10,7 +10,7 @@ interface DeleteEventDialogProps {
   event: {
     id: string;
     title: string;
-    description: string;
+    content: string;
   };
   onEventDeleted: (eventId: string) => void;
   children: React.ReactNode;

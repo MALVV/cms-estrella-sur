@@ -6,7 +6,6 @@ interface NewsItem {
   id: string;
   title: string;
   content: string;
-  excerpt?: string;
   imageUrl?: string;
   imageAlt?: string;
   isActive: boolean;
@@ -24,8 +23,7 @@ interface NewsItem {
 interface EventItem {
   id: string;
   title: string;
-  description: string;
-  content?: string;
+  content: string;
   imageUrl?: string;
   imageAlt?: string;
   eventDate: string;
